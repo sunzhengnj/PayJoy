@@ -23,6 +23,10 @@ final class SalaryCalculatorTests: XCTestCase {
         settings.salaryAmount = 240_000
         XCTAssertEqual(calculator.dailySalary(for: settings), 240_000 / 12 / 21.75, accuracy: 0.001)
 
+        settings.salaryType = .daily
+        settings.salaryAmount = 500
+        XCTAssertEqual(calculator.dailySalary(for: settings), 500, accuracy: 0.001)
+
         settings.salaryType = .hourly
         settings.salaryAmount = 100
         XCTAssertEqual(calculator.dailySalary(for: settings), 900, accuracy: 0.001)

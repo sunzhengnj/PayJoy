@@ -5,6 +5,7 @@ struct SettingsStore {
     private let profileKey = "payjoy.user.profile"
     private let preferencesKey = "payjoy.app.preferences"
     private let overtimeDaysKey = "payjoy.overtime.days"
+    private let appleAccountKey = "payjoy.apple.account"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -81,6 +82,36 @@ struct SettingsStore {
         guard let data = try? JSONEncoder().encode(days) else { return }
         defaults.set(data, forKey: overtimeDaysKey)
         sharedDefaults?.set(data, forKey: overtimeDaysKey)
+    }
+
+    func loadAppleAccount() -> AppleAccount? {
+        if let data = defaults.data(forKey: appleAccountKey),
+           let account = try? JSONDecoder().decode(AppleAccount.self, from: data) {
+            return account
+        }
+        guard let data = sharedDefaults?.data(forKey: appleAccountKey),
+              let account = try? JSONDecoder().decode(AppleAccount.self, from: data) else {
+            return nil
+        }
+        return account
+    }
+
+    func saveAppleAccount(_ account: AppleAccount) {
+        guard let data = try? JSONEncoder().encode(account) else { return }
+        defaults.set(data, forKey: appleAccountKey)
+        sharedDefaults?.set(data, forKey: appleAccountKey)
+    }
+
+    func clearAppleAccount() {
+        defaults.removeObject(forKey: appleAccountKey)
+        sharedDefaults?.removeObject(forKey: appleAccountKey)
+    }
+
+    func clearAllLocalData() {
+        [salaryKey, profileKey, preferencesKey, overtimeDaysKey, appleAccountKey].forEach { key in
+            defaults.removeObject(forKey: key)
+            sharedDefaults?.removeObject(forKey: key)
+        }
     }
 
     private var sharedDefaults: UserDefaults? {

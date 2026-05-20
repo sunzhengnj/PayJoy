@@ -1,5 +1,7 @@
 import Foundation
 import ActivityKit
+import AuthenticationServices
+import CloudKit
 import Observation
 import UserNotifications
 import WidgetKit
@@ -35,26 +37,38 @@ final class AppState {
     var isTabBarHidden = false
     var reminderPermissionState: ReminderPermissionState = .unknown
     var liveActivityErrorMessage: String?
+    var appleAccount: AppleAccount?
+    var cloudStatusText = "尚未检查 iCloud"
+    var syncMessage = "数据保存在本机"
+    var isSyncing = false
 
     private let calculator: SalaryCalculator
     private let store: SettingsStore
     private let reminderScheduler: WorkReminderScheduler
+    private let cloudKit: PayJoyCloudKitService
 
     init(
         calculator: SalaryCalculator = SalaryCalculator(),
         store: SettingsStore = SettingsStore(),
         reminderScheduler: WorkReminderScheduler = WorkReminderScheduler(),
+        cloudKit: PayJoyCloudKitService = PayJoyCloudKitService(),
         now: Date = Date()
     ) {
         self.calculator = calculator
         self.store = store
         self.reminderScheduler = reminderScheduler
+        self.cloudKit = cloudKit
         self.settings = store.load()
         self.profile = store.loadProfile()
         self.preferences = store.loadPreferences()
         self.overtimeDateKeys = store.loadOvertimeDays()
+        self.appleAccount = store.loadAppleAccount()
         self.now = now
         refreshReminderAuthorization()
+        Task {
+            await refreshCloudStatus()
+            await refreshAppleCredentialState()
+        }
     }
 
     var snapshot: EarningsSnapshot {
@@ -102,7 +116,7 @@ final class AppState {
     }
 
     var isLiveActivityAvailable: Bool {
-        ActivityAuthorizationInfo().areActivitiesEnabled
+        preferences.isProUnlocked && ActivityAuthorizationInfo().areActivitiesEnabled
     }
 
     var isLiveActivityActive: Bool {
@@ -111,6 +125,10 @@ final class AppState {
 
     func startLiveActivity() {
         liveActivityErrorMessage = nil
+        guard preferences.isProUnlocked else {
+            liveActivityErrorMessage = "锁屏/灵动岛是 PRO 功能，开通后即可使用。"
+            return
+        }
         guard isLiveActivityAvailable else { return }
         if isLiveActivityActive {
             updateLiveActivity()
@@ -207,6 +225,186 @@ final class AppState {
                 reminderPermissionState = await reminderScheduler.authorizationState()
             }
         }
+    }
+
+    var isSignedInWithApple: Bool {
+        appleAccount != nil
+    }
+
+    var appleAccountDetail: String {
+        appleAccount?.displayName ?? "Apple ID 可用于账号登录；iCloud 同步需开通 PRO。"
+    }
+
+    var canUseCloudSync: Bool {
+        preferences.isProUnlocked
+    }
+
+    func unlockProForCurrentVersion() {
+        var updatedPreferences = preferences
+        updatedPreferences.isProUnlocked = true
+        preferences = updatedPreferences
+        syncMessage = "开薪 PRO 已开通，iCloud、锁屏/灵动岛已解锁。"
+    }
+
+    func signInCompleted(credential: ASAuthorizationAppleIDCredential) {
+        let formatter = PersonNameComponentsFormatter()
+        let fullName = credential.fullName.map { formatter.string(from: $0).trimmingCharacters(in: .whitespacesAndNewlines) }
+        signInCompleted(
+            userIdentifier: credential.user,
+            email: credential.email,
+            fullName: fullName?.isEmpty == false ? fullName : nil
+        )
+    }
+
+    func signInCompleted(userIdentifier: String, email: String? = nil, fullName: String? = nil) {
+        let existing = appleAccount?.userIdentifier == userIdentifier ? appleAccount : nil
+        let account = AppleAccount(
+            userIdentifier: userIdentifier,
+            email: clean(email) ?? existing?.email,
+            fullName: clean(fullName) ?? existing?.fullName,
+            signedInAt: Date()
+        )
+        appleAccount = account
+        store.saveAppleAccount(account)
+        syncMessage = canUseCloudSync ? "Apple ID 已连接，可以同步到 iCloud。" : "Apple ID 已连接；开通 PRO 后可使用 iCloud 同步。"
+    }
+
+    func signInFailed(_ error: Error) {
+        syncMessage = "Apple 登录失败：\(error.localizedDescription)"
+    }
+
+    func signOutAppleID() {
+        appleAccount = nil
+        store.clearAppleAccount()
+        syncMessage = "已退出 Apple ID，本机数据仍会继续保存。"
+    }
+
+    func refreshAppleCredentialState() async {
+        guard let userIdentifier = appleAccount?.userIdentifier else { return }
+        let state = await withCheckedContinuation { continuation in
+            ASAuthorizationAppleIDProvider().getCredentialState(forUserID: userIdentifier) { state, _ in
+                continuation.resume(returning: state)
+            }
+        }
+
+        switch state {
+        case .authorized, .transferred:
+            break
+        case .revoked, .notFound:
+            appleAccount = nil
+            store.clearAppleAccount()
+            syncMessage = "Apple ID 授权已失效，请重新登录。"
+        @unknown default:
+            break
+        }
+    }
+
+    func refreshCloudStatus() async {
+        do {
+            let status = try await cloudKit.accountStatus()
+            switch status {
+            case .available:
+                cloudStatusText = "iCloud 可用"
+            case .noAccount:
+                cloudStatusText = "未登录 iCloud"
+            case .restricted:
+                cloudStatusText = "iCloud 受限"
+            case .couldNotDetermine:
+                cloudStatusText = "无法确认 iCloud 状态"
+            case .temporarilyUnavailable:
+                cloudStatusText = "iCloud 暂时不可用"
+            @unknown default:
+                cloudStatusText = "未知 iCloud 状态"
+            }
+        } catch {
+            cloudStatusText = "检查 iCloud 失败"
+            syncMessage = error.localizedDescription
+        }
+    }
+
+    func syncToCloud() async {
+        guard canUseCloudSync else {
+            syncMessage = "iCloud 同步是 PRO 功能，¥6 开通后可用。"
+            return
+        }
+        guard isSignedInWithApple else {
+            syncMessage = "请先连接 Apple ID，再同步到 iCloud。"
+            return
+        }
+
+        isSyncing = true
+        defer { isSyncing = false }
+
+        do {
+            try await cloudKit.saveSnapshot(
+                PayJoyCloudSnapshot(
+                    settings: settings,
+                    profile: profile,
+                    preferences: preferences,
+                    overtimeDateKeys: overtimeDateKeys,
+                    updatedAt: Date()
+                )
+            )
+            syncMessage = "已同步到 iCloud。"
+        } catch {
+            syncMessage = "同步失败：\(error.localizedDescription)"
+        }
+    }
+
+    func restoreFromCloud() async {
+        guard canUseCloudSync else {
+            syncMessage = "iCloud 恢复是 PRO 功能，¥6 开通后可用。"
+            return
+        }
+        guard isSignedInWithApple else {
+            syncMessage = "请先连接 Apple ID，再从 iCloud 恢复。"
+            return
+        }
+
+        isSyncing = true
+        defer { isSyncing = false }
+
+        do {
+            guard let snapshot = try await cloudKit.fetchSnapshot() else {
+                syncMessage = "iCloud 里暂时没有开薪数据。"
+                return
+            }
+            settings = snapshot.settings
+            profile = snapshot.profile
+            preferences = snapshot.preferences
+            overtimeDateKeys = snapshot.overtimeDateKeys
+            syncMessage = "已从 iCloud 恢复数据。"
+        } catch {
+            syncMessage = "恢复失败：\(error.localizedDescription)"
+        }
+    }
+
+    func deleteAccountAndLocalData() async {
+        let cloudDeletionError: String? = await {
+            guard isSignedInWithApple else { return nil }
+            do {
+                try await cloudKit.deleteAllPrivateData()
+                return nil
+            } catch {
+                return error.localizedDescription
+            }
+        }()
+
+        endLiveActivity()
+        reminderScheduler.cancelWorkdayReminders()
+        store.clearAllLocalData()
+        appleAccount = nil
+        settings = .defaultValue
+        profile = .defaultValue
+        preferences = .defaultValue
+        overtimeDateKeys = []
+        selectedTab = .home
+        syncMessage = cloudDeletionError.map { "账号和本机数据已删除，iCloud 删除失败：\($0)" } ?? "账号、本机与 iCloud 数据已删除。"
+    }
+
+    private func clean(_ value: String?) -> String? {
+        let text = value?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text?.isEmpty == false ? text : nil
     }
 }
 

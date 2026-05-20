@@ -1,6 +1,29 @@
 import SwiftUI
 
+enum SalarySettingsMode {
+    case salary
+    case workTime
+    case all
+
+    var title: String {
+        switch self {
+        case .salary: "薪资设置"
+        case .workTime: "工作时间设置"
+        case .all: "薪资设置"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .salary: "设置年薪、月薪、日薪或时薪。"
+        case .workTime: "设置计薪日、上下班和午休时间。"
+        case .all: "输入薪资和工作时间，开薪马上开始。"
+        }
+    }
+}
+
 struct SalarySettingsView: View {
+    var mode: SalarySettingsMode = .all
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
     @State private var draft = SalarySettings.defaultValue
@@ -11,11 +34,15 @@ struct SalarySettingsView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 14) {
                 titleBlock
-                salaryTypePicker
-                amountCard
-                workTimeCard
-                workdayCard
-                lunchCard
+                if mode == .salary || mode == .all {
+                    salaryTypePicker
+                    amountCard
+                }
+                if mode == .workTime || mode == .all {
+                    workTimeCard
+                    workdayCard
+                    lunchCard
+                }
                 previewCard
                 if let validationMessage {
                     Text(validationMessage)
@@ -33,7 +60,7 @@ struct SalarySettingsView: View {
             .padding(.bottom, 18)
         }
         .background(AppTheme.paper.ignoresSafeArea())
-        .navigationTitle("薪资设置")
+        .navigationTitle(mode.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.light, for: .navigationBar)
         .onAppear {
@@ -50,9 +77,16 @@ struct SalarySettingsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("薪资设置")
                     .font(.system(size: 28, weight: .black, design: .rounded))
-                Text("输入薪资和工作时间，开薪马上开始。")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.textGray)
+                    .hidden()
+            }
+            .overlay(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(mode.title)
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    Text(mode.subtitle)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                }
             }
             Spacer()
             AssetImage(name: "cat_corner_redraw_v1")
@@ -260,6 +294,8 @@ struct SalarySettingsView: View {
             [120_000, 240_000, 360_000]
         case .monthly:
             [8_000, 10_000, 15_000]
+        case .daily:
+            [300, 500, 800]
         case .hourly:
             [30, 50, 80]
         }
@@ -358,6 +394,7 @@ struct SalarySettingsView: View {
         switch type {
         case .yearly: 120_000
         case .monthly: 10_000
+        case .daily: 500
         case .hourly: 50
         }
     }

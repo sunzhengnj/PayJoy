@@ -130,6 +130,8 @@ final class SalaryCalculator {
             return settings.salaryAmount / 12 / settings.monthlyPaidDays
         case .monthly:
             return settings.salaryAmount / settings.monthlyPaidDays
+        case .daily:
+            return settings.salaryAmount
         case .hourly:
             return settings.salaryAmount * workingSecondsPerDay(settings: settings) / 3_600
         }
@@ -152,6 +154,8 @@ final class SalaryCalculator {
             return settings.salaryAmount
         case .monthly:
             return settings.salaryAmount * 12
+        case .daily:
+            return settings.salaryAmount * settings.monthlyPaidDays * 12
         case .hourly:
             return dailySalary(for: settings) * settings.monthlyPaidDays * 12
         }

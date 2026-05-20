@@ -13,6 +13,7 @@
 		000000000000000000000104 /* SalaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000204 /* SalaryCalculator.swift */; };
 		000000000000000000000105 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000205 /* SettingsStore.swift */; };
 		000000000000000000000106 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000206 /* AppTheme.swift */; };
+		000000000000000000000118 /* PayJoyCloudKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000217 /* PayJoyCloudKitService.swift */; };
 		000000000000000000000107 /* AppComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000207 /* AppComponents.swift */; };
 		000000000000000000000108 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000208 /* AppRootView.swift */; };
 		000000000000000000000109 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000209 /* HomeView.swift */; };
@@ -113,6 +114,7 @@
 		000000000000000000000214 /* PayJoyWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayJoyWidgets.entitlements; sourceTree = "<group>"; };
 		000000000000000000000215 /* PayJoy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayJoy.entitlements; sourceTree = "<group>"; };
 		000000000000000000000216 /* WidgetAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = WidgetAssets.xcassets; sourceTree = "<group>"; };
+		000000000000000000000217 /* PayJoyCloudKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyCloudKitService.swift; sourceTree = "<group>"; };
 		000000000000000000000220 /* PayJoy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayJoy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000221 /* PayJoyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PayJoyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000222 /* PayJoyWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PayJoyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,6 +207,7 @@
 			children = (
 				000000000000000000000204 /* SalaryCalculator.swift */,
 				000000000000000000000205 /* SettingsStore.swift */,
+				000000000000000000000217 /* PayJoyCloudKitService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -455,6 +458,7 @@
 				00000000000000000000010E /* PayJoyActivityAttributes.swift in Sources */,
 				000000000000000000000104 /* SalaryCalculator.swift in Sources */,
 				000000000000000000000105 /* SettingsStore.swift in Sources */,
+				000000000000000000000118 /* PayJoyCloudKitService.swift in Sources */,
 				000000000000000000000106 /* AppTheme.swift in Sources */,
 				000000000000000000000107 /* AppComponents.swift in Sources */,
 				000000000000000000000108 /* AppRootView.swift in Sources */,

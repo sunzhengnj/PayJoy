@@ -8,6 +8,7 @@
 - `privacy.html`：隐私政策
 - `terms.html`：服务条款
 - `support.html`：支持与反馈
+- `delete-account.html`：账号删除说明
 
 ## GitHub Pages 发布方式
 
@@ -27,6 +28,7 @@ https://<github-username>.github.io/<repository-name>/
 https://sunzhengnj.github.io/PayJoy/privacy.html
 https://sunzhengnj.github.io/PayJoy/terms.html
 https://sunzhengnj.github.io/PayJoy/support.html
+https://sunzhengnj.github.io/PayJoy/delete-account.html
 ```
 
 正式上架前，需要把 App Store Connect 中的隐私政策 URL 指向实际的 `privacy.html` 地址。

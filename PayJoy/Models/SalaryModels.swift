@@ -7,6 +7,7 @@ enum AppConstants {
 enum SalaryType: String, Codable, CaseIterable, Identifiable {
     case yearly
     case monthly
+    case daily
     case hourly
 
     var id: String { rawValue }
@@ -15,6 +16,7 @@ enum SalaryType: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .yearly: "年薪"
         case .monthly: "月薪"
+        case .daily: "日薪"
         case .hourly: "时薪"
         }
     }
@@ -23,6 +25,7 @@ enum SalaryType: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .yearly: "年薪金额"
         case .monthly: "月薪金额"
+        case .daily: "日薪金额"
         case .hourly: "时薪金额"
         }
     }
@@ -192,13 +195,59 @@ struct AppPreferences: Codable, Equatable {
     var showCoinRain: Bool
     var reduceMotion: Bool
     var showDecimalCents: Bool
+    var isProUnlocked: Bool
 
     static let defaultValue = AppPreferences(
         remindersEnabled: false,
         showCoinRain: true,
         reduceMotion: false,
-        showDecimalCents: true
+        showDecimalCents: true,
+        isProUnlocked: false
     )
+
+    enum CodingKeys: String, CodingKey {
+        case remindersEnabled
+        case showCoinRain
+        case reduceMotion
+        case showDecimalCents
+        case isProUnlocked
+    }
+
+    init(
+        remindersEnabled: Bool,
+        showCoinRain: Bool,
+        reduceMotion: Bool,
+        showDecimalCents: Bool,
+        isProUnlocked: Bool
+    ) {
+        self.remindersEnabled = remindersEnabled
+        self.showCoinRain = showCoinRain
+        self.reduceMotion = reduceMotion
+        self.showDecimalCents = showDecimalCents
+        self.isProUnlocked = isProUnlocked
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        remindersEnabled = try container.decodeIfPresent(Bool.self, forKey: .remindersEnabled) ?? false
+        showCoinRain = try container.decodeIfPresent(Bool.self, forKey: .showCoinRain) ?? true
+        reduceMotion = try container.decodeIfPresent(Bool.self, forKey: .reduceMotion) ?? false
+        showDecimalCents = try container.decodeIfPresent(Bool.self, forKey: .showDecimalCents) ?? true
+        isProUnlocked = try container.decodeIfPresent(Bool.self, forKey: .isProUnlocked) ?? false
+    }
+}
+
+struct AppleAccount: Codable, Equatable {
+    var userIdentifier: String
+    var email: String?
+    var fullName: String?
+    var signedInAt: Date
+
+    var displayName: String {
+        if let fullName, !fullName.isEmpty { return fullName }
+        if let email, !email.isEmpty { return email }
+        return "Apple ID 已连接"
+    }
 }
 
 enum ReminderPermissionState: String, Equatable {
