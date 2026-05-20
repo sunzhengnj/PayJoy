@@ -1,0 +1,767 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		000000000000000000000101 /* PayJoyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000201 /* PayJoyApp.swift */; };
+		000000000000000000000102 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000202 /* AppState.swift */; };
+		000000000000000000000103 /* SalaryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000203 /* SalaryModels.swift */; };
+		000000000000000000000104 /* SalaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000204 /* SalaryCalculator.swift */; };
+		000000000000000000000105 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000205 /* SettingsStore.swift */; };
+		000000000000000000000106 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000206 /* AppTheme.swift */; };
+		000000000000000000000107 /* AppComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000207 /* AppComponents.swift */; };
+		000000000000000000000108 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000208 /* AppRootView.swift */; };
+		000000000000000000000109 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000209 /* HomeView.swift */; };
+		00000000000000000000010A /* SalarySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020A /* SalarySettingsView.swift */; };
+		00000000000000000000010B /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020B /* StatsView.swift */; };
+		00000000000000000000010C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020C /* ProfileView.swift */; };
+		00000000000000000000010D /* SalaryCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020D /* SalaryCalculatorTests.swift */; };
+		00000000000000000000010E /* PayJoyActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020E /* PayJoyActivityAttributes.swift */; };
+		00000000000000000000010F /* PayJoyWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020F /* PayJoyWidgetsBundle.swift */; };
+		000000000000000000000110 /* PayJoyEarningsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000210 /* PayJoyEarningsWidget.swift */; };
+		000000000000000000000111 /* PayJoyLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000211 /* PayJoyLiveActivityWidget.swift */; };
+		000000000000000000000112 /* PayJoyWidgetIllustrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000212 /* PayJoyWidgetIllustrations.swift */; };
+		000000000000000000000113 /* PayJoyActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020E /* PayJoyActivityAttributes.swift */; };
+		000000000000000000000114 /* SalaryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000203 /* SalaryModels.swift */; };
+		000000000000000000000115 /* SalaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000204 /* SalaryCalculator.swift */; };
+		000000000000000000000116 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000205 /* SettingsStore.swift */; };
+		000000000000000000000117 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000206 /* AppTheme.swift */; };
+		000000000000000000000153 /* PayJoyWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 000000000000000000000222 /* PayJoyWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		000000000000000000000154 /* worker_at_desk_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000241 /* worker_at_desk_v1.png */; };
+		000000000000000000000155 /* pro_sunglasses_worker_redraw_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000245 /* pro_sunglasses_worker_redraw_v1.png */; };
+		000000000000000000000156 /* coin_single_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000247 /* coin_single_v1.png */; };
+		000000000000000000000157 /* decor_sparkle_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024C /* decor_sparkle_v1.png */; };
+		000000000000000000000158 /* WidgetAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000216 /* WidgetAssets.xcassets */; };
+		000000000000000000000159 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000253 /* PrivacyInfo.xcprivacy */; };
+		00000000000000000000015A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000253 /* PrivacyInfo.xcprivacy */; };
+		000000000000000000000140 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000240 /* Assets.xcassets */; };
+		000000000000000000000141 /* worker_at_desk_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000241 /* worker_at_desk_v1.png */; };
+		000000000000000000000142 /* moyu_chair_worker_redraw_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000242 /* moyu_chair_worker_redraw_v1.png */; };
+		000000000000000000000143 /* stats_coin_worker_redraw_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000243 /* stats_coin_worker_redraw_v1.png */; };
+		000000000000000000000144 /* profile_avatar_worker_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000244 /* profile_avatar_worker_v1.png */; };
+		000000000000000000000145 /* pro_sunglasses_worker_redraw_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000245 /* pro_sunglasses_worker_redraw_v1.png */; };
+		000000000000000000000146 /* cat_corner_redraw_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000246 /* cat_corner_redraw_v1.png */; };
+		000000000000000000000147 /* coin_single_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000247 /* coin_single_v1.png */; };
+		000000000000000000000148 /* coin_rain_left_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000248 /* coin_rain_left_v1.png */; };
+		000000000000000000000149 /* coin_rain_right_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000249 /* coin_rain_right_v1.png */; };
+		00000000000000000000014A /* coin_rain_side_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024A /* coin_rain_side_v1.png */; };
+		00000000000000000000014B /* coin_pile_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024B /* coin_pile_v1.png */; };
+		00000000000000000000014C /* decor_sparkle_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024C /* decor_sparkle_v1.png */; };
+		00000000000000000000014D /* decor_sun_progress_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024D /* decor_sun_progress_v1.png */; };
+		00000000000000000000014E /* exchange_milk_tea_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024E /* exchange_milk_tea_v1.png */; };
+		00000000000000000000014F /* exchange_coffee_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000024F /* exchange_coffee_v1.png */; };
+		000000000000000000000150 /* exchange_hotpot_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000250 /* exchange_hotpot_v1.png */; };
+		000000000000000000000151 /* exchange_iphone_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000251 /* exchange_iphone_v1.png */; };
+		000000000000000000000152 /* theme_worker_cover_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000252 /* theme_worker_cover_v1.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		000000000000000000000301 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000000401;
+			remoteInfo = PayJoy;
+		};
+		000000000000000000000303 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000000403;
+			remoteInfo = PayJoyWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		000000000000000000000807 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				000000000000000000000153 /* PayJoyWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		000000000000000000000201 /* PayJoyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyApp.swift; sourceTree = "<group>"; };
+		000000000000000000000202 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		000000000000000000000203 /* SalaryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryModels.swift; sourceTree = "<group>"; };
+		000000000000000000000204 /* SalaryCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculator.swift; sourceTree = "<group>"; };
+		000000000000000000000205 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		000000000000000000000206 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		000000000000000000000207 /* AppComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppComponents.swift; sourceTree = "<group>"; };
+		000000000000000000000208 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
+		000000000000000000000209 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		00000000000000000000020A /* SalarySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalarySettingsView.swift; sourceTree = "<group>"; };
+		00000000000000000000020B /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		00000000000000000000020C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		00000000000000000000020D /* SalaryCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculatorTests.swift; sourceTree = "<group>"; };
+		00000000000000000000020E /* PayJoyActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyActivityAttributes.swift; sourceTree = "<group>"; };
+		00000000000000000000020F /* PayJoyWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyWidgetsBundle.swift; sourceTree = "<group>"; };
+		000000000000000000000210 /* PayJoyEarningsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyEarningsWidget.swift; sourceTree = "<group>"; };
+		000000000000000000000211 /* PayJoyLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyLiveActivityWidget.swift; sourceTree = "<group>"; };
+		000000000000000000000212 /* PayJoyWidgetIllustrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyWidgetIllustrations.swift; sourceTree = "<group>"; };
+		000000000000000000000213 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		000000000000000000000214 /* PayJoyWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayJoyWidgets.entitlements; sourceTree = "<group>"; };
+		000000000000000000000215 /* PayJoy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PayJoy.entitlements; sourceTree = "<group>"; };
+		000000000000000000000216 /* WidgetAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = WidgetAssets.xcassets; sourceTree = "<group>"; };
+		000000000000000000000220 /* PayJoy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayJoy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000221 /* PayJoyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PayJoyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000222 /* PayJoyWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PayJoyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000240 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		000000000000000000000241 /* worker_at_desk_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = worker_at_desk_v1.png; sourceTree = "<group>"; };
+		000000000000000000000242 /* moyu_chair_worker_redraw_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moyu_chair_worker_redraw_v1.png; sourceTree = "<group>"; };
+		000000000000000000000243 /* stats_coin_worker_redraw_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stats_coin_worker_redraw_v1.png; sourceTree = "<group>"; };
+		000000000000000000000244 /* profile_avatar_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_worker_v1.png; sourceTree = "<group>"; };
+		000000000000000000000245 /* pro_sunglasses_worker_redraw_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pro_sunglasses_worker_redraw_v1.png; sourceTree = "<group>"; };
+		000000000000000000000246 /* cat_corner_redraw_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cat_corner_redraw_v1.png; sourceTree = "<group>"; };
+		000000000000000000000247 /* coin_single_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coin_single_v1.png; sourceTree = "<group>"; };
+		000000000000000000000248 /* coin_rain_left_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coin_rain_left_v1.png; sourceTree = "<group>"; };
+		000000000000000000000249 /* coin_rain_right_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coin_rain_right_v1.png; sourceTree = "<group>"; };
+		00000000000000000000024A /* coin_rain_side_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coin_rain_side_v1.png; sourceTree = "<group>"; };
+		00000000000000000000024B /* coin_pile_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coin_pile_v1.png; sourceTree = "<group>"; };
+		00000000000000000000024C /* decor_sparkle_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = decor_sparkle_v1.png; sourceTree = "<group>"; };
+		00000000000000000000024D /* decor_sun_progress_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = decor_sun_progress_v1.png; sourceTree = "<group>"; };
+		00000000000000000000024E /* exchange_milk_tea_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = exchange_milk_tea_v1.png; sourceTree = "<group>"; };
+		00000000000000000000024F /* exchange_coffee_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = exchange_coffee_v1.png; sourceTree = "<group>"; };
+		000000000000000000000250 /* exchange_hotpot_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = exchange_hotpot_v1.png; sourceTree = "<group>"; };
+		000000000000000000000251 /* exchange_iphone_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = exchange_iphone_v1.png; sourceTree = "<group>"; };
+		000000000000000000000252 /* theme_worker_cover_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = theme_worker_cover_v1.png; sourceTree = "<group>"; };
+		000000000000000000000253 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		000000000000000000000501 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000502 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000503 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		000000000000000000000601 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000602 /* PayJoy */,
+				00000000000000000000060B /* PayJoyWidgets */,
+				000000000000000000000609 /* PayJoyTests */,
+				00000000000000000000060A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000602 /* PayJoy */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000201 /* PayJoyApp.swift */,
+				000000000000000000000202 /* AppState.swift */,
+				000000000000000000000215 /* PayJoy.entitlements */,
+				000000000000000000000253 /* PrivacyInfo.xcprivacy */,
+				000000000000000000000603 /* Models */,
+				000000000000000000000604 /* Services */,
+				000000000000000000000605 /* Theme */,
+				000000000000000000000606 /* Components */,
+				000000000000000000000607 /* Views */,
+				000000000000000000000608 /* Resources */,
+				000000000000000000000240 /* Assets.xcassets */,
+			);
+			path = PayJoy;
+			sourceTree = "<group>";
+		};
+		000000000000000000000603 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000203 /* SalaryModels.swift */,
+				00000000000000000000020E /* PayJoyActivityAttributes.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		000000000000000000000604 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000204 /* SalaryCalculator.swift */,
+				000000000000000000000205 /* SettingsStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		000000000000000000000605 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000206 /* AppTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		000000000000000000000606 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000207 /* AppComponents.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		000000000000000000000607 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000208 /* AppRootView.swift */,
+				000000000000000000000209 /* HomeView.swift */,
+				00000000000000000000020A /* SalarySettingsView.swift */,
+				00000000000000000000020B /* StatsView.swift */,
+				00000000000000000000020C /* ProfileView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		000000000000000000000608 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000241 /* worker_at_desk_v1.png */,
+				000000000000000000000242 /* moyu_chair_worker_redraw_v1.png */,
+				000000000000000000000243 /* stats_coin_worker_redraw_v1.png */,
+				000000000000000000000244 /* profile_avatar_worker_v1.png */,
+				000000000000000000000245 /* pro_sunglasses_worker_redraw_v1.png */,
+				000000000000000000000246 /* cat_corner_redraw_v1.png */,
+				000000000000000000000247 /* coin_single_v1.png */,
+				000000000000000000000248 /* coin_rain_left_v1.png */,
+				000000000000000000000249 /* coin_rain_right_v1.png */,
+				00000000000000000000024A /* coin_rain_side_v1.png */,
+				00000000000000000000024B /* coin_pile_v1.png */,
+				00000000000000000000024C /* decor_sparkle_v1.png */,
+				00000000000000000000024D /* decor_sun_progress_v1.png */,
+				00000000000000000000024E /* exchange_milk_tea_v1.png */,
+				00000000000000000000024F /* exchange_coffee_v1.png */,
+				000000000000000000000250 /* exchange_hotpot_v1.png */,
+				000000000000000000000251 /* exchange_iphone_v1.png */,
+				000000000000000000000252 /* theme_worker_cover_v1.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		000000000000000000000609 /* PayJoyTests */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000020D /* SalaryCalculatorTests.swift */,
+			);
+			path = PayJoyTests;
+			sourceTree = "<group>";
+		};
+		00000000000000000000060A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000220 /* PayJoy.app */,
+				000000000000000000000221 /* PayJoyTests.xctest */,
+				000000000000000000000222 /* PayJoyWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		00000000000000000000060B /* PayJoyWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000020F /* PayJoyWidgetsBundle.swift */,
+				000000000000000000000210 /* PayJoyEarningsWidget.swift */,
+				000000000000000000000211 /* PayJoyLiveActivityWidget.swift */,
+				000000000000000000000212 /* PayJoyWidgetIllustrations.swift */,
+				000000000000000000000216 /* WidgetAssets.xcassets */,
+				000000000000000000000213 /* Info.plist */,
+				000000000000000000000214 /* PayJoyWidgets.entitlements */,
+			);
+			path = PayJoyWidgets;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		000000000000000000000401 /* PayJoy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000701 /* Build configuration list for PBXNativeTarget "PayJoy" */;
+			buildPhases = (
+				000000000000000000000801 /* Sources */,
+				000000000000000000000501 /* Frameworks */,
+				000000000000000000000802 /* Resources */,
+				000000000000000000000807 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				000000000000000000000306 /* PBXTargetDependency */,
+			);
+			name = PayJoy;
+			productName = PayJoy;
+			productReference = 000000000000000000000220 /* PayJoy.app */;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000000402 /* PayJoyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000702 /* Build configuration list for PBXNativeTarget "PayJoyTests" */;
+			buildPhases = (
+				000000000000000000000803 /* Sources */,
+				000000000000000000000502 /* Frameworks */,
+				000000000000000000000804 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				000000000000000000000302 /* PBXTargetDependency */,
+			);
+			name = PayJoyTests;
+			productName = PayJoyTests;
+			productReference = 000000000000000000000221 /* PayJoyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		000000000000000000000403 /* PayJoyWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000703 /* Build configuration list for PBXNativeTarget "PayJoyWidgets" */;
+			buildPhases = (
+				000000000000000000000805 /* Sources */,
+				000000000000000000000503 /* Frameworks */,
+				000000000000000000000806 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PayJoyWidgets;
+			productName = PayJoyWidgets;
+			productReference = 000000000000000000000222 /* PayJoyWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		000000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					000000000000000000000401 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+					000000000000000000000402 = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = 000000000000000000000401;
+					};
+					000000000000000000000403 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+				};
+			};
+			buildConfigurationList = 000000000000000000000700 /* Build configuration list for PBXProject "PayJoy" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				"zh-Hans",
+				en,
+				Base,
+			);
+			mainGroup = 000000000000000000000601;
+			productRefGroup = 00000000000000000000060A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				000000000000000000000401 /* PayJoy */,
+				000000000000000000000402 /* PayJoyTests */,
+				000000000000000000000403 /* PayJoyWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		000000000000000000000802 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000140 /* Assets.xcassets in Resources */,
+				000000000000000000000141 /* worker_at_desk_v1.png in Resources */,
+				000000000000000000000142 /* moyu_chair_worker_redraw_v1.png in Resources */,
+				000000000000000000000143 /* stats_coin_worker_redraw_v1.png in Resources */,
+				000000000000000000000144 /* profile_avatar_worker_v1.png in Resources */,
+				000000000000000000000145 /* pro_sunglasses_worker_redraw_v1.png in Resources */,
+				000000000000000000000146 /* cat_corner_redraw_v1.png in Resources */,
+				000000000000000000000147 /* coin_single_v1.png in Resources */,
+				000000000000000000000148 /* coin_rain_left_v1.png in Resources */,
+				000000000000000000000149 /* coin_rain_right_v1.png in Resources */,
+				00000000000000000000014A /* coin_rain_side_v1.png in Resources */,
+				00000000000000000000014B /* coin_pile_v1.png in Resources */,
+				00000000000000000000014C /* decor_sparkle_v1.png in Resources */,
+				00000000000000000000014D /* decor_sun_progress_v1.png in Resources */,
+				00000000000000000000014E /* exchange_milk_tea_v1.png in Resources */,
+				00000000000000000000014F /* exchange_coffee_v1.png in Resources */,
+				000000000000000000000150 /* exchange_hotpot_v1.png in Resources */,
+				000000000000000000000151 /* exchange_iphone_v1.png in Resources */,
+				000000000000000000000152 /* theme_worker_cover_v1.png in Resources */,
+				000000000000000000000159 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000804 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000806 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000158 /* WidgetAssets.xcassets in Resources */,
+				000000000000000000000154 /* worker_at_desk_v1.png in Resources */,
+				000000000000000000000155 /* pro_sunglasses_worker_redraw_v1.png in Resources */,
+				000000000000000000000156 /* coin_single_v1.png in Resources */,
+				000000000000000000000157 /* decor_sparkle_v1.png in Resources */,
+				00000000000000000000015A /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		000000000000000000000801 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000101 /* PayJoyApp.swift in Sources */,
+				000000000000000000000102 /* AppState.swift in Sources */,
+				000000000000000000000103 /* SalaryModels.swift in Sources */,
+				00000000000000000000010E /* PayJoyActivityAttributes.swift in Sources */,
+				000000000000000000000104 /* SalaryCalculator.swift in Sources */,
+				000000000000000000000105 /* SettingsStore.swift in Sources */,
+				000000000000000000000106 /* AppTheme.swift in Sources */,
+				000000000000000000000107 /* AppComponents.swift in Sources */,
+				000000000000000000000108 /* AppRootView.swift in Sources */,
+				000000000000000000000109 /* HomeView.swift in Sources */,
+				00000000000000000000010A /* SalarySettingsView.swift in Sources */,
+				00000000000000000000010B /* StatsView.swift in Sources */,
+				00000000000000000000010C /* ProfileView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000803 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00000000000000000000010D /* SalaryCalculatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000805 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00000000000000000000010F /* PayJoyWidgetsBundle.swift in Sources */,
+				000000000000000000000110 /* PayJoyEarningsWidget.swift in Sources */,
+				000000000000000000000111 /* PayJoyLiveActivityWidget.swift in Sources */,
+				000000000000000000000112 /* PayJoyWidgetIllustrations.swift in Sources */,
+				000000000000000000000113 /* PayJoyActivityAttributes.swift in Sources */,
+				000000000000000000000114 /* SalaryModels.swift in Sources */,
+				000000000000000000000115 /* SalaryCalculator.swift in Sources */,
+				000000000000000000000116 /* SettingsStore.swift in Sources */,
+				000000000000000000000117 /* AppTheme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		000000000000000000000302 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000000000401 /* PayJoy */;
+			targetProxy = 000000000000000000000301 /* PBXContainerItemProxy */;
+		};
+		000000000000000000000306 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000000000403 /* PayJoyWidgets */;
+			targetProxy = 000000000000000000000303 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		000000000000000000000901 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		000000000000000000000902 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		000000000000000000000903 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PayJoy/PayJoy.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 3S9L85LXA3;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "开薪";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		000000000000000000000904 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PayJoy/PayJoy.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 3S9L85LXA3;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "开薪";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		000000000000000000000905 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PayJoy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PayJoy";
+			};
+			name = Debug;
+		};
+		000000000000000000000906 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PayJoy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PayJoy";
+			};
+			name = Release;
+		};
+		000000000000000000000907 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = PayJoyWidgets/PayJoyWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 3S9L85LXA3;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PayJoyWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		000000000000000000000908 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = PayJoyWidgets/PayJoyWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 3S9L85LXA3;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PayJoyWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 0.4;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		000000000000000000000700 /* Build configuration list for PBXProject "PayJoy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000901 /* Debug */,
+				000000000000000000000902 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000701 /* Build configuration list for PBXNativeTarget "PayJoy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000903 /* Debug */,
+				000000000000000000000904 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000702 /* Build configuration list for PBXNativeTarget "PayJoyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000905 /* Debug */,
+				000000000000000000000906 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000703 /* Build configuration list for PBXNativeTarget "PayJoyWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000907 /* Debug */,
+				000000000000000000000908 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 000000000000000000000001 /* Project object */;
+}
