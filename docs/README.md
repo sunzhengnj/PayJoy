@@ -1,6 +1,14 @@
 # 开薪 PayJoy 法律页面
 
-这个目录用于 GitHub Pages 托管，当前仅提供中文页面。
+这个目录用于 GitHub Pages 托管。
+
+- 根目录页面会根据 `?lang=` 参数或浏览器语言自动切换为简体中文、繁体中文、英文、日文或韩文。
+- 同时也提供了固定语言路径页面，便于直接分享或在 App 内按语言跳转：
+  - `zh-hans/`
+  - `zh-hant/`
+  - `en/`
+  - `ja/`
+  - `ko/`
 
 ## 页面
 
@@ -29,6 +37,16 @@ https://sunzhengnj.github.io/PayJoy/privacy.html
 https://sunzhengnj.github.io/PayJoy/terms.html
 https://sunzhengnj.github.io/PayJoy/support.html
 https://sunzhengnj.github.io/PayJoy/delete-account.html
+```
+
+固定语言路径示例：
+
+```text
+https://sunzhengnj.github.io/PayJoy/en/privacy.html
+https://sunzhengnj.github.io/PayJoy/ja/terms.html
+https://sunzhengnj.github.io/PayJoy/ko/support.html
+https://sunzhengnj.github.io/PayJoy/zh-hant/delete-account.html
+https://sunzhengnj.github.io/PayJoy/zh-hans/index.html
 ```
 
 正式上架前，需要把 App Store Connect 中的隐私政策 URL 指向实际的 `privacy.html` 地址。

@@ -755,8 +755,29 @@ private final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerD
 }
 
 private enum PayJoyLegalLinks {
-    static let privacy = URL(string: "https://sunzhengnj.github.io/PayJoy/privacy.html")!
-    static let terms = URL(string: "https://sunzhengnj.github.io/PayJoy/terms.html")!
-    static let support = URL(string: "https://sunzhengnj.github.io/PayJoy/support.html")!
-    static let deleteAccount = URL(string: "https://sunzhengnj.github.io/PayJoy/delete-account.html")!
+    private static var languagePath: String {
+        switch L10n.currentLanguage.resolved {
+        case .zhHans:
+            "zh-hans"
+        case .zhHant:
+            "zh-hant"
+        case .en:
+            "en"
+        case .ja:
+            "ja"
+        case .ko:
+            "ko"
+        case .system:
+            "zh-hans"
+        }
+    }
+
+    private static func url(_ path: String) -> URL {
+        URL(string: "https://sunzhengnj.github.io/PayJoy/\(languagePath)/\(path)")!
+    }
+
+    static var privacy: URL { url("privacy.html") }
+    static var terms: URL { url("terms.html") }
+    static var support: URL { url("support.html") }
+    static var deleteAccount: URL { url("delete-account.html") }
 }
