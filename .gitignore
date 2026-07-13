@@ -1,9 +1,14 @@
 # Xcode
-DerivedData/
+DerivedData*/
 *.xcuserstate
 xcuserdata/
 *.moved-aside
 *.xcscmblueprint
+*.xcresult
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+*.ipa
 
 # Swift Package Manager
 .build/
@@ -17,3 +22,7 @@ Package.resolved
 tmp/
 artifacts/
 .xcodebuildmcp/
+
+# Local QA / screenshot outputs
+AppStoreScreenshots/
+design-qa.md

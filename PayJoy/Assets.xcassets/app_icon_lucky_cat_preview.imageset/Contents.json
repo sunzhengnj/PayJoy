@@ -1,0 +1,12 @@
+{
+  "images": [
+    {
+      "filename": "app_icon_lucky_cat_preview.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

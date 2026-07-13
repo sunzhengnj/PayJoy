@@ -5,6 +5,9 @@ struct SettingsStore {
     private let profileKey = "payjoy.user.profile"
     private let preferencesKey = "payjoy.app.preferences"
     private let overtimeDaysKey = "payjoy.overtime.days"
+    private let overtimeRecordsKey = "payjoy.overtime.records"
+    private let earlyLeaveDaysKey = "payjoy.early.leave.days"
+    private let salaryDayRecordsKey = "payjoy.salary.day.records"
     private let appleAccountKey = "payjoy.apple.account"
     private let defaults: UserDefaults
 
@@ -64,6 +67,8 @@ struct SettingsStore {
         guard let data = try? JSONEncoder().encode(preferences) else { return }
         defaults.set(data, forKey: preferencesKey)
         sharedDefaults?.set(data, forKey: preferencesKey)
+        defaults.synchronize()
+        sharedDefaults?.synchronize()
     }
 
     func loadOvertimeDays() -> Set<String> {
@@ -82,6 +87,60 @@ struct SettingsStore {
         guard let data = try? JSONEncoder().encode(days) else { return }
         defaults.set(data, forKey: overtimeDaysKey)
         sharedDefaults?.set(data, forKey: overtimeDaysKey)
+    }
+
+    func loadOvertimeRecords() -> [OvertimeRecord] {
+        if let data = defaults.data(forKey: overtimeRecordsKey),
+           let records = try? JSONDecoder().decode([OvertimeRecord].self, from: data) {
+            return records
+        }
+        guard let data = sharedDefaults?.data(forKey: overtimeRecordsKey),
+              let records = try? JSONDecoder().decode([OvertimeRecord].self, from: data) else {
+            return []
+        }
+        return records
+    }
+
+    func saveOvertimeRecords(_ records: [OvertimeRecord]) {
+        guard let data = try? JSONEncoder().encode(records) else { return }
+        defaults.set(data, forKey: overtimeRecordsKey)
+        sharedDefaults?.set(data, forKey: overtimeRecordsKey)
+    }
+
+    func loadEarlyLeaveDays() -> Set<String> {
+        if let data = defaults.data(forKey: earlyLeaveDaysKey),
+           let days = try? JSONDecoder().decode(Set<String>.self, from: data) {
+            return days
+        }
+        guard let data = sharedDefaults?.data(forKey: earlyLeaveDaysKey),
+              let days = try? JSONDecoder().decode(Set<String>.self, from: data) else {
+            return []
+        }
+        return days
+    }
+
+    func saveEarlyLeaveDays(_ days: Set<String>) {
+        guard let data = try? JSONEncoder().encode(days) else { return }
+        defaults.set(data, forKey: earlyLeaveDaysKey)
+        sharedDefaults?.set(data, forKey: earlyLeaveDaysKey)
+    }
+
+    func loadSalaryDayRecords() -> [SalaryDayRecord] {
+        if let data = defaults.data(forKey: salaryDayRecordsKey),
+           let records = try? JSONDecoder().decode([SalaryDayRecord].self, from: data) {
+            return records
+        }
+        guard let data = sharedDefaults?.data(forKey: salaryDayRecordsKey),
+              let records = try? JSONDecoder().decode([SalaryDayRecord].self, from: data) else {
+            return []
+        }
+        return records
+    }
+
+    func saveSalaryDayRecords(_ records: [SalaryDayRecord]) {
+        guard let data = try? JSONEncoder().encode(records) else { return }
+        defaults.set(data, forKey: salaryDayRecordsKey)
+        sharedDefaults?.set(data, forKey: salaryDayRecordsKey)
     }
 
     func loadAppleAccount() -> AppleAccount? {
@@ -108,7 +167,7 @@ struct SettingsStore {
     }
 
     func clearAllLocalData() {
-        [salaryKey, profileKey, preferencesKey, overtimeDaysKey, appleAccountKey].forEach { key in
+        [salaryKey, profileKey, preferencesKey, overtimeDaysKey, overtimeRecordsKey, earlyLeaveDaysKey, salaryDayRecordsKey, appleAccountKey].forEach { key in
             defaults.removeObject(forKey: key)
             sharedDefaults?.removeObject(forKey: key)
         }

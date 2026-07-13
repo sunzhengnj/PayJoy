@@ -1,0 +1,13 @@
+{
+  "images": [
+    {
+      "filename": "widget_desk_worker_original.png",
+      "idiom": "universal",
+      "scale": "1x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

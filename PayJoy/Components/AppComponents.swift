@@ -14,9 +14,9 @@ struct ComicCard<Content: View>: View {
             .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .stroke(AppTheme.ink, lineWidth: 1.6)
+                    .stroke(AppTheme.outline, lineWidth: 1.6)
             }
-            .shadow(color: AppTheme.ink.opacity(0.14), radius: 1, x: 3, y: 3)
+            .shadow(color: AppTheme.shadow.opacity(0.14), radius: 1, x: 3, y: 3)
     }
 }
 
@@ -27,13 +27,13 @@ struct ComicProgressBar: View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.55))
+                    .fill(AppTheme.softSurface.opacity(0.72))
                 Capsule()
                     .fill(AppTheme.coin)
                     .frame(width: max(12, proxy.size.width * CGFloat(min(1, max(0, progress)))))
             }
             .overlay {
-                Capsule().stroke(AppTheme.ink, lineWidth: 1.4)
+                Capsule().stroke(AppTheme.outline, lineWidth: 1.4)
             }
         }
         .frame(height: 13)
@@ -55,7 +55,7 @@ struct PrimaryButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous)
-                        .stroke(AppTheme.ink, lineWidth: 1.5)
+                        .stroke(AppTheme.outline, lineWidth: 1.5)
                 }
         }
         .buttonStyle(.plain)
@@ -68,6 +68,11 @@ struct AssetImage: View {
 
     var body: some View {
         if let image = UIImage(named: name) ?? UIImage(named: "\(name).png") {
+            Image(uiImage: image)
+                .resizable()
+                .aspectRatio(contentMode: contentMode)
+        } else if let url = Bundle.main.url(forResource: name, withExtension: "png"),
+                  let image = UIImage(contentsOfFile: url.path) {
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: contentMode)
@@ -94,12 +99,12 @@ struct SpeechBubble: View {
             .padding(.bottom, 17)
             .background(bubbleFill)
             .clipShape(ComicBubbleShape(tailX: tailX))
-            .overlay(ComicBubbleShape(tailX: tailX).stroke(AppTheme.ink, lineWidth: 1.8))
-            .shadow(color: AppTheme.ink.opacity(0.08), radius: 0, x: 2, y: 2)
+            .overlay(ComicBubbleShape(tailX: tailX).stroke(AppTheme.outline, lineWidth: 1.8))
+            .shadow(color: AppTheme.shadow.opacity(0.08), radius: 0, x: 2, y: 2)
     }
 
     private var bubbleFill: Color {
-        isYellow ? Color(hex: 0xFFF1A8) : Color.white
+        isYellow ? AppTheme.highlightCardBackground : AppTheme.softSurface
     }
 }
 
@@ -148,9 +153,9 @@ enum AppTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .home: "首页"
-        case .stats: "统计"
-        case .profile: "我的"
+        case .home: L10n.t("首页")
+        case .stats: L10n.t("统计")
+        case .profile: L10n.t("我的")
         }
     }
 
@@ -168,28 +173,28 @@ struct ComicTabBar: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 27, style: .continuous)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(Color.clear)
-                .shadow(color: AppTheme.ink.opacity(0.18), radius: 0, x: 0, y: 3)
-                .offset(y: 4)
+                .shadow(color: AppTheme.shadow.opacity(0.14), radius: 0, x: 0, y: 2)
+                .offset(y: 3)
 
-            RoundedRectangle(cornerRadius: 27, style: .continuous)
-                .fill(Color(hex: 0xFFFDF7))
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(AppTheme.tabBarBackground)
                 .overlay(alignment: .top) {
                     Capsule()
-                        .fill(Color.white.opacity(0.78))
+                        .fill(AppTheme.softSurface.opacity(0.78))
                         .frame(height: 3)
-                        .padding(.horizontal, 36)
-                        .padding(.top, 7)
+                        .padding(.horizontal, 34)
+                        .padding(.top, 6)
                 }
                 .overlay {
-                    RoundedRectangle(cornerRadius: 27, style: .continuous)
-                        .stroke(AppTheme.ink, lineWidth: 2.4)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(AppTheme.outline, lineWidth: 2.1)
                 }
                 .overlay {
-                    RoundedRectangle(cornerRadius: 23, style: .continuous)
-                        .stroke(AppTheme.ink.opacity(0.18), lineWidth: 1)
-                        .padding(6)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(AppTheme.outline.opacity(0.18), lineWidth: 1)
+                        .padding(5)
                 }
 
             HStack(spacing: 7) {
@@ -204,11 +209,10 @@ struct ComicTabBar: View {
                     }
                 }
             }
-            .padding(8)
+            .padding(7)
         }
-        .frame(height: 78)
+        .frame(height: 66)
         .padding(.horizontal, 18)
-        .padding(.top, 8)
     }
 }
 
@@ -228,10 +232,10 @@ struct LiveActivityControlCard: View {
                     .frame(width: 38, height: 38)
                     .background(isAvailable ? AppTheme.coin : AppTheme.divider)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(AppTheme.ink, lineWidth: 1.2))
+                    .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("锁屏 / 灵动岛")
+                    Text(L10n.t("锁屏 / 灵动岛"))
                         .font(.subheadline.weight(.heavy))
                     Text(statusText)
                         .font(.caption.weight(.bold))
@@ -242,14 +246,14 @@ struct LiveActivityControlCard: View {
                 Spacer(minLength: 4)
 
                 Button(action: action) {
-                    Text(isActive ? "结束" : "开启")
+                    Text(isActive ? L10n.t("结束") : L10n.t("开启"))
                         .font(.caption.weight(.black))
                         .foregroundStyle(AppTheme.ink)
                         .padding(.horizontal, 13)
                         .padding(.vertical, 9)
                         .background(isAvailable ? AppTheme.coin : AppTheme.divider)
                         .clipShape(Capsule())
-                        .overlay(Capsule().stroke(AppTheme.ink, lineWidth: 1.1))
+                        .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1.1))
                 }
                 .buttonStyle(.plain)
                 .disabled(!isAvailable)
@@ -262,7 +266,7 @@ struct LiveActivityControlCard: View {
         if let errorMessage {
             return errorMessage
         }
-        return isAvailable ? "\(statusTitle)，可在系统实时活动中展示。" : "当前系统未开放实时活动。"
+        return isAvailable ? L10n.t("状态可在系统实时活动中展示", statusTitle) : L10n.t("当前系统未开放实时活动。")
     }
 }
 
@@ -282,14 +286,14 @@ private struct ComicTabButton: View {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [Color(hex: 0xFFE16B), AppTheme.coin],
+                                colors: [AppTheme.accentGradientStart, AppTheme.coin],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
                         )
 
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(AppTheme.ink, lineWidth: 2)
+                        .stroke(AppTheme.outline, lineWidth: 2)
                 }
 
                 VStack(spacing: 4) {

@@ -9,48 +9,55 @@ struct PayJoyLiveActivityWidget: Widget {
                 .activityBackgroundTint(.black)
                 .activitySystemActionForegroundColor(WidgetColors.coin)
         } dynamicIsland: { context in
-            DynamicIsland {
+                DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("今日已赚")
-                            .font(.caption2.bold())
+                        Text(L10n.t("今日已赚"))
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.72))
-                        Text(context.state.earned.moneyText)
-                            .font(.headline.weight(.black))
+                            .lineLimit(1)
+                        Text(PrivacyText.money(context.state.earned, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol))
+                            .font(.system(size: 17, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
                     }
+                    .padding(.leading, 10)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 3) {
-                        Text("下班倒计时")
-                            .font(.caption2.bold())
+                        Text(L10n.t("下班倒计时"))
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.72))
+                            .lineLimit(1)
                         Text(context.state.remainingText)
-                            .font(.headline.weight(.black))
+                            .font(.system(size: 17, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
                     }
+                    .padding(.trailing, 10)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack(spacing: 10) {
-                        WidgetPNGImage(name: "widget_worker_at_desk")
-                            .frame(width: 62, height: 42)
-                            .clipped()
+                    HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("≈ ¥\(String(format: "%.4f", context.state.perSecond)) / 秒")
+                            Text(PrivacyText.perSecond(context.state.perSecond, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol))
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(WidgetColors.coin)
                             WidgetProgress(progress: context.state.progress)
                                 .frame(height: 8)
                         }
+                        LiveActivityWorkerImage(width: 62, height: 40, theme: context.state.visualTheme)
                     }
+                    .padding(.horizontal, 8)
                 }
             } compactLeading: {
-                Text("开薪中")
+                Text(L10n.t("开薪中"))
                     .font(.system(size: 13, weight: .black, design: .rounded))
                     .foregroundStyle(WidgetColors.coin)
             } compactTrailing: {
                 HStack(spacing: 5) {
-                    Text(context.state.earned.compactMoneyText)
+                    Text(PrivacyText.compactMoney(context.state.earned, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol))
                         .font(.system(size: 13, weight: .black, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1)
@@ -70,54 +77,84 @@ struct PayJoyLockScreenActivityView: View {
     let state: PayJoyActivityAttributes.ContentState
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            HStack(spacing: 13) {
-                VStack(alignment: .leading, spacing: 7) {
-                    Text("今日已赚")
-                        .font(.system(size: 12, weight: .black, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.82))
-                    Text(state.earned.compactMoneyText)
-                        .font(.system(size: 25, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.72)
-                    ActivityProgressBar(progress: state.progress, width: 78)
-                }
-                .frame(width: 116, alignment: .leading)
-
-                Rectangle()
-                    .fill(Color.white.opacity(0.13))
-                    .frame(width: 1, height: 66)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("\(state.progress * 100, specifier: "%.1f")%")
-                        .font(.system(size: 19, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
-                    ActivityProgressBar(progress: state.progress, width: 84)
-                    Text("≈ ¥\(String(format: "%.4f", state.perSecond)) / 秒")
-                        .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(WidgetColors.coin)
-                        .lineLimit(1)
-                }
-                .frame(width: 104, alignment: .leading)
-
-                Spacer(minLength: 76)
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 7) {
+                Text(L10n.t("今日已赚"))
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.82))
+                Text(PrivacyText.compactMoney(state.earned, hidden: state.hidesSensitiveAmounts, currencySymbol: state.currencySymbol))
+                    .font(.system(size: 25, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                ActivityProgressBar(progress: state.progress, width: 78)
             }
-            .padding(.leading, 18)
-            .padding(.trailing, 10)
-            .padding(.vertical, 12)
+            .frame(width: 116, alignment: .leading)
 
-            ActivitySpeechBubble(text: "正在努力\n赚钱中...")
-                .frame(width: 86, height: 50)
-                .offset(x: -10, y: -50)
+            Rectangle()
+                .fill(Color.white.opacity(0.13))
+                .frame(width: 1, height: 66)
 
-            WidgetPNGImage(name: "widget_worker_at_desk")
-                .frame(width: 122, height: 82)
-                .offset(x: 5, y: 14)
-                .clipped()
+            VStack(alignment: .leading, spacing: 8) {
+                Text("\(state.progress * 100, specifier: "%.1f")%")
+                    .font(.system(size: 19, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                ActivityProgressBar(progress: state.progress, width: 84)
+                Text(PrivacyText.perSecond(state.perSecond, hidden: state.hidesSensitiveAmounts, currencySymbol: state.currencySymbol))
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(WidgetColors.coin)
+                    .lineLimit(1)
+            }
+            .frame(width: 104, alignment: .leading)
+
+            Spacer(minLength: 0)
+
+            LiveActivitySideVisual(theme: state.visualTheme)
+                .frame(width: 110)
         }
+        .padding(.leading, 18)
+        .padding(.trailing, 14)
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, minHeight: 92, maxHeight: 104)
         .widgetAccentable(false)
+    }
+}
+
+private struct LiveActivitySideVisual: View {
+    let theme: AppVisualTheme
+
+    var body: some View {
+        LiveActivityWorkerImage(width: 108, height: 74, theme: theme)
+    }
+}
+
+private struct LiveActivityWorkerImage: View {
+    let width: CGFloat
+    let height: CGFloat
+    var theme: AppVisualTheme = WidgetColors.current
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            WidgetColors.cream(for: theme).opacity(0.92),
+                            WidgetColors.coin(for: theme).opacity(0.28)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: WidgetColors.coin(for: theme).opacity(0.22), radius: 10, x: 0, y: 0)
+
+            WidgetPNGImage(name: WidgetColors.liveWorkerAsset(for: theme), contentMode: .fit)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 3)
+                .scaleEffect(WidgetColors.artworkScale(for: theme))
+        }
+        .frame(width: width, height: height)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -154,7 +191,7 @@ private struct ActivitySpeechBubble: View {
             .clipShape(WidgetActivityBubbleShape())
             .overlay {
                 WidgetActivityBubbleShape()
-                    .stroke(WidgetColors.ink, lineWidth: 1.3)
+                    .stroke(WidgetColors.outline, lineWidth: 1.3)
             }
     }
 }

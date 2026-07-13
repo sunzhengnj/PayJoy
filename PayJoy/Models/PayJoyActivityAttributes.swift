@@ -10,6 +10,9 @@ struct PayJoyActivityAttributes: ActivityAttributes {
         var statusTitle: String
         var endDate: Date
         var remainingText: String
+        var hidesSensitiveAmounts: Bool
+        var currencySymbol: String
+        var visualTheme: AppVisualTheme
     }
 
     var title: String

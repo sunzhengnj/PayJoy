@@ -5,15 +5,16 @@ struct PayJoyWidgetEntry: TimelineEntry {
     let date: Date
     let snapshot: EarningsSnapshot
     let settings: SalarySettings
+    let preferences: AppPreferences
 }
 
 struct PayJoyWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> PayJoyWidgetEntry {
-        entry(for: Date())
+        previewEntry
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PayJoyWidgetEntry) -> Void) {
-        completion(entry(for: Date()))
+        completion(context.isPreview ? previewEntry : entry(for: Date()))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PayJoyWidgetEntry>) -> Void) {
@@ -27,17 +28,36 @@ struct PayJoyWidgetProvider: TimelineProvider {
     private func entry(for date: Date) -> PayJoyWidgetEntry {
         let store = SettingsStore(defaults: UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? .standard)
         let settings = store.load()
+        let preferences = store.loadPreferences()
         let snapshot = SalaryCalculator().snapshot(
             for: date,
             settings: settings,
-            overtimeDateKeys: store.loadOvertimeDays()
+            overtimeDateKeys: store.loadOvertimeDays(),
+            earlyLeaveDateKeys: store.loadEarlyLeaveDays()
         )
-        return PayJoyWidgetEntry(date: date, snapshot: snapshot, settings: settings)
+        return PayJoyWidgetEntry(date: date, snapshot: snapshot, settings: settings, preferences: preferences)
+    }
+
+    private var previewEntry: PayJoyWidgetEntry {
+        PayJoyWidgetEntry(
+            date: Date(),
+            snapshot: EarningsSnapshot(
+                todayEarned: 420.15,
+                todayTotal: 460,
+                earnedPerSecond: 0.0098,
+                progress: 0.914,
+                remainingToday: 39.85,
+                secondsUntilOffWork: 1_860,
+                status: .working
+            ),
+            settings: .defaultValue,
+            preferences: .defaultValue
+        )
     }
 }
 
 struct PayJoyEarningsWidget: Widget {
-    let kind = "PayJoyEarningsWidget"
+    let kind = "PayJoyEarningsWidgetV3"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PayJoyWidgetProvider()) { entry in
@@ -46,8 +66,8 @@ struct PayJoyEarningsWidget: Widget {
                     WidgetColors.paper
                 }
         }
-        .configurationDisplayName("开薪实时收入")
-        .description("不用打开 App，也能看到今天赚了多少。")
+        .configurationDisplayName(L10n.t("开薪实时收入"))
+        .description(L10n.t("不用打开 App，也能看到今天赚了多少。"))
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
@@ -55,6 +75,14 @@ struct PayJoyEarningsWidget: Widget {
 struct PayJoyWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: PayJoyWidgetEntry
+
+    private var hidesSensitiveAmounts: Bool {
+        entry.preferences.hideSensitiveAmounts
+    }
+
+    private var currencySymbol: String {
+        entry.settings.currencySymbol
+    }
 
     var body: some View {
         ZStack {
@@ -74,56 +102,68 @@ struct PayJoyWidgetView: View {
     }
 
     private var smallWidget: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ZStack(alignment: .bottomTrailing) {
-                Text("开薪中")
-                    .font(.system(size: 17, weight: .black, design: .rounded))
-                    .foregroundStyle(WidgetColors.ink)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .top, spacing: 6) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(L10n.t("开薪中"))
+                        .font(.system(size: 16, weight: .black, design: .rounded))
+                        .foregroundStyle(WidgetColors.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
 
-                WidgetPNGImage(name: "widget_pro_worker", contentMode: .fill)
-                    .frame(width: 76, height: 52)
-                    .offset(x: 8, y: 25)
-                    .clipped()
+                    Text(L10n.t("今日已赚"))
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .foregroundStyle(WidgetColors.muted)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                WidgetPNGImage(name: WidgetColors.smallMoyuWorkerAsset(for: entry.preferences.selectedTheme), contentMode: .fit)
+                    .frame(width: 48, height: 38)
+                    .scaleEffect(WidgetColors.artworkScale(for: entry.preferences.selectedTheme), anchor: .trailing)
+                    .accessibilityHidden(true)
             }
-            .frame(height: 34)
 
-            DividerLine()
-
-            Text("今日已赚")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
-                .foregroundStyle(WidgetColors.muted)
-            Text(entry.snapshot.todayEarned.moneyText)
-                .font(.system(size: 28, weight: .black, design: .rounded))
+            Text(PrivacyText.money(entry.snapshot.todayEarned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                .font(.system(size: 24, weight: .black, design: .rounded))
                 .foregroundStyle(WidgetColors.ink)
-                .minimumScaleFactor(0.58)
+                .minimumScaleFactor(0.56)
                 .lineLimit(1)
+
+            Text(PrivacyText.perSecond(entry.snapshot.earnedPerSecond, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                .font(.system(size: 10, weight: .black, design: .rounded))
+                .foregroundStyle(WidgetColors.ink)
+                .minimumScaleFactor(0.72)
+                .lineLimit(1)
+
+            WidgetProgress(progress: entry.snapshot.progress)
+
             Text("\(entry.snapshot.progress * 100, specifier: "%.1f")%")
                 .font(.system(size: 12, weight: .black, design: .rounded))
                 .foregroundStyle(WidgetColors.ink)
-            WidgetProgress(progress: entry.snapshot.progress)
+                .lineLimit(1)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
     }
 
     private var mediumWidget: some View {
-        HStack(alignment: .bottom, spacing: 10) {
+        HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 7) {
-                Text("开薪! 努力搬砖中")
+                Text(L10n.t("开薪! 努力搬砖中"))
                     .font(.system(size: 16, weight: .black, design: .rounded))
                     .foregroundStyle(WidgetColors.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.68)
-                Text("今日已赚")
+                Text(L10n.t("今日已赚"))
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundStyle(WidgetColors.muted)
-                Text(entry.snapshot.todayEarned.moneyText)
+                Text(PrivacyText.money(entry.snapshot.todayEarned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                     .font(.system(size: 33, weight: .black, design: .rounded))
                     .foregroundStyle(WidgetColors.ink)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
-                Text("≈ ¥\(String(format: "%.4f", entry.snapshot.earnedPerSecond)) / 秒")
+                Text(PrivacyText.perSecond(entry.snapshot.earnedPerSecond, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundStyle(WidgetColors.ink)
                     .lineLimit(1)
@@ -132,38 +172,31 @@ struct PayJoyWidgetView: View {
                     .font(.system(size: 12, weight: .black, design: .rounded))
                     .foregroundStyle(WidgetColors.ink)
             }
-            .frame(width: 148, alignment: .leading)
+            .frame(width: 138, alignment: .leading)
 
-            ZStack(alignment: .bottom) {
-                ForEach(0..<5, id: \.self) { index in
-                    CoinSymbol()
-                        .frame(width: 14, height: 14)
-                        .offset(x: mediumSparkleOffsets[index].x, y: mediumSparkleOffsets[index].y)
-                }
-                WidgetPNGImage(name: "widget_worker_at_desk")
-                    .frame(width: 166, height: 108)
-                    .offset(x: 8, y: 12)
-            }
-            .frame(maxWidth: .infinity, minHeight: 112, maxHeight: 112, alignment: .bottom)
-            .clipped()
+            WidgetPNGImage(name: WidgetColors.moyuWorkerAsset(for: entry.preferences.selectedTheme), contentMode: .fit)
+                .frame(maxWidth: .infinity, minHeight: 116, maxHeight: 116, alignment: .center)
+                .scaleEffect(1.08 * WidgetColors.artworkScale(for: entry.preferences.selectedTheme))
+                .offset(x: 2, y: 6)
+                .clipped()
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.vertical, 12)
     }
 
     private var largeWidget: some View {
         VStack(spacing: 0) {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("今日已赚")
+                    Text(L10n.t("今日已赚"))
                         .font(.system(size: 16, weight: .black, design: .rounded))
                         .foregroundStyle(WidgetColors.ink)
-                    Text(entry.snapshot.todayEarned.moneyText)
+                    Text(PrivacyText.money(entry.snapshot.todayEarned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                         .font(.system(size: 38, weight: .black, design: .rounded))
                         .foregroundStyle(WidgetColors.ink)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                    Text("≈ ¥\(String(format: "%.4f", entry.snapshot.earnedPerSecond)) / 秒")
+                    Text(PrivacyText.perSecond(entry.snapshot.earnedPerSecond, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(WidgetColors.muted)
                 }
@@ -172,7 +205,7 @@ struct PayJoyWidgetView: View {
                     .overlay(WidgetColors.divider)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("下班倒计时")
+                    Text(L10n.t("下班倒计时"))
                         .font(.system(size: 15, weight: .black, design: .rounded))
                         .foregroundStyle(WidgetColors.ink)
                     Text(entry.snapshot.secondsUntilOffWork.countdownText)
@@ -189,7 +222,7 @@ struct PayJoyWidgetView: View {
 
             HStack(alignment: .bottom, spacing: 12) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("今日进度")
+                    Text(L10n.t("今日进度"))
                         .font(.system(size: 15, weight: .black, design: .rounded))
                         .foregroundStyle(WidgetColors.ink)
                     Text("\(entry.snapshot.progress * 100, specifier: "%.1f")%")
@@ -199,23 +232,10 @@ struct PayJoyWidgetView: View {
                         .frame(maxWidth: 190)
                 }
                 Spacer()
-                ZStack(alignment: .topLeading) {
-                    SpeechBadge(text: "马上下班，\n快乐加倍！")
-                        .frame(width: 92, height: 54)
-                        .offset(x: -14, y: 0)
-                        .zIndex(3)
-                    ForEach(0..<4, id: \.self) { index in
-                        CoinSymbol()
-                            .frame(width: 14, height: 14)
-                            .offset(x: largeSparkleOffsets[index].x, y: largeSparkleOffsets[index].y)
-                            .zIndex(1)
-                    }
-                    WidgetPNGImage(name: "widget_pro_worker")
-                        .frame(width: 154, height: 112)
-                        .offset(x: 18, y: 24)
-                        .zIndex(2)
-                }
-                .frame(width: 158, height: 124)
+                WidgetPNGImage(name: WidgetColors.moyuWorkerAsset(for: entry.preferences.selectedTheme), contentMode: .fit)
+                    .frame(width: 172, height: 150)
+                    .scaleEffect(WidgetColors.artworkScale(for: entry.preferences.selectedTheme), anchor: .trailing)
+                    .offset(x: -4, y: 14)
                 .clipped()
             }
         }
@@ -232,24 +252,6 @@ struct PayJoyWidgetView: View {
         ]
     }
 
-    private var mediumSparkleOffsets: [CGPoint] {
-        [
-            CGPoint(x: -52, y: -34),
-            CGPoint(x: 54, y: -40),
-            CGPoint(x: -62, y: 2),
-            CGPoint(x: 60, y: 12),
-            CGPoint(x: 38, y: 43)
-        ]
-    }
-
-    private var largeSparkleOffsets: [CGPoint] {
-        [
-            CGPoint(x: 94, y: 42),
-            CGPoint(x: 122, y: 20),
-            CGPoint(x: 42, y: 72),
-            CGPoint(x: 136, y: 82)
-        ]
-    }
 }
 
 struct WidgetProgress: View {
@@ -258,12 +260,12 @@ struct WidgetProgress: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color(hex: 0xFFFDF6))
+                Capsule().fill(WidgetColors.cream)
                 Capsule()
                     .fill(WidgetColors.coin)
                     .frame(width: max(12, proxy.size.width * CGFloat(min(1, max(0, progress)))))
             }
-            .overlay(Capsule().stroke(WidgetColors.ink.opacity(0.82), lineWidth: 1.4))
+            .overlay(Capsule().stroke(WidgetColors.outline.opacity(0.82), lineWidth: 1.4))
         }
         .frame(height: 11)
     }
@@ -291,7 +293,7 @@ private struct SpeechBadge: View {
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(WidgetColors.ink, lineWidth: 1.4)
+                    .stroke(WidgetColors.outline, lineWidth: 1.4)
             }
     }
 }
