@@ -1,4 +1,4 @@
-# 开薪 PayJoy 法律页面
+# 开薪 / ClockJoy 法律与支持页面
 
 这个目录用于 GitHub Pages 托管。
 
