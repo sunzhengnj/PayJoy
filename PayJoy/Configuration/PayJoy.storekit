@@ -1,0 +1,59 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "zh_Hans",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "C4A6D4F2",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "F98B2D6A",
+      "localizations" : [
+        {
+          "description" : "一次购买，解锁同步、锁屏与灵动岛、密码保护、午休设置和主题。",
+          "displayName" : "开薪会员",
+          "locale" : "zh_Hans"
+        },
+        {
+          "description" : "One purchase unlocks sync, Lock Screen and Dynamic Island, passcode protection, lunch settings, and themes.",
+          "displayName" : "ClockJoy Membership",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "payjoy.pro.lifetime",
+      "referenceName" : "开薪 PRO 终身版",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "zh_Hans",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "CHN",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 5,
+    "minor" : 0
+  }
+}

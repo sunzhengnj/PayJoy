@@ -35,6 +35,11 @@
 		00000000000000000000011A /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000219 /* L10n.swift */; };
 		00000000000000000000011B /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000219 /* L10n.swift */; };
 		00000000000000000000011C /* SalaryCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000021A /* SalaryCalendarView.swift */; };
+		00000000000000000000011D /* PersonalGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000021B /* PersonalGoalView.swift */; };
+		00000000000000000000011E /* WeeklyPayReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000021C /* WeeklyPayReportView.swift */; };
+		00000000000000000000011F /* ProSalaryReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000021D /* ProSalaryReportView.swift */; };
+		000000000000000000000120 /* DailyPayReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000021E /* DailyPayReportView.swift */; };
+		000000000000000000000121 /* PaydayExperienceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000021F /* PaydayExperienceView.swift */; };
 		000000000000000000000140 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000240 /* Assets.xcassets */; };
 		000000000000000000000141 /* worker_at_desk_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000241 /* worker_at_desk_v1.png */; };
 		000000000000000000000142 /* moyu_chair_worker_redraw_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000242 /* moyu_chair_worker_redraw_v1.png */; };
@@ -63,6 +68,8 @@
 		00000000000000000000015A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000253 /* PrivacyInfo.xcprivacy */; };
 		00000000000000000000015C /* stats_summary_worker_original_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000255 /* stats_summary_worker_original_v1.png */; };
 		00000000000000000000015D /* stats_target_worker_original_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000256 /* stats_target_worker_original_v1.png */; };
+		00000000000000000000016A /* payday_goal_worker_original_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000262 /* payday_goal_worker_original_v1.png */; };
+		00000000000000000000016B /* payday_goal_worker_original_v1.png in Widget Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000262 /* payday_goal_worker_original_v1.png */; };
 		00000000000000000000015E /* profile_avatar_focus_worker_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000257 /* profile_avatar_focus_worker_v1.png */; };
 		00000000000000000000015F /* profile_avatar_coffee_worker_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000258 /* profile_avatar_coffee_worker_v1.png */; };
 		000000000000000000000160 /* profile_avatar_coin_worker_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000259 /* profile_avatar_coin_worker_v1.png */; };
@@ -75,6 +82,11 @@
 		000000000000000000000167 /* profile_avatar_cool_worker_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000260 /* profile_avatar_cool_worker_v1.png */; };
 		000000000000000000000168 /* profile_avatar_smile_worker_v1.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000261 /* profile_avatar_smile_worker_v1.png */; };
 		000000000000000000000169 /* (null) in Resources */ = {isa = PBXBuildFile; };
+		00000000000000000000017A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000060D /* InfoPlist.strings */; };
+		00000000000000000000017B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000060E /* InfoPlist.strings */; };
+		00000000000000000000017C /* WishExperience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000264 /* WishExperience.swift */; };
+		00000000000000000000017D /* WishExperienceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000265 /* WishExperienceView.swift */; };
+		00000000000000000000017E /* WishExperience.swift in Widget Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000264 /* WishExperience.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +147,11 @@
 		000000000000000000000218 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
 		000000000000000000000219 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		00000000000000000000021A /* SalaryCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalendarView.swift; sourceTree = "<group>"; };
+		00000000000000000000021B /* PersonalGoalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalGoalView.swift; sourceTree = "<group>"; };
+		00000000000000000000021C /* WeeklyPayReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyPayReportView.swift; sourceTree = "<group>"; };
+		00000000000000000000021D /* ProSalaryReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProSalaryReportView.swift; sourceTree = "<group>"; };
+		00000000000000000000021E /* DailyPayReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyPayReportView.swift; sourceTree = "<group>"; };
+		00000000000000000000021F /* PaydayExperienceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaydayExperienceView.swift; sourceTree = "<group>"; };
 		000000000000000000000220 /* PayJoy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayJoy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000221 /* PayJoyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PayJoyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000222 /* PayJoyWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PayJoyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -159,6 +176,10 @@
 		000000000000000000000253 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		000000000000000000000255 /* stats_summary_worker_original_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stats_summary_worker_original_v1.png; sourceTree = "<group>"; };
 		000000000000000000000256 /* stats_target_worker_original_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stats_target_worker_original_v1.png; sourceTree = "<group>"; };
+		000000000000000000000262 /* payday_goal_worker_original_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = payday_goal_worker_original_v1.png; sourceTree = "<group>"; };
+		000000000000000000000263 /* PayJoy.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PayJoy.storekit; sourceTree = "<group>"; };
+		000000000000000000000264 /* WishExperience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishExperience.swift; sourceTree = "<group>"; };
+		000000000000000000000265 /* WishExperienceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishExperienceView.swift; sourceTree = "<group>"; };
 		000000000000000000000257 /* profile_avatar_focus_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_focus_worker_v1.png; sourceTree = "<group>"; };
 		000000000000000000000258 /* profile_avatar_coffee_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_coffee_worker_v1.png; sourceTree = "<group>"; };
 		000000000000000000000259 /* profile_avatar_coin_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_coin_worker_v1.png; sourceTree = "<group>"; };
@@ -170,6 +191,20 @@
 		00000000000000000000025F /* profile_avatar_bun_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_bun_worker_v1.png; sourceTree = "<group>"; };
 		000000000000000000000260 /* profile_avatar_cool_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_cool_worker_v1.png; sourceTree = "<group>"; };
 		000000000000000000000261 /* profile_avatar_smile_worker_v1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_avatar_smile_worker_v1.png; sourceTree = "<group>"; };
+		000000000000000000000270 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000271 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000272 /* zh-Hant-TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-TW"; path = "zh-Hant-TW.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000273 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "zh-Hant-HK.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000274 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		000000000000000000000275 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		000000000000000000000276 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		000000000000000000000280 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000281 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000282 /* zh-Hant-TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-TW"; path = "zh-Hant-TW.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000283 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "zh-Hant-HK.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		000000000000000000000284 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		000000000000000000000285 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		000000000000000000000286 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -210,6 +245,7 @@
 		000000000000000000000602 /* PayJoy */ = {
 			isa = PBXGroup;
 			children = (
+				00000000000000000000060D /* InfoPlist.strings */,
 				000000000000000000000201 /* PayJoyApp.swift */,
 				000000000000000000000202 /* AppState.swift */,
 				000000000000000000000215 /* PayJoy.entitlements */,
@@ -220,15 +256,25 @@
 				000000000000000000000606 /* Components */,
 				000000000000000000000607 /* Views */,
 				000000000000000000000608 /* Resources */,
+				00000000000000000000060C /* Configuration */,
 				000000000000000000000240 /* Assets.xcassets */,
 			);
 			path = PayJoy;
+			sourceTree = "<group>";
+		};
+		00000000000000000000060C /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000263 /* PayJoy.storekit */,
+			);
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		000000000000000000000603 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				000000000000000000000203 /* SalaryModels.swift */,
+				000000000000000000000264 /* WishExperience.swift */,
 				00000000000000000000020E /* PayJoyActivityAttributes.swift */,
 			);
 			path = Models;
@@ -270,6 +316,12 @@
 				00000000000000000000020A /* SalarySettingsView.swift */,
 				00000000000000000000020B /* StatsView.swift */,
 				00000000000000000000021A /* SalaryCalendarView.swift */,
+				00000000000000000000021B /* PersonalGoalView.swift */,
+				00000000000000000000021C /* WeeklyPayReportView.swift */,
+				00000000000000000000021D /* ProSalaryReportView.swift */,
+				00000000000000000000021E /* DailyPayReportView.swift */,
+				00000000000000000000021F /* PaydayExperienceView.swift */,
+				000000000000000000000265 /* WishExperienceView.swift */,
 				00000000000000000000020C /* ProfileView.swift */,
 			);
 			path = Views;
@@ -297,6 +349,7 @@
 				000000000000000000000251 /* exchange_iphone_v1.png */,
 				000000000000000000000255 /* stats_summary_worker_original_v1.png */,
 				000000000000000000000256 /* stats_target_worker_original_v1.png */,
+				000000000000000000000262 /* payday_goal_worker_original_v1.png */,
 				000000000000000000000257 /* profile_avatar_focus_worker_v1.png */,
 				000000000000000000000258 /* profile_avatar_coffee_worker_v1.png */,
 				000000000000000000000259 /* profile_avatar_coin_worker_v1.png */,
@@ -333,6 +386,7 @@
 		00000000000000000000060B /* PayJoyWidgets */ = {
 			isa = PBXGroup;
 			children = (
+				00000000000000000000060E /* InfoPlist.strings */,
 				00000000000000000000020F /* PayJoyWidgetsBundle.swift */,
 				000000000000000000000210 /* PayJoyEarningsWidget.swift */,
 				000000000000000000000211 /* PayJoyLiveActivityWidget.swift */,
@@ -345,6 +399,37 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXVariantGroup section */
+		00000000000000000000060D /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				000000000000000000000270 /* zh-Hans */,
+				000000000000000000000271 /* zh-Hant */,
+				000000000000000000000272 /* zh-Hant-TW */,
+				000000000000000000000273 /* zh-Hant-HK */,
+				000000000000000000000274 /* en */,
+				000000000000000000000275 /* ja */,
+				000000000000000000000276 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		00000000000000000000060E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				000000000000000000000280 /* zh-Hans */,
+				000000000000000000000281 /* zh-Hant */,
+				000000000000000000000282 /* zh-Hant-TW */,
+				000000000000000000000283 /* zh-Hant-HK */,
+				000000000000000000000284 /* en */,
+				000000000000000000000285 /* ja */,
+				000000000000000000000286 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXNativeTarget section */
 		000000000000000000000401 /* PayJoy */ = {
@@ -443,6 +528,8 @@
 			knownRegions = (
 				"zh-Hans",
 				"zh-Hant",
+				"zh-Hant-TW",
+				"zh-Hant-HK",
 				en,
 				ja,
 				ko,
@@ -465,6 +552,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00000000000000000000017A /* InfoPlist.strings in Resources */,
 				000000000000000000000140 /* Assets.xcassets in Resources */,
 				000000000000000000000141 /* worker_at_desk_v1.png in Resources */,
 				000000000000000000000142 /* moyu_chair_worker_redraw_v1.png in Resources */,
@@ -485,6 +573,7 @@
 				000000000000000000000151 /* exchange_iphone_v1.png in Resources */,
 				00000000000000000000015C /* stats_summary_worker_original_v1.png in Resources */,
 				00000000000000000000015D /* stats_target_worker_original_v1.png in Resources */,
+				00000000000000000000016A /* payday_goal_worker_original_v1.png in Resources */,
 				00000000000000000000015E /* profile_avatar_focus_worker_v1.png in Resources */,
 				00000000000000000000015F /* profile_avatar_coffee_worker_v1.png in Resources */,
 				000000000000000000000160 /* profile_avatar_coin_worker_v1.png in Resources */,
@@ -512,11 +601,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00000000000000000000017B /* InfoPlist.strings in Resources */,
 				000000000000000000000158 /* WidgetAssets.xcassets in Resources */,
 				000000000000000000000154 /* worker_at_desk_v1.png in Resources */,
 				000000000000000000000155 /* pro_sunglasses_worker_redraw_v1.png in Resources */,
 				000000000000000000000156 /* coin_single_v1.png in Resources */,
 				000000000000000000000157 /* decor_sparkle_v1.png in Resources */,
+				00000000000000000000016B /* payday_goal_worker_original_v1.png in Widget Resources */,
 				00000000000000000000015A /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -544,6 +635,13 @@
 				00000000000000000000010A /* SalarySettingsView.swift in Sources */,
 				00000000000000000000010B /* StatsView.swift in Sources */,
 				00000000000000000000011C /* SalaryCalendarView.swift in Sources */,
+				00000000000000000000011D /* PersonalGoalView.swift in Sources */,
+				00000000000000000000011E /* WeeklyPayReportView.swift in Sources */,
+				00000000000000000000011F /* ProSalaryReportView.swift in Sources */,
+				000000000000000000000120 /* DailyPayReportView.swift in Sources */,
+				000000000000000000000121 /* PaydayExperienceView.swift in Sources */,
+				00000000000000000000017C /* WishExperience.swift in Sources */,
+				00000000000000000000017D /* WishExperienceView.swift in Sources */,
 				00000000000000000000010C /* ProfileView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -566,6 +664,7 @@
 				000000000000000000000112 /* PayJoyWidgetIllustrations.swift in Sources */,
 				000000000000000000000113 /* PayJoyActivityAttributes.swift in Sources */,
 				000000000000000000000114 /* SalaryModels.swift in Sources */,
+				00000000000000000000017E /* WishExperience.swift in Widget Sources */,
 				000000000000000000000115 /* SalaryCalculator.swift in Sources */,
 				000000000000000000000116 /* SettingsStore.swift in Sources */,
 				000000000000000000000117 /* AppTheme.swift in Sources */,
@@ -691,13 +790,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = PayJoy/PayJoy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 3S9L85LXA3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PayJoy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-					MARKETING_VERSION = 1.2;
+					MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -712,13 +811,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = PayJoy/PayJoy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 3S9L85LXA3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PayJoy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-					MARKETING_VERSION = 1.2;
+					MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -731,11 +830,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-					MARKETING_VERSION = 1.2;
+					MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -749,11 +848,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-					MARKETING_VERSION = 1.2;
+					MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -768,7 +867,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = PayJoyWidgets/PayJoyWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 3S9L85LXA3;
 				ENABLE_DEBUG_DYLIB = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -779,7 +878,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-					MARKETING_VERSION = 1.2;
+					MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -794,7 +893,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = PayJoyWidgets/PayJoyWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 3S9L85LXA3;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PayJoyWidgets/Info.plist;
@@ -804,7 +903,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-					MARKETING_VERSION = 1.2;
+					MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

@@ -1,6 +1,17 @@
 import SwiftUI
 import UIKit
 
+private struct PayJoyReduceMotionKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var payJoyReduceMotion: Bool {
+        get { self[PayJoyReduceMotionKey.self] }
+        set { self[PayJoyReduceMotionKey.self] = newValue }
+    }
+}
+
 struct ComicCard<Content: View>: View {
     var background: Color = AppTheme.cream
     var radius: CGFloat = AppTheme.cardRadius
@@ -42,6 +53,7 @@ struct ComicProgressBar: View {
 
 struct PrimaryButton: View {
     let title: String
+    var reduceMotion = false
     let action: () -> Void
 
     var body: some View {
@@ -49,8 +61,13 @@ struct PrimaryButton: View {
             Text(title)
                 .font(.headline.weight(.heavy))
                 .foregroundStyle(AppTheme.ink)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.82)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
+                .frame(minHeight: 52)
+                .padding(.vertical, 2)
                 .background(AppTheme.coin)
                 .clipShape(RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous))
                 .overlay {
@@ -58,7 +75,26 @@ struct PrimaryButton: View {
                         .stroke(AppTheme.outline, lineWidth: 1.5)
                 }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: reduceMotion))
+    }
+}
+
+struct PayJoyPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.payJoyReduceMotion) private var appReduceMotion
+
+    var scale: CGFloat = 0.985
+    var reduceMotion = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        let shouldReduceMotion = accessibilityReduceMotion || appReduceMotion || reduceMotion
+        configuration.label
+            .scaleEffect(configuration.isPressed && !shouldReduceMotion ? scale : 1)
+            .opacity(configuration.isPressed ? 0.88 : 1)
+            .animation(
+                shouldReduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.78),
+                value: configuration.isPressed
+            )
     }
 }
 
@@ -86,13 +122,14 @@ struct SpeechBubble: View {
     let text: String
     var isYellow = false
     var tailX: CGFloat = 0.22
+    var lineLimit = 2
 
     var body: some View {
         Text(text)
             .font(.system(size: 13, weight: .heavy, design: .rounded))
             .foregroundStyle(AppTheme.ink)
             .multilineTextAlignment(.leading)
-            .lineLimit(2)
+            .lineLimit(lineLimit)
             .minimumScaleFactor(0.82)
             .padding(.horizontal, 15)
             .padding(.top, 10)
@@ -147,6 +184,7 @@ struct ComicBubbleShape: Shape {
 enum AppTab: String, CaseIterable, Identifiable {
     case home
     case stats
+    case wish
     case profile
 
     var id: String { rawValue }
@@ -155,6 +193,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: L10n.t("首页")
         case .stats: L10n.t("统计")
+        case .wish: L10n.t("愿望")
         case .profile: L10n.t("我的")
         }
     }
@@ -163,12 +202,15 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: "house.fill"
         case .stats: "chart.bar.fill"
+        case .wish: "sparkles.rectangle.stack.fill"
         case .profile: "person.fill"
         }
     }
 }
 
 struct ComicTabBar: View {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.payJoyReduceMotion) private var appReduceMotion
     @Binding var selectedTab: AppTab
 
     var body: some View {
@@ -203,7 +245,7 @@ struct ComicTabBar: View {
                         tab: tab,
                         isSelected: selectedTab == tab
                     ) {
-                        withAnimation(.spring(response: 0.30, dampingFraction: 0.70)) {
+                        withAnimation(prefersReducedMotion ? nil : .spring(response: 0.30, dampingFraction: 0.70)) {
                             selectedTab = tab
                         }
                     }
@@ -213,6 +255,11 @@ struct ComicTabBar: View {
         }
         .frame(height: 66)
         .padding(.horizontal, 18)
+        .sensoryFeedback(.selection, trigger: selectedTab)
+    }
+
+    private var prefersReducedMotion: Bool {
+        accessibilityReduceMotion || appReduceMotion
     }
 }
 
@@ -220,6 +267,7 @@ struct LiveActivityControlCard: View {
     let isAvailable: Bool
     let isActive: Bool
     let statusTitle: String
+    var statusMessage: String? = nil
     let errorMessage: String?
     let action: () -> Void
 
@@ -240,7 +288,7 @@ struct LiveActivityControlCard: View {
                     Text(statusText)
                         .font(.caption.weight(.bold))
                         .foregroundStyle(errorMessage == nil ? AppTheme.textGray : AppTheme.red)
-                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Spacer(minLength: 4)
@@ -250,12 +298,12 @@ struct LiveActivityControlCard: View {
                         .font(.caption.weight(.black))
                         .foregroundStyle(AppTheme.ink)
                         .padding(.horizontal, 13)
-                        .padding(.vertical, 9)
+                        .frame(minHeight: 44)
                         .background(isAvailable ? AppTheme.coin : AppTheme.divider)
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1.1))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PayJoyPressStyle(scale: 0.96))
                 .disabled(!isAvailable)
                 .opacity(isAvailable ? 1 : 0.55)
             }
@@ -266,7 +314,36 @@ struct LiveActivityControlCard: View {
         if let errorMessage {
             return errorMessage
         }
+        if let statusMessage {
+            return statusMessage
+        }
         return isAvailable ? L10n.t("状态可在系统实时活动中展示", statusTitle) : L10n.t("当前系统未开放实时活动。")
+    }
+}
+
+extension View {
+    func payJoyKeyboardDismissToolbar() -> some View {
+        toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(L10n.t("完成")) {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+                .font(.body.weight(.heavy))
+            }
+        }
+    }
+
+    func membershipFeatureAlert(
+        isPresented: Binding<Bool>,
+        onContinue: @escaping () -> Void
+    ) -> some View {
+        alert(L10n.t("这是会员功能"), isPresented: isPresented) {
+            Button(L10n.t("取消"), role: .cancel) {}
+            Button(L10n.t("前往开通"), action: onContinue)
+        } message: {
+            Text(L10n.t("开通会员后即可使用，是否前往会员开通页？"))
+        }
     }
 }
 
@@ -313,7 +390,9 @@ private struct ComicTabButton: View {
             .opacity(isSelected ? 1 : 0.78)
             .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle(scale: 0.96))
+        .frame(maxWidth: .infinity)
         .accessibilityLabel(tab.title)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

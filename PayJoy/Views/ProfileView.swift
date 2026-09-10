@@ -1,13 +1,18 @@
 import SwiftUI
 import UIKit
 import AuthenticationServices
+import StoreKit
 
 struct ProfileView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @State private var activeSheet: ProfileSheet?
+    @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
     @State private var showsAccountManagement = false
     @State private var showsWidgetGuide = false
+    @State private var showsClosingReceipts = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -26,6 +31,7 @@ struct ProfileView: View {
             .padding(.bottom, 18)
         }
         .background(AppTheme.paper.ignoresSafeArea())
+        .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
         .navigationBarHidden(true)
         .sheet(item: $activeSheet) { sheet in
             ProfileDetailSheet(sheet: sheet)
@@ -45,52 +51,101 @@ struct ProfileView: View {
                 .presentationDragIndicator(.visible)
                 .presentationBackground(AppTheme.paper)
         }
+        .sheet(isPresented: $showsClosingReceipts) {
+            NavigationStack {
+                ClosingReceiptHistoryView()
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(AppTheme.paper)
+        }
+        .membershipFeatureAlert(isPresented: $showsMembershipPrompt) {
+            showsProPaywall = true
+        }
         .fullScreenCover(isPresented: $showsProPaywall) {
             ProPaywallSheet()
+        }
+        .transaction { transaction in
+            guard appState.preferences.reduceMotion || accessibilityReduceMotion else { return }
+            transaction.animation = nil
+            transaction.disablesAnimations = true
         }
     }
 
     private var profileHeader: some View {
-        HStack(spacing: 14) {
-            ProfileAvatarImage(name: appState.profile.avatarAssetName, size: 78, lineWidth: 1.5)
-            VStack(alignment: .leading, spacing: 5) {
-                Text(appState.profile.displayNickname)
-                    .font(.title3.weight(.black))
-                Text(appState.profile.displayMotto)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.textGray)
-                    .lineLimit(2)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(alignment: .top, spacing: 14) {
+                        ProfileAvatarImage(name: appState.profile.avatarAssetName, size: 72, lineWidth: 1.5)
+                        Spacer(minLength: 8)
+                        editProfileButton
+                    }
+                    Text(appState.profile.displayNickname)
+                        .font(.title3.weight(.black))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(appState.profile.displayMotto)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                HStack(spacing: 14) {
+                    ProfileAvatarImage(name: appState.profile.avatarAssetName, size: 78, lineWidth: 1.5)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(appState.profile.displayNickname)
+                            .font(.title3.weight(.black))
+                        Text(appState.profile.displayMotto)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                            .lineLimit(2)
+                    }
+                    Spacer()
+                    editProfileButton
+                }
             }
-            Spacer()
-            Button {
-                activeSheet = .editProfile
-            } label: {
-                Image(systemName: "pencil")
-                    .font(.system(size: 15, weight: .black))
-                    .foregroundStyle(AppTheme.ink)
-                    .frame(width: 36, height: 36)
-                    .background(AppTheme.coin)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.3))
-            }
-            .buttonStyle(.plain)
         }
+    }
+
+    private var editProfileButton: some View {
+        Button {
+            activeSheet = .editProfile
+        } label: {
+            Image(systemName: "pencil")
+                .font(.system(size: 15, weight: .black))
+                .foregroundStyle(AppTheme.ink)
+                .frame(width: 44, height: 44)
+                .background(AppTheme.coin)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.3))
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.92, reduceMotion: prefersReducedMotion))
+        .accessibilityLabel(L10n.t("编辑资料"))
+    }
+
+    private var prefersReducedMotion: Bool {
+        accessibilityReduceMotion || appState.preferences.reduceMotion
     }
 
     private var proCard: some View {
         Button {
-            showsProPaywall = true
+            if appState.hasEffectivePro {
+                showsProPaywall = true
+            } else {
+                showsMembershipPrompt = true
+            }
         } label: {
             ComicCard(background: AppTheme.proCardBackground) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(appState.hasEffectivePro ? L10n.t("开薪 PRO 已开通") : L10n.t("开薪 PRO · \(appState.proPriceText)"))
+                        Text(proCardTitle)
                             .font(.title3.weight(.black))
-                        Text(L10n.t("同步、灵动岛、密码、午休和主题，一次解锁。"))
+                        Text(L10n.t("工资报告、同步、密码、午休和主题集中管理。"))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(AppTheme.textGray)
-                            .lineLimit(2)
-                        Text(appState.hasEffectivePro ? L10n.t("查看权益") : L10n.t("查看开通权益"))
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(L10n.t("查看详情"))
                             .font(.caption.weight(.black))
                             .foregroundStyle(AppTheme.ink)
                             .padding(.horizontal, 12)
@@ -105,7 +160,7 @@ struct ProfileView: View {
                 }
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle())
     }
 
     @ViewBuilder
@@ -118,7 +173,7 @@ struct ProfileView: View {
                     accountCardContent(showsChevron: true)
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PayJoyPressStyle())
             .accessibilityLabel(L10n.t("管理 Apple ID"))
         } else {
             ComicCard(background: AppTheme.cream.opacity(0.78), padding: 14) {
@@ -140,64 +195,113 @@ struct ProfileView: View {
     }
 
     private func accountCardContent(showsChevron: Bool) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "apple.logo")
-                .font(.system(size: 22, weight: .black))
-                .foregroundStyle(AppTheme.ink)
-                .frame(width: 46, height: 46)
-                .background(appState.isSignedInWithApple ? AppTheme.coin : AppTheme.divider.opacity(0.6))
-                .clipShape(Circle())
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 9) {
+                    HStack(spacing: 12) {
+                        appleAccountMark
+                        Text(appState.isSignedInWithApple ? L10n.t("Apple ID 已连接") : L10n.t("连接 Apple ID"))
+                            .font(.headline.weight(.black))
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 4)
+                        if showsChevron {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .black))
+                                .foregroundStyle(AppTheme.textGray)
+                        }
+                    }
+                    Text(appState.isSignedInWithApple ? L10n.t("查看账号信息、退出登录和删除账号") : appState.appleAccountDetail)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                HStack(alignment: .center, spacing: 12) {
+                    appleAccountMark
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(appState.isSignedInWithApple ? L10n.t("Apple ID 已连接") : L10n.t("连接 Apple ID"))
-                    .font(.headline.weight(.black))
-                Text(appState.isSignedInWithApple ? L10n.t("查看账号信息、退出登录和删除账号") : appState.appleAccountDetail)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.textGray)
-                    .lineLimit(2)
-            }
-            Spacer()
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(appState.isSignedInWithApple ? L10n.t("Apple ID 已连接") : L10n.t("连接 Apple ID"))
+                            .font(.headline.weight(.black))
+                        Text(appState.isSignedInWithApple ? L10n.t("查看账号信息、退出登录和删除账号") : appState.appleAccountDetail)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                            .lineLimit(2)
+                    }
+                    Spacer()
 
-            if appState.isSignedInWithApple {
-                Text(L10n.t("已连接"))
-                    .font(.caption2.weight(.black))
-                    .foregroundStyle(AppTheme.ink)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(AppTheme.coin.opacity(0.72))
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
-            }
+                    if appState.isSignedInWithApple {
+                        connectedBadge
+                    }
 
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .black))
-                    .foregroundStyle(AppTheme.textGray)
+                    if showsChevron {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .black))
+                            .foregroundStyle(AppTheme.textGray)
+                    }
+                }
             }
         }
     }
 
+    private var appleAccountMark: some View {
+        Image(systemName: "apple.logo")
+            .font(.system(size: 22, weight: .black))
+            .foregroundStyle(AppTheme.ink)
+            .frame(width: 46, height: 46)
+            .background(appState.isSignedInWithApple ? AppTheme.coin : AppTheme.divider.opacity(0.6))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
+    }
+
+    private var connectedBadge: some View {
+        Text(L10n.t("已连接"))
+            .font(.caption2.weight(.black))
+            .foregroundStyle(AppTheme.ink)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(AppTheme.coin.opacity(0.72))
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
+    }
+
     private var settingsList: some View {
-        ComicCard(padding: 0) {
-            VStack(spacing: 0) {
+        VStack(spacing: 14) {
+            SettingsGroup(title: L10n.t("工作与收入")) {
                 NavigationLink {
                     SalarySettingsView(mode: .salary)
                 } label: {
-                    SettingsRow(icon: "yensign.circle.fill", title: L10n.t("薪资设置"), detail: appState.settings.salaryType.title)
+                    SettingsRow(title: L10n.t("薪资设置"), detail: appState.settings.salaryType.title)
                 }
+                .buttonStyle(SettingsRowButtonStyle())
+
                 NavigationLink {
                     SalarySettingsView(mode: .workTime)
                 } label: {
-                    SettingsRow(icon: "clock.fill", title: L10n.t("工作时间设置"), detail: "\(appState.settings.workStart.displayText)-\(appState.settings.workEnd.displayText)")
+                    SettingsRow(title: L10n.t("工作时间设置"), detail: "\(appState.settings.workStart.displayText)-\(appState.settings.workEnd.displayText)")
                 }
-                profileButton(.privacy)
-                profileButton(.reminders)
+                .buttonStyle(SettingsRowButtonStyle())
+
+                Button {
+                    showsClosingReceipts = true
+                } label: {
+                    SettingsRow(title: L10n.t("收工回执"), detail: L10n.t("查看往日回执"))
+                }
+                .buttonStyle(SettingsRowButtonStyle())
+
+                profileButton(.reminders, showsDivider: false)
+            }
+
+            SettingsGroup(title: L10n.t("外观与使用")) {
+                profileButton(.displayEffects)
                 profileButton(.theme)
                 profileButton(.language)
                 widgetGuideButton
+            }
+
+            SettingsGroup(title: L10n.t("隐私与支持")) {
+                profileButton(.privacy)
                 profileButton(.data)
-                profileButton(.help)
+                profileButton(.help, showsDivider: false)
             }
         }
     }
@@ -206,17 +310,17 @@ struct ProfileView: View {
         Button {
             showsWidgetGuide = true
         } label: {
-            SettingsRow(icon: "rectangle.on.rectangle.angled", title: L10n.t("小组件指引"), detail: L10n.t("添加到桌面"))
+            SettingsRow(title: L10n.t("小组件指引"), detail: L10n.t("添加到桌面"), showsDivider: false)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SettingsRowButtonStyle())
     }
 
     private var liveActivityCard: some View {
         LiveActivityControlCard(
-            isAvailable: appState.hasEffectivePro && appState.isLiveActivityAvailable,
+            isAvailable: appState.isLiveActivityAvailable,
             isActive: appState.isLiveActivityActive,
             statusTitle: appState.snapshot.status.title,
-            errorMessage: appState.hasEffectivePro ? appState.liveActivityErrorMessage : L10n.t("PRO 功能，开通后可在锁屏和灵动岛展示。")
+            errorMessage: appState.liveActivityErrorMessage
         ) {
             if appState.isLiveActivityActive {
                 appState.endLiveActivity()
@@ -226,13 +330,13 @@ struct ProfileView: View {
         }
     }
 
-    private func profileButton(_ sheet: ProfileSheet) -> some View {
+    private func profileButton(_ sheet: ProfileSheet, showsDivider: Bool = true) -> some View {
         Button {
             activeSheet = sheet
         } label: {
-            SettingsRow(icon: sheet.icon, title: sheet.title, detail: detailText(for: sheet))
+            SettingsRow(title: sheet.title, detail: detailText(for: sheet), showsDivider: showsDivider)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SettingsRowButtonStyle())
     }
 
     private func detailText(for sheet: ProfileSheet) -> String {
@@ -241,36 +345,54 @@ struct ProfileView: View {
             appState.preferences.appLockEnabled ? L10n.t("已开启") : L10n.t("未开启")
         case .reminders:
             profileRemindersStatusText
+        case .displayEffects:
+            appState.preferences.reduceMotion ? L10n.t("减少动态效果") : L10n.t("工作中显示金币雨")
         case .theme:
-            appState.hasEffectivePro ? "\(appState.preferences.selectedTheme.title) · \(appState.preferences.selectedAppIcon.title)" : "\(L10n.t("PRO 解锁")) · \(L10n.t("默认元气打工"))"
+            appState.hasEffectivePro ? "\(appState.preferences.selectedTheme.title) · \(appState.preferences.selectedAppIcon.title)" : L10n.t("默认元气打工")
         case .language:
             appState.preferences.appLanguage.title
+        case .data:
+            dataSyncStatusText
         default:
             sheet.detail
         }
     }
 
+    private var dataSyncStatusText: String {
+        guard appState.hasEffectivePro else { return L10n.t("本地保存") }
+        guard appState.isSignedInWithApple else { return L10n.t("未连接") }
+        return appState.cloudStatusText
+    }
+
     private var profileRemindersStatusText: String {
-        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled].filter { $0 }.count
+        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled, appState.preferences.goalRemindersEnabled].filter { $0 }.count
         switch enabledCount {
         case 0: return L10n.t("未开启")
         case 1: return L10n.t("已开启 1 项")
-        default: return L10n.t("已开启 2 项")
+        case 2: return L10n.t("已开启 2 项")
+        default: return L10n.t("已开启 3 项")
         }
     }
 
+    private var isLowerScreenshot: Bool {
+        AppState.isScreenshotMode && ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_SCREEN"] == "profile-lower"
+    }
+
+    private var proCardTitle: String {
+        L10n.t("更多功能")
+    }
 }
 
-private enum ProfileSheet: String, Identifiable {
+enum ProfileSheet: String, Identifiable {
     case pro
     case editProfile
+    case displayEffects
     case privacy
     case reminders
     case theme
     case language
     case data
     case help
-    case about
 
     var id: String { rawValue }
 
@@ -278,27 +400,27 @@ private enum ProfileSheet: String, Identifiable {
         switch self {
         case .pro: "crown.fill"
         case .editProfile: "pencil"
+        case .displayEffects: "sparkles"
         case .privacy: "lock.shield.fill"
         case .reminders: "bell.fill"
         case .theme: "paintpalette.fill"
         case .language: "globe"
         case .data: "icloud.fill"
         case .help: "questionmark.circle.fill"
-        case .about: "info.circle.fill"
         }
     }
 
     var title: String {
         switch self {
-        case .pro: L10n.t("开薪 PRO")
+        case .pro: L10n.t("开薪会员")
         case .editProfile: L10n.t("编辑资料")
+        case .displayEffects: L10n.t("显示与动效")
         case .privacy: L10n.t("隐私与密码")
         case .reminders: L10n.t("开薪提醒")
         case .theme: L10n.t("主题")
         case .language: L10n.t("语言")
         case .data: L10n.t("数据与同步")
         case .help: L10n.t("帮助与反馈")
-        case .about: L10n.t("关于开薪")
         }
     }
 
@@ -306,38 +428,39 @@ private enum ProfileSheet: String, Identifiable {
         switch self {
         case .pro: L10n.t("一次买断")
         case .editProfile: ""
+        case .displayEffects: L10n.t("保留显示精度和动态效果的偏好。")
         case .privacy: L10n.t("密码保护")
         case .reminders: ""
         case .theme: L10n.t("主题与 App 图标")
         case .language: L10n.t("自动跟随手机语言")
         case .data: L10n.t("本地保存")
         case .help: ""
-        case .about: "v1.0"
         }
     }
 
     var bodyText: String {
         switch self {
         case .pro:
-            L10n.t("PRO 是给高频打工人的增强包；一次开通后解锁 iCloud 同步、锁屏/灵动岛、密码保护、午休时间设置和 PRO 独享主题。实际价格以 App Store 付款页为准。")
+            L10n.t("一次开通后可使用 iCloud 同步、锁屏与灵动岛、密码保护、午休时间和全部主题。实际价格以 App Store 付款页为准。")
         case .editProfile:
             L10n.t("修改昵称和个性签名后，会立刻保存在本机。")
+        case .displayEffects:
+            L10n.t("保留显示精度和动态效果的偏好。")
         case .privacy:
             L10n.t("开启密码保护后，每次打开开薪都需要输入 4 位密码；进入多任务切换器时也会自动隐藏页面内容。")
         case .reminders:
-            L10n.t("提醒功能会用于上班开薪、下班结算和午休暂停提示。首版先不主动申请通知权限，避免一打开就打扰你。")
+            L10n.t("提醒功能会用于上班开薪、下班结算、午休暂停和目标达成提示。默认关闭，只有你主动开启后才会请求通知权限。")
         case .theme:
             L10n.t("主题控制 App、小组件、锁屏和灵动岛的视觉风格；App 图标可以单独选择，不和主题绑定。")
         case .language:
             L10n.t("默认跟随手机语言，也可以在这里固定为繁体中文、日文、英语或韩文。")
         case .data:
-            L10n.t("免费版本地保存；PRO 可通过 iCloud 私有数据库自动同步，多设备使用时可以恢复设置。")
+            L10n.t("数据默认保存在本机，也可以通过 iCloud 在多台设备间同步和恢复设置。")
         case .help:
             L10n.t("计算规则：月薪按月薪 / 21.75 估算日薪，年薪按年薪 / 12 / 21.75，时薪按每日工作时长计算。默认周一到周五计薪。")
-        case .about:
-            L10n.t("PayJoy「开薪」v1.0。这个版本把实时收入、统计、小组件、PRO 同步和隐私保护整理成了正式首版。")
         }
     }
+
 }
 
 private struct ProfileAvatarImage: View {
@@ -359,11 +482,14 @@ private struct ProfileAvatarImage: View {
     }
 }
 
-private struct ProfileDetailSheet: View {
+struct ProfileDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
     let sheet: ProfileSheet
+    @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
+    @State private var showsClearLocalDataConfirmation = false
+    @State private var showsCloudUploadConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -374,6 +500,8 @@ private struct ProfileDetailSheet: View {
                     ProPaywallSheet()
                 } else if sheet == .privacy {
                     PrivacySettingsSheet()
+                } else if sheet == .displayEffects {
+                    DisplayEffectsSettingsSheet()
                 } else if sheet == .theme {
                     ThemeSettingsSheet()
                 } else if sheet == .language {
@@ -394,61 +522,96 @@ private struct ProfileDetailSheet: View {
                     .foregroundStyle(AppTheme.ink)
                 }
             }
+            .membershipFeatureAlert(isPresented: $showsMembershipPrompt) {
+                showsProPaywall = true
+            }
             .fullScreenCover(isPresented: $showsProPaywall) {
                 ProPaywallSheet()
+            }
+            .alert(L10n.t("清除本机数据？"), isPresented: $showsClearLocalDataConfirmation) {
+                Button(L10n.t("取消"), role: .cancel) {}
+                Button(L10n.t("删除"), role: .destructive) {
+                    Task { await appState.clearLocalData() }
+                }
+            } message: {
+                Text(L10n.t("这会删除本机保存的薪资、记录、目标和设置，并退出 Apple ID。若曾同步到 iCloud，云端数据不会被删除，可在之后重新连接并恢复。"))
+            }
+            .alert(L10n.t("上传到 iCloud？"), isPresented: $showsCloudUploadConfirmation) {
+                Button(L10n.t("取消"), role: .cancel) {}
+                Button(L10n.t("上传并开启自动同步"), role: .destructive) {
+                    Task { await appState.syncToCloud() }
+                }
+            } message: {
+                Text(L10n.t("这会用这台设备上的数据替换 iCloud 中已有的开薪数据。确认后将开启自动同步。"))
             }
         }
     }
 
     private var detailBody: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            sheetHeader
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                sheetHeader
 
-            ComicCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(sheet.bodyText)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(AppTheme.ink)
-                        .lineSpacing(4)
+                ComicCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(sheet.bodyText)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(AppTheme.ink)
+                            .lineSpacing(4)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                    switch sheet {
-                    case .reminders:
-                        remindersControls
-                    case .theme:
-                        EmptyView()
-                    case .data:
-                        dataControls
-                    case .help:
-                        legalControls
-                    case .pro:
-                        EmptyView()
-                    default:
-                        EmptyView()
+                        switch sheet {
+                        case .reminders:
+                            remindersControls
+                        case .theme:
+                            EmptyView()
+                        case .data:
+                            dataControls
+                        case .help:
+                            legalControls
+                        case .displayEffects:
+                            EmptyView()
+                        case .pro:
+                            EmptyView()
+                        default:
+                            EmptyView()
+                        }
                     }
                 }
             }
-
-            Spacer()
+            .padding(AppTheme.pagePadding)
+            .padding(.bottom, 44)
         }
-        .padding(AppTheme.pagePadding)
-        .padding(.bottom, 44)
     }
 
     private var sheetHeader: some View {
-        HStack(spacing: 12) {
-            Image(systemName: sheet.icon)
-                .font(.system(size: 22, weight: .black))
-                .foregroundStyle(AppTheme.ink)
-                .frame(width: 48, height: 48)
-                .background(AppTheme.coin)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.4))
-            VStack(alignment: .leading, spacing: 4) {
-                Text(sheet.title)
-                    .font(.title3.weight(.black))
-                Text(sheetHeaderDetail)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.textGray)
+        Group {
+            if sheet == .help {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("01 · \(sheet.title)")
+                        .font(.title3.weight(.black))
+                    Text(L10n.t("规则、支持与法律信息"))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                HStack(spacing: 12) {
+                    Image(systemName: sheet.icon)
+                        .font(.system(size: 22, weight: .black))
+                        .foregroundStyle(AppTheme.ink)
+                        .frame(width: 48, height: 48)
+                        .background(AppTheme.coin)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.4))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(sheet.title)
+                            .font(.title3.weight(.black))
+                        Text(sheetHeaderDetail)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                    }
+                }
             }
         }
     }
@@ -458,16 +621,17 @@ private struct ProfileDetailSheet: View {
         case .reminders:
             remindersStatusText
         default:
-            sheet.detail.isEmpty ? L10n.t("首版功能") : sheet.detail
+            sheet.detail
         }
     }
 
     private var remindersStatusText: String {
-        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled].filter { $0 }.count
+        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled, appState.preferences.goalRemindersEnabled].filter { $0 }.count
         switch enabledCount {
         case 0: return L10n.t("未开启")
         case 1: return L10n.t("已开启 1 项")
-        default: return L10n.t("已开启 2 项")
+        case 2: return L10n.t("已开启 2 项")
+        default: return L10n.t("已开启 3 项")
         }
     }
 
@@ -487,8 +651,24 @@ private struct ProfileDetailSheet: View {
                 title: L10n.t("午休提醒"),
                 subtitle: lunchReminderHelpText,
                 isEnabled: appState.preferences.lunchRemindersEnabled,
-                isAvailable: appState.canUseLunchReminders,
-                action: appState.setLunchRemindersEnabled
+                isAvailable: !appState.hasEffectivePro || appState.canUseLunchReminders,
+                action: { newValue in
+                    if appState.hasEffectivePro {
+                        appState.setLunchRemindersEnabled(newValue)
+                    } else {
+                        showsMembershipPrompt = true
+                    }
+                }
+            )
+
+            Divider().overlay(AppTheme.divider)
+
+            reminderToggleRow(
+                title: L10n.t("目标达成提醒"),
+                subtitle: goalReminderHelpText,
+                isEnabled: appState.preferences.goalRemindersEnabled,
+                isAvailable: appState.personalGoal != nil,
+                action: appState.setGoalRemindersEnabled
             )
 
             if appState.reminderPermissionState == .denied {
@@ -540,7 +720,7 @@ private struct ProfileDetailSheet: View {
 
     private var workReminderHelpText: String {
         if appState.preferences.remindersEnabled {
-            return L10n.t("已安排周一到周五 \(appState.settings.workStart.displayText) 开薪、\(appState.settings.workEnd.displayText) 到账提醒。")
+            return L10n.t("已安排 \(appState.settings.workdaySummary) \(appState.settings.workStart.displayText) 开薪、\(appState.settings.workEnd.displayText) 到账提醒。")
         }
         switch appState.reminderPermissionState {
         case .notDetermined:
@@ -556,7 +736,7 @@ private struct ProfileDetailSheet: View {
 
     private var lunchReminderHelpText: String {
         guard appState.hasEffectivePro else {
-            return L10n.t("午休提醒是 PRO 功能。")
+            return L10n.t("打开后会在午休开始和午休结束时提醒。")
         }
         guard appState.settings.deductLunch else {
             return L10n.t("请先在工作时间设置里开启午休时间。")
@@ -572,6 +752,23 @@ private struct ProfileDetailSheet: View {
         }
     }
 
+    private var goalReminderHelpText: String {
+        guard appState.personalGoal != nil else {
+            return L10n.t("请先设置一个开薪目标。")
+        }
+        if appState.preferences.goalRemindersEnabled {
+            return L10n.t("会在预计达成日的下班时间提醒你。")
+        }
+        switch appState.reminderPermissionState {
+        case .notDetermined:
+            return L10n.t("开启时会自动请求系统通知权限。")
+        case .denied:
+            return L10n.t("系统通知权限已关闭，需要到设置里重新打开。")
+        default:
+            return L10n.t("开启后会在预计目标达成时提醒。")
+        }
+    }
+
     private var dataControls: some View {
         VStack(alignment: .leading, spacing: 8) {
             Divider().overlay(AppTheme.divider)
@@ -581,52 +778,139 @@ private struct ProfileDetailSheet: View {
             }
             HStack(spacing: 10) {
                 Button {
-                    Task { await appState.syncToCloud() }
+                    if !appState.hasEffectivePro {
+                        showsMembershipPrompt = true
+                    } else if appState.requiresCloudSyncSourceConfirmation {
+                        showsCloudUploadConfirmation = true
+                    } else {
+                        Task { await appState.syncToCloud() }
+                    }
                 } label: {
                     Label(appState.isSyncing ? L10n.t("同步中") : L10n.t("上传 iCloud"), systemImage: "icloud.and.arrow.up")
                         .font(.caption.weight(.heavy))
                 }
                 .buttonStyle(.plain)
-                .disabled(appState.isSyncing)
+                .disabled((appState.hasEffectivePro && !canManuallySync) || appState.isSyncing)
 
                 Button {
-                    Task { await appState.restoreFromCloud() }
+                    if appState.hasEffectivePro {
+                        Task { await appState.restoreFromCloud() }
+                    } else {
+                        showsMembershipPrompt = true
+                    }
                 } label: {
                     Label(L10n.t("恢复"), systemImage: "icloud.and.arrow.down")
                         .font(.caption.weight(.heavy))
                 }
                 .buttonStyle(.plain)
-                .disabled(appState.isSyncing)
+                .disabled((appState.hasEffectivePro && !canManuallySync) || appState.isSyncing)
             }
             .foregroundStyle(AppTheme.ink)
+            .opacity(appState.hasEffectivePro && !canManuallySync ? 0.45 : 1)
 
-            Text(appState.syncMessage)
+            Text(dataSyncMessage)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(AppTheme.textGray)
+
+            Divider().overlay(AppTheme.divider)
+
+            Button(role: .destructive) {
+                showsClearLocalDataConfirmation = true
+            } label: {
+                Label(L10n.t("删除本机数据"), systemImage: "trash")
+                    .font(.caption.weight(.heavy))
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(L10n.t("仅删除这台设备上的数据，不会删除 iCloud 记录。"))
 
         }
     }
 
+    private var canManuallySync: Bool {
+        appState.hasEffectivePro && appState.isSignedInWithApple
+    }
+
+    private var dataSyncMessage: String {
+        guard appState.hasEffectivePro else {
+            return L10n.t("在多台设备间同步设置和历史记录。")
+        }
+        guard appState.isSignedInWithApple else {
+            return L10n.t("请先连接 Apple ID，再同步到 iCloud。")
+        }
+        return appState.syncMessage
+    }
+
     private var legalControls: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Link(destination: PayJoyLegalLinks.privacy) {
-                Label(L10n.t("隐私政策"), systemImage: "hand.raised.fill")
-                    .font(.subheadline.weight(.heavy))
+            Button {
+                requestAppStoreReview()
+            } label: {
+                HStack(spacing: 10) {
+                    Text("02")
+                        .font(.system(size: 12, weight: .black, design: .rounded))
+                        .foregroundStyle(AppTheme.ink)
+                        .frame(width: 36, height: 36)
+                        .background(AppTheme.coin)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppTheme.outline, lineWidth: 1))
+                        .dynamicTypeSize(.large)
+                        .accessibilityHidden(true)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.t("去 App Store 给开薪评分"))
+                            .font(.subheadline.weight(.black))
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(L10n.t("轻点即可打开系统评分"))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .foregroundStyle(AppTheme.ink)
+                .padding(12)
+                .background(AppTheme.softSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(AppTheme.divider, lineWidth: 1)
+                }
             }
-            Link(destination: PayJoyLegalLinks.terms) {
-                Label(L10n.t("服务条款"), systemImage: "doc.plaintext.fill")
-                    .font(.subheadline.weight(.heavy))
-            }
-            Link(destination: PayJoyLegalLinks.support) {
-                Label(L10n.t("支持与反馈"), systemImage: "questionmark.circle.fill")
-                    .font(.subheadline.weight(.heavy))
-            }
-            Link(destination: PayJoyLegalLinks.deleteAccount) {
-                Label(L10n.t("账号删除说明"), systemImage: "trash.fill")
-                    .font(.subheadline.weight(.heavy))
-            }
+            .buttonStyle(.plain)
+
+            legalLink(index: "03", title: L10n.t("隐私政策"), destination: PayJoyLegalLinks.privacy)
+            legalLink(index: "04", title: L10n.t("服务条款"), destination: PayJoyLegalLinks.terms)
+            legalLink(index: "05", title: L10n.t("支持与反馈"), destination: PayJoyLegalLinks.support)
+            legalLink(index: "06", title: L10n.t("账号删除说明"), destination: PayJoyLegalLinks.deleteAccount)
         }
         .foregroundStyle(AppTheme.ink)
+    }
+
+    private func legalLink(index: String, title: String, destination: URL) -> some View {
+        Link(destination: destination) {
+            HStack(alignment: .center, spacing: 10) {
+                Text(index)
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(AppTheme.textGray)
+                    .frame(width: 32, height: 32)
+                    .background(AppTheme.softSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    .dynamicTypeSize(.large)
+                    .accessibilityHidden(true)
+                Text(title)
+                    .font(.subheadline.weight(.heavy))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        }
+    }
+
+    private func requestAppStoreReview() {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }) else {
+            return
+        }
+        SKStoreReviewController.requestReview(in: windowScene)
     }
 
     private func preferenceBinding(_ keyPath: WritableKeyPath<AppPreferences, Bool>) -> Binding<Bool> {
@@ -646,6 +930,7 @@ private struct AccountManagementSheet: View {
     @State private var showsSignOutConfirmation = false
     @State private var showsDeleteConfirmation = false
     @State private var isDeletingAccount = false
+    @State private var deletionResultMessage: String?
 
     private var account: AppleAccount? {
         appState.appleAccount
@@ -684,6 +969,7 @@ private struct AccountManagementSheet: View {
                     }
                     .fontWeight(.heavy)
                     .foregroundStyle(AppTheme.ink)
+                    .disabled(isDeletingAccount)
                 }
             }
             .alert(L10n.t("退出 Apple ID？"), isPresented: $showsSignOutConfirmation) {
@@ -702,12 +988,26 @@ private struct AccountManagementSheet: View {
                         isDeletingAccount = true
                         await appState.deleteAccountAndLocalData()
                         isDeletingAccount = false
-                        dismiss()
+                        deletionResultMessage = appState.syncMessage
                     }
                 }
             } message: {
                 Text(L10n.t("这会退出 Apple ID，并删除本机保存的数据；若已连接 iCloud，也会尝试删除开薪的 iCloud 私有库记录。此操作不能撤销。"))
             }
+            .alert(
+                L10n.t("删除结果"),
+                isPresented: Binding(
+                    get: { deletionResultMessage != nil },
+                    set: { if !$0 { deletionResultMessage = nil } }
+                )
+            ) {
+                Button(L10n.t("完成")) {
+                    dismiss()
+                }
+            } message: {
+                Text(deletionResultMessage ?? "")
+            }
+            .interactiveDismissDisabled(isDeletingAccount)
         }
     }
 
@@ -755,7 +1055,6 @@ private struct AccountManagementSheet: View {
 
                 HStack {
                     ProfileInfoChip(title: "iCloud", value: appState.cloudStatusText)
-                    ProfileInfoChip(title: "PRO", value: appState.hasEffectivePro ? L10n.t("已开通") : L10n.t("未开通"))
                 }
 
                 Text(appState.syncMessage)
@@ -1020,30 +1319,102 @@ private struct ProfileEditSheet: View {
     }
 }
 
+struct DisplayEffectsSettingsSheet: View {
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            ComicCard(background: AppTheme.cream, padding: 14) {
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L10n.t("显示与动效"))
+                            .font(.headline.weight(.black))
+                            .foregroundStyle(AppTheme.ink)
+                        Text(L10n.t("保留显示精度和动态效果的偏好。"))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                    }
+
+                    displayToggle(
+                        title: L10n.t("收入显示到分"),
+                        subtitle: L10n.t("关闭后金额会省略小数。"),
+                        keyPath: \.showDecimalCents
+                    )
+
+                    Divider().overlay(AppTheme.divider)
+
+                    displayToggle(
+                        title: L10n.t("工作中显示金币雨"),
+                        subtitle: L10n.t("工作时显示背景金币动画；减少动态效果时会自动停用。"),
+                        keyPath: \.showCoinRain
+                    )
+
+                    Divider().overlay(AppTheme.divider)
+
+                    displayToggle(
+                        title: L10n.t("减少动态效果"),
+                        subtitle: L10n.t("关闭金币雨、数字弹跳和界面过渡动画。"),
+                        keyPath: \.reduceMotion
+                    )
+                }
+            }
+            .padding(AppTheme.pagePadding)
+            .padding(.bottom, 36)
+        }
+    }
+
+    private func displayToggle(
+        title: String,
+        subtitle: String,
+        keyPath: WritableKeyPath<AppPreferences, Bool>
+    ) -> some View {
+        Toggle(isOn: preferenceBinding(keyPath)) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline.weight(.heavy))
+                    .foregroundStyle(AppTheme.ink)
+                Text(subtitle)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppTheme.textGray)
+                    .lineSpacing(2)
+            }
+        }
+        .tint(AppTheme.coin)
+    }
+
+    private func preferenceBinding(_ keyPath: WritableKeyPath<AppPreferences, Bool>) -> Binding<Bool> {
+        Binding {
+            appState.preferences[keyPath: keyPath]
+        } set: { newValue in
+            var preferences = appState.preferences
+            preferences[keyPath: keyPath] = newValue
+            appState.preferences = preferences
+        }
+    }
+}
+
 private struct ThemeSettingsSheet: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @State private var showsIconChoices = false
+    @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 iconPicker
-
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(AppVisualTheme.allCases) { theme in
                         themeOption(theme)
                     }
-
-                    Text(L10n.t("更多 PRO 主题敬请期待..."))
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
-                        .foregroundStyle(AppTheme.muted)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 2)
                 }
             }
             .padding(AppTheme.pagePadding)
             .padding(.bottom, 36)
+        }
+        .membershipFeatureAlert(isPresented: $showsMembershipPrompt) {
+            showsProPaywall = true
         }
         .fullScreenCover(isPresented: $showsProPaywall) {
             ProPaywallSheet()
@@ -1054,12 +1425,8 @@ private struct ThemeSettingsSheet: View {
         ComicCard(background: AppTheme.cream, padding: 12) {
             VStack(spacing: 12) {
                 Button {
-                    if appState.hasEffectivePro {
-                        withAnimation(.spring(response: 0.24, dampingFraction: 0.86)) {
-                            showsIconChoices.toggle()
-                        }
-                    } else {
-                        showsProPaywall = true
+                    withAnimation(prefersReducedMotion ? nil : .spring(response: 0.24, dampingFraction: 0.86)) {
+                        showsIconChoices.toggle()
                     }
                 } label: {
                     HStack(spacing: 12) {
@@ -1082,7 +1449,7 @@ private struct ThemeSettingsSheet: View {
 
                         Spacer()
 
-                        Image(systemName: appState.hasEffectivePro ? (showsIconChoices ? "chevron.up" : "chevron.down") : "lock.fill")
+                        Image(systemName: showsIconChoices ? "chevron.up" : "chevron.down")
                             .font(.system(size: 15, weight: .black))
                             .foregroundStyle(AppTheme.ink)
                     }
@@ -1103,14 +1470,13 @@ private struct ThemeSettingsSheet: View {
                             .foregroundStyle(AppTheme.textGray)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                } else if !appState.hasEffectivePro {
-                    Text(L10n.t("App 图标属于 PRO 主题权益，未开通时保持默认元气图标。"))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(AppTheme.textGray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
+    }
+
+    private var prefersReducedMotion: Bool {
+        appState.preferences.reduceMotion || accessibilityReduceMotion
     }
 
     private func themeOption(_ theme: AppVisualTheme) -> some View {
@@ -1119,18 +1485,15 @@ private struct ThemeSettingsSheet: View {
         return Button {
             guard appState.hasEffectivePro else {
                 if theme != .classic {
-                    showsProPaywall = true
+                    showsMembershipPrompt = true
+                } else {
+                    applyTheme(theme)
                 }
                 return
             }
-
-            withAnimation(.spring(response: 0.24, dampingFraction: 0.84)) {
-                var updatedPreferences = appState.preferences
-                updatedPreferences.selectedTheme = theme
-                appState.preferences = updatedPreferences
-            }
+            applyTheme(theme)
         } label: {
-            ThemeChoiceCard(theme: theme, isSelected: isSelected, isLocked: !appState.hasEffectivePro && theme != .classic)
+            ThemeChoiceCard(theme: theme, isSelected: isSelected)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isSelected ? L10n.t("当前主题 \(theme.title)") : L10n.t("切换主题 \(theme.title)"))
@@ -1142,7 +1505,9 @@ private struct ThemeSettingsSheet: View {
         return Button {
             guard appState.hasEffectivePro else {
                 if icon != .classic {
-                    showsProPaywall = true
+                    showsMembershipPrompt = true
+                } else {
+                    appState.setAppIconChoice(icon)
                 }
                 return
             }
@@ -1156,7 +1521,6 @@ private struct ThemeSettingsSheet: View {
                         RoundedRectangle(cornerRadius: 15, style: .continuous)
                             .stroke(AppTheme.outline, lineWidth: isSelected ? 2 : 1.1)
                     }
-                    .opacity(appState.hasEffectivePro || icon == .classic ? 1 : 0.44)
 
                 if isSelected {
                     Image(systemName: "checkmark")
@@ -1167,21 +1531,23 @@ private struct ThemeSettingsSheet: View {
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1.4))
                         .offset(x: 4, y: 4)
-                } else if !appState.hasEffectivePro && icon != .classic {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundStyle(.white)
-                        .frame(width: 19, height: 19)
-                        .background(AppTheme.ink.opacity(0.86))
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 1.2))
-                        .offset(x: 4, y: 4)
                 }
             }
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isSelected ? L10n.t("当前 App 图标 \(icon.title)") : L10n.t("切换 App 图标 \(icon.title)"))
+    }
+
+    private func applyTheme(_ theme: AppVisualTheme) {
+        // Theme colors are global computed values. Keep the switch atomic so text remains readable.
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            var updatedPreferences = appState.preferences
+            updatedPreferences.selectedTheme = theme
+            appState.preferences = updatedPreferences
+        }
     }
 }
 
@@ -1246,10 +1612,67 @@ private struct LanguageSettingsSheet: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(language.title)
+                            .accessibilityValue(
+                                appState.preferences.appLanguage == language
+                                    ? L10n.t("已选择")
+                                    : L10n.t("未选择")
+                            )
+                            .accessibilityAddTraits(
+                                appState.preferences.appLanguage == language ? .isSelected : []
+                            )
 
                             if language != AppLanguage.allCases.last {
                                 Divider().overlay(AppTheme.divider).padding(.leading, 74)
                             }
+                        }
+                    }
+                }
+
+                ComicCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(L10n.t("地区语气与格式"))
+                            .font(.headline.weight(.heavy))
+                        Text(L10n.t("决定台湾、香港、日本或韩国的用词、日期与默认货币；不会修改你的工资金额。"))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+
+                        Menu {
+                            Button {
+                                var preferences = appState.preferences
+                                preferences.marketOverride = nil
+                                appState.preferences = preferences
+                            } label: {
+                                Label(
+                                    "\(L10n.t("跟随系统")) · \(AppMarket.systemResolved.title)",
+                                    systemImage: appState.preferences.marketOverride == nil ? "checkmark" : "globe"
+                                )
+                            }
+
+                            ForEach(AppMarket.allCases) { market in
+                                Button {
+                                    var preferences = appState.preferences
+                                    preferences.marketOverride = market
+                                    appState.preferences = preferences
+                                } label: {
+                                    Label(
+                                        market.title,
+                                        systemImage: appState.preferences.marketOverride == market ? "checkmark" : "mappin"
+                                    )
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Text(appState.preferences.marketOverride?.title ?? "\(L10n.t("跟随系统")) · \(AppMarket.systemResolved.title)")
+                                    .font(.subheadline.weight(.black))
+                                Spacer()
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption.weight(.black))
+                            }
+                            .foregroundStyle(AppTheme.ink)
+                            .padding(13)
+                            .background(AppTheme.softSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
                     }
                 }
@@ -1264,7 +1687,6 @@ private struct LanguageSettingsSheet: View {
 private struct ThemeChoiceCard: View {
     let theme: AppVisualTheme
     let isSelected: Bool
-    var isLocked = false
 
     var body: some View {
         let usesDarkShell = AppTheme.current == .midnight
@@ -1280,7 +1702,6 @@ private struct ThemeChoiceCard: View {
                 .frame(width: theme.previewSize.width, height: theme.previewSize.height)
                 .scaleEffect(theme.previewScale, anchor: .bottomTrailing)
                 .offset(theme.previewOffset)
-                .opacity(isLocked ? 0.52 : 1)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 5) {
@@ -1313,16 +1734,6 @@ private struct ThemeChoiceCard: View {
                         .background(Color(hex: 0x0B73D9))
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Color.white, lineWidth: 1.7))
-                        .padding(.trailing, 16)
-                        .padding(.top, 16)
-                } else if isLocked {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundStyle(.white)
-                        .frame(width: 32, height: 32)
-                        .background(AppTheme.ink.opacity(0.82))
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
                         .padding(.trailing, 16)
                         .padding(.top, 16)
                 }
@@ -1497,20 +1908,25 @@ private struct PrivacySettingsSheet: View {
     @Environment(AppState.self) private var appState
     @State private var firstPasscode = ""
     @State private var confirmPasscode = ""
+    @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
 
     private var canSavePasscode: Bool {
         firstPasscode.count == 4 && firstPasscode == confirmPasscode
     }
 
+    private var hasPasscodeMismatch: Bool {
+        firstPasscode.count == 4 && confirmPasscode.count == 4 && firstPasscode != confirmPasscode
+    }
+
     private var helperText: String {
         if !appState.hasEffectivePro {
-            return L10n.t("密码保护是 PRO 功能；多任务隐私遮罩会始终保护 App 预览。")
+            return L10n.t("为打开 App 和从多任务返回增加 4 位密码保护。")
         }
         if appState.preferences.appLockEnabled {
             return L10n.t("下次打开 App 或从多任务切回来时，需要输入 4 位密码。")
         }
-        if !confirmPasscode.isEmpty && firstPasscode != confirmPasscode {
+        if hasPasscodeMismatch {
             return L10n.t("两次输入不一致，请重新确认。")
         }
         return L10n.t("首次设置需要输入两遍 4 位数字密码。请记住它，当前版本暂不提供找回。")
@@ -1537,22 +1953,19 @@ private struct PrivacySettingsSheet: View {
                                 .font(.system(size: 18, weight: .black))
                                 .foregroundStyle(AppTheme.ink)
                                 .frame(width: 38, height: 38)
-                                .background(appState.hasEffectivePro ? AppTheme.coin : AppTheme.divider)
+                                .background(AppTheme.coin)
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(L10n.t("4 位密码保护"))
                                     .font(.headline.weight(.black))
-                                Text(appState.hasEffectivePro ? L10n.t("PRO 已解锁") : L10n.t("PRO 功能"))
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(AppTheme.textGray)
                             }
                             Spacer()
                         }
 
                         Text(helperText)
                             .font(.caption.weight(.bold))
-                            .foregroundStyle(helperText.contains(L10n.t("不一致")) ? AppTheme.red : AppTheme.textGray)
+                            .foregroundStyle(hasPasscodeMismatch ? AppTheme.red : AppTheme.textGray)
                             .lineSpacing(3)
 
                         if appState.hasEffectivePro {
@@ -1577,8 +1990,8 @@ private struct PrivacySettingsSheet: View {
                                 .opacity(canSavePasscode ? 1 : 0.45)
                             }
                         } else {
-                            PrimaryButton(title: L10n.t("开通 PRO 后启用")) {
-                                showsProPaywall = true
+                            PrimaryButton(title: L10n.t("开启密码保护")) {
+                                showsMembershipPrompt = true
                             }
                         }
                     }
@@ -1590,6 +2003,10 @@ private struct PrivacySettingsSheet: View {
             .padding(.bottom, 56)
         }
         .background(AppTheme.paper.ignoresSafeArea())
+        .payJoyKeyboardDismissToolbar()
+        .membershipFeatureAlert(isPresented: $showsMembershipPrompt) {
+            showsProPaywall = true
+        }
         .fullScreenCover(isPresented: $showsProPaywall) {
             ProPaywallSheet()
         }
@@ -1603,16 +2020,13 @@ private struct PrivacySettingsSheet: View {
                         .font(.system(size: 18, weight: .black))
                         .foregroundStyle(AppTheme.ink)
                         .frame(width: 38, height: 38)
-                        .background(appState.hasEffectivePro ? AppTheme.coin : AppTheme.divider)
+                        .background(AppTheme.coin)
                         .clipShape(Circle())
                         .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text(L10n.t("老板键"))
                             .font(.headline.weight(.black))
-                        Text(appState.hasEffectivePro ? L10n.t("PRO 已解锁") : L10n.t("PRO 功能"))
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(AppTheme.textGray)
                     }
 
                     Spacer()
@@ -1624,8 +2038,8 @@ private struct PrivacySettingsSheet: View {
                     .lineSpacing(3)
 
                 if !appState.hasEffectivePro {
-                    PrimaryButton(title: L10n.t("开通 PRO 后使用老板键")) {
-                        showsProPaywall = true
+                    PrimaryButton(title: L10n.t("使用老板键")) {
+                        showsMembershipPrompt = true
                     }
                 }
             }
@@ -1660,83 +2074,110 @@ private struct PrivacySettingsSheet: View {
     }
 }
 
+enum ProPaywallContext: Equatable {
+    case general
+    case salaryReport
+
+    var subtitle: String {
+        switch self {
+        case .general:
+            L10n.t("让每天的世界，更像你喜欢的样子")
+        case .salaryReport:
+            L10n.t("把每个月的努力，变成看得见的战绩")
+        }
+    }
+
+    var coverDescription: String {
+        switch self {
+        case .general:
+            L10n.t("实际薪资、完整回执历史、额外语气和全部主题，一次开通。")
+        case .salaryReport:
+            L10n.t("四套主题工资报告、月度趋势和年度累计，一次解锁。")
+        }
+    }
+}
+
 struct ProPaywallSheet: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    let context: ProPaywallContext
+
+    init(context: ProPaywallContext = .general) {
+        self.context = context
+    }
 
     var body: some View {
         ZStack {
             ProPaywallBackground()
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 10) {
-                    ProPaywallHeader {
-                        dismiss()
+            ScrollViewReader { _ in
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ProPaywallHeader(subtitle: context.subtitle) {
+                            dismiss()
+                        }
+                        ProPassCoverCard(
+                            isUnlocked: appState.hasEffectivePro,
+                            description: context.coverDescription
+                        )
+                        if context == .salaryReport {
+                            ProSalaryReportBenefitCard()
+                        }
+                        ProMissionBoard()
+                        ProThemeBenefitsCard()
                     }
-                    ProPassCoverCard(isUnlocked: appState.hasEffectivePro, priceText: appState.proPriceText)
-                    ProMissionBoard()
-                    ProComingSoonCard()
+                    .padding(AppTheme.pagePadding)
+                    .padding(.bottom, 122)
                 }
-                .padding(AppTheme.pagePadding)
-                .padding(.bottom, 122)
             }
         }
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 8) {
-                PrimaryButton(title: proButtonTitle) {
-                    Task {
-                        await appState.purchasePro()
-                        if appState.hasEffectivePro {
-                            dismiss()
-                        }
-                    }
+                primaryActionButton
+
+                if let message = appState.proPurchaseMessage {
+                    purchaseNotice(message)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
-                .disabled(!appState.canPurchasePro)
-                .opacity(appState.canPurchasePro ? 1 : 0.58)
 
-                HStack(spacing: 12) {
-                    Button {
-                        Task {
-                            await appState.restoreProPurchases()
-                            if appState.hasEffectivePro {
-                                dismiss()
-                            }
-                        }
-                    } label: {
-                        Text(L10n.t("恢复购买"))
-                            .font(.caption.weight(.black))
-                            .foregroundStyle(.white.opacity(appState.isPurchasingPro ? 0.42 : 0.92))
-                            .frame(minWidth: 86, minHeight: 32)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        restorePurchaseButton
+
+                        Rectangle()
+                            .fill(Color.white.opacity(0.24))
+                            .frame(width: 1, height: 14)
+
+                        oneTimePurchaseLabel
+                        Spacer(minLength: 0)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(appState.isPurchasingPro)
 
-                    Rectangle()
-                        .fill(Color.white.opacity(0.24))
-                        .frame(width: 1, height: 14)
+                    VStack(spacing: 2) {
+                        restorePurchaseButton
+                        oneTimePurchaseLabel
+                    }
+                    .frame(maxWidth: .infinity)
+                }
 
-                    Text(L10n.t("非订阅，一次买断"))
-                        .font(.caption.weight(.black))
+                if appState.proPurchaseMessage == nil {
+                    Text(paywallFootnote)
+                        .font(.caption2.weight(.black))
                         .foregroundStyle(.white.opacity(0.72))
-
-                    Spacer(minLength: 0)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.center)
                 }
 
-                Text(paywallFootnote)
-                    .font(.caption2.weight(.black))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-
-                HStack(spacing: 8) {
-                    Text(L10n.t("价格以 App Store 付款页为准"))
-                    Text("·")
-                    Link(destination: PayJoyLegalLinks.privacy) {
-                        Text(L10n.t("隐私政策"))
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        finalPriceLabel
+                        Text("·")
+                        legalLinks
                     }
-                    Text("·")
-                    Link(destination: PayJoyLegalLinks.terms) {
-                        Text(L10n.t("服务条款"))
+
+                    VStack(spacing: 3) {
+                        finalPriceLabel
+                        legalLinks
                     }
                 }
                 .font(.caption2.weight(.black))
@@ -1745,6 +2186,7 @@ struct ProPaywallSheet: View {
             .padding(.horizontal, AppTheme.pagePadding)
             .padding(.top, 10)
             .padding(.bottom, 8)
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .background {
                 LinearGradient(
                     colors: [
@@ -1761,21 +2203,145 @@ struct ProPaywallSheet: View {
                 }
                 .ignoresSafeArea()
             }
+            .animation(prefersReducedMotion ? nil : .easeInOut(duration: 0.2), value: appState.proPurchaseMessage)
         }
         .task {
+            appState.recordPaywallViewed()
             await appState.loadProProduct()
+        }
+        .sensoryFeedback(.success, trigger: appState.hasEffectivePro)
+    }
+
+    private var prefersReducedMotion: Bool {
+        appState.preferences.reduceMotion || accessibilityReduceMotion
+    }
+
+    private var primaryActionButton: some View {
+        Button {
+            Task {
+                if appState.isProProductAvailable {
+                    await appState.purchasePro()
+                } else {
+                    await appState.loadProProduct()
+                }
+                if appState.hasEffectivePro {
+                    dismiss()
+                }
+            }
+        } label: {
+            HStack(spacing: 10) {
+                if isPrimaryActionBusy {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(AppTheme.ink)
+                        .accessibilityHidden(true)
+                }
+                Text(proButtonTitle)
+                    .font(.headline.weight(.heavy))
+                    .foregroundStyle(AppTheme.ink)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.76)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 52)
+            .padding(.vertical, 2)
+            .background(AppTheme.coin)
+            .clipShape(RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous)
+                    .stroke(AppTheme.outline, lineWidth: 1.5)
+            }
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: prefersReducedMotion))
+        .disabled(!appState.canStartProPrimaryAction)
+        .opacity(appState.canStartProPrimaryAction ? 1 : 0.58)
+        .accessibilityValue(isPrimaryActionBusy ? proButtonTitle : "")
+    }
+
+    private var isPrimaryActionBusy: Bool {
+        appState.isLoadingProProduct || appState.isPurchasingPro
+    }
+
+    private func purchaseNotice(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Capsule()
+                .fill(appState.hasEffectivePro ? AppTheme.coin : AppTheme.orange)
+                .frame(width: 4, height: 30)
+                .accessibilityHidden(true)
+
+            Text(message)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.94))
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(Color.white.opacity(0.09))
+        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .stroke(Color.white.opacity(0.16), lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var restorePurchaseButton: some View {
+        Button {
+            Task {
+                await appState.restoreProPurchases()
+                if appState.hasEffectivePro {
+                    dismiss()
+                }
+            }
+        } label: {
+            Text(L10n.t("恢复购买"))
+                .font(.caption.weight(.black))
+                .foregroundStyle(.white.opacity(appState.isPurchasingPro ? 0.42 : 0.92))
+                .frame(minWidth: 86, minHeight: 44)
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.96, reduceMotion: prefersReducedMotion))
+        .disabled(appState.isPurchasingPro)
+    }
+
+    private var oneTimePurchaseLabel: some View {
+        Text(L10n.t("非订阅，一次买断"))
+            .font(.caption.weight(.black))
+            .foregroundStyle(.white.opacity(0.76))
+            .multilineTextAlignment(.center)
+    }
+
+    private var finalPriceLabel: some View {
+        Text(L10n.t("价格以 App Store 付款页为准"))
+            .multilineTextAlignment(.center)
+    }
+
+    private var legalLinks: some View {
+        HStack(spacing: 8) {
+            Link(destination: PayJoyLegalLinks.privacy) {
+                Text(L10n.t("隐私政策"))
+            }
+            Text("·")
+            Link(destination: PayJoyLegalLinks.terms) {
+                Text(L10n.t("服务条款"))
+            }
         }
     }
 
     private var proButtonTitle: String {
         if appState.hasEffectivePro {
-            return L10n.t("PRO 已开通")
+            return L10n.t("会员已开通")
         }
         if appState.isPurchasingPro {
             return L10n.t("处理中...")
         }
         if appState.isLoadingProProduct {
             return L10n.t("正在加载价格...")
+        }
+        if !appState.isProProductAvailable {
+            return L10n.t("重新加载商品")
         }
         return L10n.t("\(appState.proPriceText) 一次买断开通")
     }
@@ -1784,7 +2350,7 @@ struct ProPaywallSheet: View {
         if let message = appState.proPurchaseMessage {
             return message
         }
-        return appState.hasEffectivePro ? L10n.t("感谢支持，PRO 权益已经生效。") : L10n.t("一次开通，当前版本所有 PRO 权益都可用。")
+        return appState.hasEffectivePro ? L10n.t("感谢支持，会员权益已经生效。") : L10n.t("一次开通，当前版本所有会员权益都可用。")
     }
 }
 
@@ -1815,39 +2381,67 @@ private struct ProPaywallBackground: View {
 }
 
 private struct ProPaywallHeader: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let subtitle: String
     let onClose: () -> Void
 
     var body: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(L10n.t("开薪 PRO"))
-                    .font(.system(size: 31, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
-                Text(L10n.t("一张打工人的系统通行证"))
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(AppTheme.coin)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top) {
+                        proTitle
+                        Spacer()
+                        closeButton
+                    }
+                    subtitleText
+                }
+            } else {
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        proTitle
+                        subtitleText
+                    }
+                    Spacer()
+                    closeButton
+                }
             }
-            Spacer()
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .black))
-                    .foregroundStyle(AppTheme.ink)
-                    .frame(width: 46, height: 46)
-                    .background(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.96) : Color.white.opacity(0.94))
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.3))
-                    .shadow(color: Color.black.opacity(0.24), radius: 0, x: 2, y: 2)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(L10n.t("关闭开薪 PRO"))
         }
         .padding(.top, 6)
+    }
+
+    private var proTitle: some View {
+        Text(L10n.t("开薪会员"))
+            .font(.system(size: 31, weight: .black, design: .rounded))
+            .foregroundStyle(.white)
+    }
+
+    private var subtitleText: some View {
+        Text(subtitle)
+            .font(.caption.weight(.black))
+            .foregroundStyle(AppTheme.coin)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var closeButton: some View {
+        Button(action: onClose) {
+            Image(systemName: "xmark")
+                .font(.system(size: 15, weight: .black))
+                .foregroundStyle(AppTheme.ink)
+                .frame(width: 46, height: 46)
+                .background(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.96) : Color.white.opacity(0.94))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.3))
+                .shadow(color: Color.black.opacity(0.24), radius: 0, x: 2, y: 2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L10n.t("关闭会员页面"))
     }
 }
 
 private struct ProPassCoverCard: View {
     let isUnlocked: Bool
-    let priceText: String
+    let description: String
 
     var body: some View {
         let isMidnight = AppTheme.current == .midnight
@@ -1876,19 +2470,23 @@ private struct ProPassCoverCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("PRO PASS")
+                        Text(L10n.t("会员卡"))
                             .font(.system(size: 15, weight: .black, design: .rounded))
                             .tracking(1.3)
                             .foregroundStyle(AppTheme.ink.opacity(0.68))
-                        Text(isUnlocked ? L10n.t("已开通") : L10n.t("\(priceText) 一次买断"))
+                        Text(passTitle)
                             .font(.system(size: 31, weight: .black, design: .rounded))
                             .foregroundStyle(AppTheme.ink)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.72)
-                        Text(L10n.t("实时活动、隐私保护、老板键、同步、午休与主题资产一次解锁。"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(description)
                             .font(.caption.weight(.black))
                             .foregroundStyle(AppTheme.ink.opacity(0.68))
                             .lineSpacing(2)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .layoutPriority(1)
                             .frame(maxWidth: 236, alignment: .leading)
                     }
                     Spacer()
@@ -1899,9 +2497,11 @@ private struct ProPassCoverCard: View {
 
                 Spacer(minLength: 4)
 
-                HStack(spacing: 6) {
-                    ProPill(text: L10n.t("非订阅"))
-                    ProPill(text: L10n.t("可恢复"))
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 6) {
+                        ProPill(text: L10n.t("非订阅"))
+                        ProPill(text: L10n.t("可恢复"))
+                    }
                     ProPill(text: L10n.t("全部权益"))
                 }
             }
@@ -1917,8 +2517,16 @@ private struct ProPassCoverCard: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .offset(x: 12)
         }
-        .frame(height: 218)
+        .frame(height: 226)
+        .dynamicTypeSize(...DynamicTypeSize.large)
         .accessibilityElement(children: .combine)
+    }
+
+    private var passTitle: String {
+        if isUnlocked {
+            return L10n.t("已开通")
+        }
+        return L10n.t("一次买断")
     }
 }
 
@@ -1939,7 +2547,7 @@ private struct ProSeal: View {
                         .rotationEffect(.degrees(-8))
                 }
 
-            Text("PRO")
+            Text(L10n.t("会员"))
                 .font(.system(size: 13, weight: .black, design: .rounded))
                 .foregroundStyle(AppTheme.ink)
                 .rotationEffect(.degrees(-8))
@@ -2028,7 +2636,58 @@ private struct ProHalftonePattern: View {
     }
 }
 
+private struct ProSalaryReportBenefitCard: View {
+    var body: some View {
+        ZStack(alignment: .leading) {
+            AssetImage(name: AppTheme.salaryReportHeroAsset, contentMode: .fill)
+                .frame(maxWidth: .infinity)
+                .frame(height: 156)
+                .clipped()
+
+            LinearGradient(
+                colors: [
+                    Color(hex: 0xFFF5DD).opacity(0.98),
+                    Color(hex: 0xFFF5DD).opacity(0.86),
+                    Color(hex: 0xFFF5DD).opacity(0.12)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+
+            VStack(alignment: .leading, spacing: 7) {
+                Text(L10n.t("工资报告"))
+                    .font(.headline.weight(.black))
+                    .foregroundStyle(AppTheme.ink)
+                Text(L10n.t("能量站、漫画战报、工资旅程"))
+                    .font(.caption.weight(.black))
+                    .foregroundStyle(AppTheme.textGray)
+                    .lineLimit(2)
+                Text(L10n.t("真实工资数据，三种年轻化表达。"))
+                    .font(.caption2.weight(.black))
+                    .foregroundStyle(AppTheme.ink)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background(AppTheme.coin)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
+            }
+            .frame(maxWidth: 215, alignment: .leading)
+            .padding(14)
+        }
+        .frame(height: 156)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(AppTheme.outline, lineWidth: 1.5)
+        }
+        .shadow(color: Color.black.opacity(0.16), radius: 0, x: 3, y: 3)
+        .accessibilityElement(children: .combine)
+    }
+}
+
 private struct ProMissionBoard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -2042,7 +2701,7 @@ private struct ProMissionBoard: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L10n.t("PRO 权益任务板"))
+                        Text(L10n.t("会员权益"))
                             .font(.headline.weight(.black))
                             .foregroundStyle(AppTheme.ink)
                         Text(L10n.t("开通后立即生效"))
@@ -2050,7 +2709,7 @@ private struct ProMissionBoard: View {
                             .foregroundStyle(AppTheme.textGray)
                     }
                     Spacer()
-                    Text("6/6")
+                    Text("7/7")
                         .font(.system(size: 18, weight: .black, design: .rounded))
                         .foregroundStyle(AppTheme.ink)
                         .padding(.horizontal, 10)
@@ -2060,44 +2719,56 @@ private struct ProMissionBoard: View {
                         .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1.1))
                 }
 
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                    ProMissionItem(icon: "sparkles.rectangle.stack.fill", title: L10n.t("锁屏 / 灵动岛"), detail: L10n.t("实时收入"))
-                    ProMissionItem(icon: "icloud.fill", title: L10n.t("iCloud 同步"), detail: L10n.t("换机恢复"))
-                    ProMissionItem(icon: "lock.shield.fill", title: L10n.t("密码保护"), detail: L10n.t("隐私加锁"))
-                    ProMissionItem(icon: "briefcase.fill", title: L10n.t("老板键"), detail: L10n.t("秒变计算器"))
-                    ProMissionItem(icon: "cup.and.saucer.fill", title: L10n.t("午休时间"), detail: L10n.t("暂停计薪"))
-                    ProMissionItem(icon: "paintpalette.fill", title: L10n.t("主题 / 图标"), detail: L10n.t("自由切换"))
+                LazyVGrid(columns: missionColumns, spacing: 8) {
+                    ProMissionItem(index: "01", title: L10n.t("工资报告"), detail: L10n.t("随主题变化的原创报告"))
+                    ProMissionItem(index: "02", title: L10n.t("实时活动"), detail: L10n.t("实时收入"))
+                    ProMissionItem(index: "03", title: L10n.t("iCloud 同步"), detail: L10n.t("换机恢复"))
+                    ProMissionItem(index: "04", title: L10n.t("密码保护"), detail: L10n.t("隐私加锁"))
+                    ProMissionItem(index: "05", title: L10n.t("老板键"), detail: L10n.t("秒变计算器"))
+                    ProMissionItem(index: "06", title: L10n.t("午休时间"), detail: L10n.t("暂停计薪"))
+                    ProMissionItem(index: "07", title: L10n.t("主题 / 图标"), detail: L10n.t("自由切换"))
                 }
             }
             .padding(14)
         }
-        .frame(height: 282)
+        .frame(minHeight: 326)
+    }
+
+    private var missionColumns: [GridItem] {
+        if dynamicTypeSize.isAccessibilitySize {
+            return [GridItem(.flexible())]
+        }
+        return [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
     }
 }
 
 private struct ProMissionItem: View {
-    let icon: String
+    let index: String
     let title: String
     let detail: String
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .black))
+            Text(index)
+                .font(.system(size: 11, weight: .black, design: .rounded))
                 .foregroundStyle(AppTheme.ink)
-                .frame(width: 30, height: 30)
+                .frame(width: 32, height: 30)
                 .background(AppTheme.coin)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .stroke(AppTheme.outline, lineWidth: 1)
+                }
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.caption.weight(.black))
                     .foregroundStyle(AppTheme.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.78)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(detail)
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(AppTheme.textGray)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
         }
@@ -2112,7 +2783,7 @@ private struct ProMissionItem: View {
     }
 }
 
-private struct ProComingSoonCard: View {
+private struct ProThemeBenefitsCard: View {
     var body: some View {
         let isMidnight = AppTheme.current == .midnight
         ZStack(alignment: .bottomTrailing) {
@@ -2132,7 +2803,7 @@ private struct ProComingSoonCard: View {
 
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(L10n.t("PRO 主题已上线"))
+                    Text(L10n.t("主题与图标"))
                         .font(.headline.weight(.black))
                         .foregroundStyle(.white)
                     Text(L10n.t("主题、App 图标和整套视觉装饰，开通后立即可切换。"))
@@ -2223,7 +2894,7 @@ private struct ProMiniComicPanel: View {
                 .frame(width: 116, height: 98)
                 .offset(x: 4, y: 14)
 
-            Text("PRO")
+            Text(L10n.t("会员"))
                 .font(.system(size: 15, weight: .black, design: .rounded))
                 .foregroundStyle(AppTheme.ink)
                 .padding(.horizontal, 10)
@@ -2261,7 +2932,7 @@ private struct ProFutureBanner: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L10n.t("主题资产与未来新功能"))
                         .font(.subheadline.weight(.black))
-                    Text(L10n.t("全部主题、图标、装饰，以及后续新增的 PRO 功能。"))
+                    Text(L10n.t("全部主题、图标、装饰，以及后续新增的会员功能。"))
                         .font(.caption.weight(.bold))
                         .foregroundStyle(AppTheme.textGray)
                         .lineLimit(1)
@@ -2303,7 +2974,7 @@ private struct ProHeroCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(isUnlocked ? L10n.t("PRO 已开通") : L10n.t("\(priceText) 一次买断"))
+                Text(isUnlocked ? L10n.t("会员已开通") : L10n.t("\(priceText) 一次买断"))
                     .font(.system(size: 28, weight: .black, design: .rounded))
                     .foregroundStyle(AppTheme.ink)
                 Text(L10n.t("同步、锁屏、密码、午休、主题和未来新功能全部打包。"))
@@ -2386,6 +3057,7 @@ private struct ProPill: View {
             .background(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.72) : Color.white.opacity(0.58))
             .clipShape(Capsule())
             .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
+            .fixedSize(horizontal: true, vertical: false)
     }
 }
 
@@ -2431,37 +3103,116 @@ private struct ProFeatureTile: View {
     }
 }
 
-private struct SettingsRow: View {
-    let icon: String
+private struct SettingsGroup<Content: View>: View {
     let title: String
-    let detail: String
+    @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .bold))
-                .frame(width: 24)
-            Text(title)
-                .font(.subheadline.weight(.bold))
-            Spacer()
-            if !detail.isEmpty {
-                Text(detail)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.muted)
+        ComicCard(padding: 0) {
+            VStack(spacing: 0) {
+                HStack(spacing: 9) {
+                    Capsule()
+                        .fill(AppTheme.coin)
+                        .frame(width: 28, height: 7)
+                        .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
+                    Text(title)
+                        .font(.caption.weight(.black))
+                        .foregroundStyle(AppTheme.textGray)
+                        .textCase(.uppercase)
+                        .tracking(0.8)
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .padding(.top, 13)
+                .padding(.bottom, 6)
+
+                content
             }
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.black))
+        }
+    }
+}
+
+private struct SettingsRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let title: String
+    let detail: String
+    var showsDivider = true
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                titleText
+                Spacer(minLength: 8)
+                detailText
+                disclosureMark
+            }
+
+            HStack(alignment: .center, spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
+                    titleText
+                    detailText
+                }
+                Spacer(minLength: 8)
+                disclosureMark
+            }
         }
         .foregroundStyle(AppTheme.ink)
         .padding(.horizontal, 14)
-        .padding(.vertical, 13)
+        .padding(.vertical, 12)
+        .frame(minHeight: 48)
         .contentShape(Rectangle())
         .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(AppTheme.divider)
-                .frame(height: 0.7)
-                .padding(.leading, 48)
+            if showsDivider {
+                Rectangle()
+                    .fill(AppTheme.divider)
+                    .frame(height: 0.7)
+                    .padding(.leading, 14)
+            }
         }
+    }
+
+    private var titleText: some View {
+        Text(title)
+            .font(.subheadline.weight(.bold))
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder
+    private var detailText: some View {
+        if !detail.isEmpty {
+            Text(detail)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.muted)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
+                .minimumScaleFactor(0.78)
+                .fixedSize(horizontal: false, vertical: dynamicTypeSize.isAccessibilitySize)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(AppTheme.paper.opacity(0.72))
+                .clipShape(Capsule())
+        }
+    }
+
+    private var disclosureMark: some View {
+        Text("›")
+            .font(.system(size: 23, weight: .black, design: .rounded))
+            .foregroundStyle(AppTheme.ink.opacity(0.78))
+            .accessibilityHidden(true)
+    }
+}
+
+private struct SettingsRowButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.payJoyReduceMotion) private var appReduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(configuration.isPressed ? AppTheme.coin.opacity(0.14) : Color.clear)
+            .opacity(configuration.isPressed ? 0.86 : 1)
+            .animation(
+                accessibilityReduceMotion || appReduceMotion ? nil : .easeOut(duration: 0.12),
+                value: configuration.isPressed
+            )
     }
 }
 

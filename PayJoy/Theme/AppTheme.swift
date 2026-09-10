@@ -3,11 +3,21 @@ import SwiftUI
 
 enum AppTheme {
     private static let preferencesKey = "payjoy.app.preferences"
+    private static let selectedThemeKey = "payjoy.app.selected.theme"
 
     static var current: AppVisualTheme {
         if let screenshotTheme = ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_THEME"]
             .flatMap(AppVisualTheme.init(rawValue:)) {
             return screenshotTheme
+        }
+        if let cachedTheme = UserDefaults.standard.string(forKey: selectedThemeKey)
+            .flatMap(AppVisualTheme.init(rawValue:)) {
+            return cachedTheme
+        }
+        if let cachedTheme = UserDefaults(suiteName: AppConstants.appGroupIdentifier)?
+            .string(forKey: selectedThemeKey)
+            .flatMap(AppVisualTheme.init(rawValue:)) {
+            return cachedTheme
         }
         if let data = UserDefaults.standard.data(forKey: preferencesKey),
            let preferences = try? JSONDecoder().decode(AppPreferences.self, from: data) {
@@ -97,7 +107,9 @@ enum AppTheme {
         }
     }
 
-    static let red = Color(hex: 0xFF6B6B)
+    static var red: Color {
+        current == .midnight ? Color(hex: 0xFF9A9A) : Color(hex: 0xB4232F)
+    }
     static let green = Color(hex: 0x5EC27F)
 
     static let pagePadding: CGFloat = 16
@@ -145,6 +157,19 @@ enum AppTheme {
         }
     }
 
+    static var salaryReportHeroAsset: String {
+        salaryReportHeroAsset(for: current)
+    }
+
+    static func salaryReportHeroAsset(for theme: AppVisualTheme) -> String {
+        switch theme {
+        case .classic: "pro_report_classic_hero"
+        case .pink: "pro_report_pink_hero"
+        case .luckyCat: "pro_report_lucky_cat_hero"
+        case .midnight: "pro_report_midnight_hero"
+        }
+    }
+
     static var moyuWorkerAsset: String {
         switch current {
         case .classic: "moyu_chair_worker_redraw_v1"
@@ -187,6 +212,24 @@ enum AppTheme {
         case .pink: "pink_stats_target_worker_v1"
         case .luckyCat: "lucky_cat_stats_target_worker_v1"
         case .midnight: "midnight_stats_worker_v1"
+        }
+    }
+
+    static var personalGoalWorkerAsset: String {
+        switch current {
+        case .classic: "payday_goal_worker_original_v1"
+        case .pink: "pink_profile_avatar_target_v1"
+        case .luckyCat: "lucky_cat_profile_avatar_crown_v2"
+        case .midnight: "midnight_stats_worker_v1"
+        }
+    }
+
+    static var paydayRocketAsset: String {
+        switch current {
+        case .classic: "payday_rocket_classic_v1"
+        case .pink: "payday_rocket_pink_v1"
+        case .luckyCat: "payday_rocket_lucky_cat_v1"
+        case .midnight: "payday_rocket_midnight_v1"
         }
     }
 
@@ -319,12 +362,15 @@ extension Double {
 
     func moneyText(currencySymbol: String) -> String {
         let formatter = NumberFormatter()
+        let currencyCode = SalaryCurrency.code(for: currencySymbol)
         formatter.numberStyle = .currency
-        formatter.currencySymbol = SalaryCurrency.normalized(currencySymbol)
-        formatter.maximumFractionDigits = 2
-        formatter.minimumFractionDigits = 2
-        formatter.locale = Locale(identifier: L10n.currentLanguage.localeIdentifier)
-        return formatter.string(from: NSNumber(value: self)) ?? "\(SalaryCurrency.normalized(currencySymbol))0.00"
+        formatter.currencyCode = currencyCode.rawValue
+        formatter.currencySymbol = currencyCode.displaySymbol
+        formatter.maximumFractionDigits = currencyCode.fractionDigits
+        formatter.minimumFractionDigits = currencyCode.fractionDigits
+        formatter.locale = Locale(identifier: L10n.currentMarket.localeIdentifier)
+        let zero = currencyCode.fractionDigits == 0 ? "0" : "0.00"
+        return formatter.string(from: NSNumber(value: self)) ?? "\(currencyCode.displaySymbol)\(zero)"
     }
 
     var compactMoneyText: String {
@@ -333,10 +379,12 @@ extension Double {
 
     func compactMoneyText(currencySymbol: String) -> String {
         let formatter = NumberFormatter()
+        let currencyCode = SalaryCurrency.code(for: currencySymbol)
         formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 2
+        formatter.locale = Locale(identifier: L10n.currentMarket.localeIdentifier)
+        formatter.maximumFractionDigits = currencyCode.fractionDigits
         formatter.minimumFractionDigits = 0
-        return SalaryCurrency.normalized(currencySymbol) + (formatter.string(from: NSNumber(value: self)) ?? "0")
+        return currencyCode.displaySymbol + (formatter.string(from: NSNumber(value: self)) ?? "0")
     }
 }
 
@@ -352,7 +400,7 @@ extension TimeInterval {
 
 extension Date {
     var localizedDateText: String {
-        let locale = Locale(identifier: L10n.currentLanguage.localeIdentifier)
+        let locale = Locale(identifier: L10n.currentMarket.localeIdentifier)
         return formatted(.dateTime.locale(locale).year().month().day())
     }
 }

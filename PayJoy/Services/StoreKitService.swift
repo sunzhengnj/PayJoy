@@ -14,7 +14,7 @@ enum StoreKitServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .productUnavailable:
-            L10n.t("暂时无法加载 PRO 商品，请稍后再试。")
+            L10n.t("暂时无法加载会员商品，请稍后再试。")
         case .unverifiedTransaction:
             L10n.t("购买校验未通过，请稍后重试或联系支持。")
         }
@@ -24,8 +24,8 @@ enum StoreKitServiceError: LocalizedError {
 @MainActor
 final class StoreKitService {
     static let proProductID = "payjoy.pro.lifetime"
-    static let proProductIDs = [
-        "payjoy.pro.lifetime",
+    static let compatibleProProductIDs = [
+        proProductID,
         "app.payjoy.kaixin.pro.lifetime"
     ]
 
@@ -36,17 +36,9 @@ final class StoreKitService {
             return proProduct
         }
 
-        let products = try await Product.products(for: Self.proProductIDs)
-        if products.isEmpty {
-            print("PayJoy StoreKit returned no PRO products. Requested IDs: \(Self.proProductIDs.joined(separator: ", "))")
-        } else {
-            print("PayJoy StoreKit returned PRO products: \(products.map(\.id).joined(separator: ", "))")
-        }
-
-        guard let product = Self.proProductIDs.compactMap({ id in
-            products.first { $0.id == id }
-        }).first else {
-            throw StoreKitServiceError.productUnavailable(Self.proProductIDs)
+        let products = try await Product.products(for: [Self.proProductID])
+        guard let product = products.first(where: { $0.id == Self.proProductID }) else {
+            throw StoreKitServiceError.productUnavailable([Self.proProductID])
         }
 
         proProduct = product
@@ -75,10 +67,15 @@ final class StoreKitService {
         try await AppStore.sync()
     }
 
+    func finishUpdatedTransaction(_ verification: VerificationResult<Transaction>) async throws {
+        let transaction = try verified(verification)
+        await transaction.finish()
+    }
+
     func hasProEntitlement() async -> Bool {
         for await entitlement in Transaction.currentEntitlements {
             guard let transaction = try? verified(entitlement),
-                  Self.proProductIDs.contains(transaction.productID),
+                  Self.compatibleProProductIDs.contains(transaction.productID),
                   transaction.revocationDate == nil else {
                 continue
             }

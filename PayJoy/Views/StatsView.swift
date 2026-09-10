@@ -2,15 +2,26 @@ import SwiftUI
 
 struct StatsView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedPeriod: StatsPeriod = .month
     @State private var isOvertimeSheetPresented = false
     @State private var overtimeMonthAnchor = Date()
+    @State private var showsProSalaryReport = false
+    @State private var showsSalaryReportMembershipPrompt = false
+    @State private var showsSalaryReportPaywall = false
+    @State private var showsActualSalaryHistory = false
+    @State private var showsActualSalaryMembershipPrompt = false
+    @State private var showsActualSalaryPaywall = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 14) {
                 statsHeader
                 summaryCard
+                salaryReportCard
+                salaryAchievementCard
+                weeklyPayReportCard
                 salaryCalendarCard
                 detailsCard
                 overtimeCard
@@ -21,10 +32,30 @@ struct StatsView: View {
             .padding(.bottom, 86)
         }
         .background(AppTheme.paper.ignoresSafeArea())
+        .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
         .navigationBarHidden(true)
+        .navigationDestination(isPresented: $showsProSalaryReport) {
+            ProSalaryReportView()
+        }
+        .navigationDestination(isPresented: $showsActualSalaryHistory) {
+            ActualSalaryHistoryView()
+        }
+        .membershipFeatureAlert(isPresented: $showsSalaryReportMembershipPrompt) {
+            showsSalaryReportPaywall = true
+        }
+        .membershipFeatureAlert(isPresented: $showsActualSalaryMembershipPrompt) {
+            showsActualSalaryPaywall = true
+        }
+        .fullScreenCover(isPresented: $showsSalaryReportPaywall) {
+            ProPaywallSheet(context: .salaryReport)
+        }
+        .fullScreenCover(isPresented: $showsActualSalaryPaywall) {
+            ProPaywallSheet()
+        }
         .sheet(isPresented: $isOvertimeSheetPresented) {
             OvertimeRecordsSheet(
                 monthAnchor: $overtimeMonthAnchor,
+                reducesMotion: appState.preferences.reduceMotion,
                 currentDate: appState.now,
                 summaryProvider: { appState.overtimeSummary(forMonthContaining: $0) },
                 addRecord: { startAt, endAt in
@@ -38,10 +69,19 @@ struct StatsView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .transaction { transaction in
+            guard prefersReducedMotion else { return }
+            transaction.animation = nil
+            transaction.disablesAnimations = true
+        }
     }
 
     private var period: PeriodEarnings {
         appState.periodEarnings(for: selectedPeriod)
+    }
+
+    private var isLowerScreenshot: Bool {
+        AppState.isScreenshotMode && ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_SCREEN"] == "stats-lower"
     }
 
     private var breakdown: PeriodBreakdown {
@@ -64,6 +104,24 @@ struct StatsView: View {
         appState.settings.currencySymbol
     }
 
+    private var currentMonthActualRecord: ActualSalaryRecord? {
+        guard selectedPeriod == .month,
+              let record = appState.actualSalaryRecord(for: appState.now),
+              record.currencyCode == appState.settings.currencyCode else { return nil }
+        return record
+    }
+
+    private var currentMonthEstimate: SalaryMonthSummary {
+        appState.estimatedSalaryMonthSummary(for: appState.now)
+    }
+
+    private var currentYearActualSalaryCount: Int {
+        let year = Calendar.current.component(.year, from: appState.now)
+        return appState.actualSalaryRecords.filter {
+            $0.currencyCode == appState.settings.currencyCode && $0.monthKey.hasPrefix("\(year)-")
+        }.count
+    }
+
     private var remainingTargetAmount: Double {
         max(0, period.projected - period.earned)
     }
@@ -79,82 +137,111 @@ struct StatsView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 12)
 
-            ZStack(alignment: .topTrailing) {
+            if dynamicTypeSize.isAccessibilitySize {
                 periodPicker
+            } else {
+                ZStack(alignment: .topTrailing) {
+                    periodPicker
 
-                AssetImage(name: AppTheme.statsHeaderWorkerAsset)
-                    .frame(width: 74, height: 54)
-                    .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottom)
-                    .offset(x: -32, y: -49)
-                    .zIndex(2)
+                    AssetImage(name: AppTheme.statsHeaderWorkerAsset)
+                        .frame(width: 74, height: 54)
+                        .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottom)
+                        .offset(x: -32, y: -49)
+                        .zIndex(2)
+                }
             }
         }
         .padding(.bottom, 8)
     }
 
     private var periodPicker: some View {
-        HStack(spacing: 8) {
-            ForEach(StatsPeriod.allCases) { period in
-                Button {
-                    withAnimation(.spring(response: 0.24, dampingFraction: 0.8)) {
-                        selectedPeriod = period
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(spacing: 6) {
+                    ForEach(StatsPeriod.allCases) { period in
+                        periodButton(period)
                     }
-                } label: {
-                    Text(period.title)
-                        .font(.subheadline.weight(.heavy))
-                        .foregroundStyle(AppTheme.ink)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(selectedPeriod == period ? AppTheme.coin : AppTheme.cream)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(AppTheme.outline, lineWidth: 1.4)
-                        }
                 }
-                .buttonStyle(.plain)
+            } else {
+                HStack(spacing: 0) {
+                    ForEach(StatsPeriod.allCases) { period in
+                        periodButton(period)
+                    }
+                }
             }
         }
+        .padding(4)
+        .background(AppTheme.cream.opacity(0.86))
+        .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                .stroke(AppTheme.outline, lineWidth: 1.5)
+        }
+        .shadow(color: AppTheme.shadow.opacity(0.09), radius: 0, x: 2, y: 2)
+        .sensoryFeedback(.selection, trigger: selectedPeriod)
+    }
+
+    private func periodButton(_ period: StatsPeriod) -> some View {
+        Button {
+            withAnimation(prefersReducedMotion ? nil : .spring(response: 0.24, dampingFraction: 0.82)) {
+                selectedPeriod = period
+            }
+        } label: {
+            Text(period.title)
+                .font(.subheadline.weight(.black))
+                .foregroundStyle(AppTheme.ink)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 44)
+                .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 5 : 0)
+                .background(selectedPeriod == period ? AppTheme.coin : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .overlay {
+                    if selectedPeriod == period {
+                        RoundedRectangle(cornerRadius: 13, style: .continuous)
+                            .stroke(AppTheme.outline, lineWidth: 1.3)
+                    }
+                }
+                .contentShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.96, reduceMotion: prefersReducedMotion))
+        .accessibilityLabel(period.title)
+        .accessibilityValue(selectedPeriod == period ? L10n.t("已选择") : L10n.t("未选择"))
+        .accessibilityAddTraits(selectedPeriod == period ? .isSelected : [])
+    }
+
+    private var prefersReducedMotion: Bool {
+        accessibilityReduceMotion || appState.preferences.reduceMotion
     }
 
     private var summaryCard: some View {
         ComicCard(background: AppTheme.cream, radius: 20, padding: 14) {
             VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .center, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(L10n.t("\(selectedPeriod.title)已赚"))
-                            .font(.subheadline.weight(.black))
-                            .foregroundStyle(AppTheme.ink)
+                if dynamicTypeSize.isAccessibilitySize {
+                    summaryHeadline
+                } else {
+                    HStack(alignment: .center, spacing: 10) {
+                        summaryHeadline
 
-                        Text(PrivacyText.money(period.earned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
-                            .font(.system(size: 37, weight: .black, design: .rounded))
-                            .foregroundStyle(AppTheme.ink)
-                            .minimumScaleFactor(0.62)
-                            .lineLimit(1)
-
-                        Text(L10n.t("预计 \(PrivacyText.money(period.projected, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))"))
-                            .font(.caption.weight(.black))
-                            .foregroundStyle(AppTheme.textGray)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.82)
+                        StatsSummaryIllustration()
+                            .frame(width: 146, height: 108)
+                            .accessibilityHidden(true)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    StatsSummaryIllustration()
-                        .frame(width: 146, height: 108)
-                        .accessibilityHidden(true)
                 }
 
                 VStack(alignment: .leading, spacing: 7) {
-                    HStack {
-                        Text(L10n.t("\(selectedPeriod.title)进度"))
-                            .font(.caption.weight(.black))
-                            .foregroundStyle(AppTheme.textGray)
-                        Spacer()
-                        Text("\(period.progress * 100, specifier: "%.1f")%")
-                            .font(.headline.weight(.black))
-                            .foregroundStyle(AppTheme.ink)
-                            .monospacedDigit()
+                    Group {
+                        if dynamicTypeSize.isAccessibilitySize {
+                            VStack(alignment: .leading, spacing: 3) {
+                                progressTitle
+                                progressValue
+                            }
+                        } else {
+                            HStack {
+                                progressTitle
+                                Spacer()
+                                progressValue
+                            }
+                        }
                     }
 
                     ComicProgressBar(progress: period.progress)
@@ -166,9 +253,125 @@ struct StatsView: View {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .stroke(AppTheme.outline.opacity(0.9), lineWidth: 1.2)
                 }
+
+                if selectedPeriod != .today {
+                    actualSalaryStatusRow
+                }
             }
         }
         .padding(.top, 2)
+    }
+
+    private var progressTitle: some View {
+        Text(L10n.t("\(selectedPeriod.title)进度"))
+            .font(.caption.weight(.black))
+            .foregroundStyle(AppTheme.textGray)
+    }
+
+    private var progressValue: some View {
+        Text("\(period.progress * 100, specifier: "%.1f")%")
+            .font(.headline.weight(.black))
+            .foregroundStyle(AppTheme.ink)
+            .monospacedDigit()
+    }
+
+    private var summaryHeadline: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(
+                currentMonthActualRecord == nil
+                    ? L10n.t("\(selectedPeriod.title)已赚")
+                    : L10n.t("本月实际薪资")
+            )
+                .font(.subheadline.weight(.black))
+                .foregroundStyle(AppTheme.ink)
+
+            Text(PrivacyText.money(period.earned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                .font(.system(size: 37, weight: .black, design: .rounded))
+                .foregroundStyle(AppTheme.ink)
+                .minimumScaleFactor(0.62)
+                .lineLimit(1)
+
+            Text(summaryReferenceText)
+                .font(.caption.weight(.black))
+                .foregroundStyle(AppTheme.textGray)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var summaryReferenceText: String {
+        if currentMonthActualRecord != nil {
+            return L10n.format(
+                "已替换原预计 %@",
+                PrivacyText.money(
+                    currentMonthEstimate.projectedAmount,
+                    hidden: hidesSensitiveAmounts,
+                    currencySymbol: currencySymbol
+                )
+            )
+        }
+        if selectedPeriod == .year, currentYearActualSalaryCount > 0 {
+            return L10n.format(
+                "含 %@ 个月实际薪资 · 全年参考 %@",
+                "\(currentYearActualSalaryCount)",
+                PrivacyText.money(period.projected, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol)
+            )
+        }
+        return L10n.t("预计 \(PrivacyText.money(period.projected, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))")
+    }
+
+    private var actualSalaryStatusRow: some View {
+        Button {
+            if appState.hasEffectivePro {
+                showsActualSalaryHistory = true
+            } else {
+                showsActualSalaryMembershipPrompt = true
+            }
+        } label: {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(L10n.t("实际薪资"))
+                        .font(.subheadline.weight(.black))
+                    Text(actualSalaryStatusText)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 8)
+
+                Text(L10n.t("管理"))
+                    .font(.caption.weight(.black))
+                    .padding(.horizontal, 11)
+                    .frame(minHeight: 36)
+                    .background(AppTheme.coin)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
+            }
+            .foregroundStyle(AppTheme.ink)
+            .padding(11)
+            .background(AppTheme.softSurface.opacity(0.7))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(AppTheme.outline.opacity(0.86), lineWidth: 1.1)
+            }
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: prefersReducedMotion))
+        .accessibilityLabel("\(L10n.t("实际薪资"))，\(actualSalaryStatusText)，\(L10n.t("管理"))")
+    }
+
+    private var actualSalaryStatusText: String {
+        if selectedPeriod == .year {
+            return L10n.format("已记录 %@ 个月", "\(currentYearActualSalaryCount)")
+        }
+        if currentMonthActualRecord != nil {
+            return L10n.t("本月已记录")
+        }
+        if appState.canEnterActualSalary(for: appState.now) {
+            return L10n.t("本月待填写")
+        }
+        return L10n.t("可补录历史月份")
     }
 
     private var exchangeCard: some View {
@@ -223,8 +426,41 @@ struct StatsView: View {
                 }
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle())
         .accessibilityLabel(L10n.t("打开工资日历"))
+    }
+
+    private var salaryAchievementCard: some View {
+        SalaryAchievementCompactEntry(
+            badges: appState.salaryBadges
+        )
+    }
+
+    private var salaryReportCard: some View {
+        Button {
+            if appState.hasEffectivePro {
+                showsProSalaryReport = true
+            } else {
+                showsSalaryReportMembershipPrompt = true
+            }
+        } label: {
+            ProSalaryReportEntryCard(
+                summary: appState.salaryMonthSummary(for: appState.now),
+                hidesSensitiveAmounts: hidesSensitiveAmounts,
+                currencySymbol: currencySymbol
+            )
+        }
+        .buttonStyle(PayJoyPressStyle())
+        .accessibilityLabel(L10n.t("查看工资报告"))
+    }
+
+    private var weeklyPayReportCard: some View {
+        WeeklyPayReportCard(
+            report: appState.weeklyPayReport,
+            hidesSensitiveAmounts: hidesSensitiveAmounts,
+            currencySymbol: currencySymbol,
+            style: .compact
+        )
     }
 
     private var overtimeCard: some View {
@@ -265,7 +501,7 @@ struct StatsView: View {
                             .font(.subheadline.weight(.black))
                     }
                     .foregroundStyle(AppTheme.ink)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, minHeight: 44)
                     .padding(.vertical, 11)
                     .background(AppTheme.coin)
                     .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
@@ -274,7 +510,7 @@ struct StatsView: View {
                             .stroke(AppTheme.outline, lineWidth: 1.2)
                     }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: prefersReducedMotion))
                 .accessibilityLabel(L10n.t("查看加班汇总表"))
             }
         }
@@ -303,42 +539,63 @@ struct StatsView: View {
     }
 
     private var targetCard: some View {
-        ZStack(alignment: .bottomTrailing) {
-            ComicCard {
-                HStack {
-                    VStack(alignment: .leading, spacing: 6) {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                ComicCard {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text(L10n.t("距离\(selectedPeriod.title)目标还差"))
                             .font(.headline.weight(.heavy))
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(PrivacyText.money(remainingTargetAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                             .font(.title2.weight(.black))
+                            .minimumScaleFactor(0.72)
+                            .lineLimit(1)
                         Text(targetCaption)
                             .font(.caption.weight(.bold))
                             .foregroundStyle(AppTheme.textGray)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    Spacer()
-                    Color.clear.frame(width: 138, height: 74)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(minHeight: 92)
+            } else {
+                ZStack(alignment: .bottomTrailing) {
+                    ComicCard {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(L10n.t("距离\(selectedPeriod.title)目标还差"))
+                                    .font(.headline.weight(.heavy))
+                                Text(PrivacyText.money(remainingTargetAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                                    .font(.title2.weight(.black))
+                                Text(targetCaption)
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(AppTheme.textGray)
+                            }
+                            Spacer()
+                            Color.clear.frame(width: 138, height: 74)
+                        }
+                        .frame(minHeight: 92)
+                    }
+
+                    SpeechBubble(text: targetBubbleText, isYellow: false, tailX: 0.52)
+                        .frame(width: 142)
+                        .offset(x: -10, y: -86)
+                        .zIndex(4)
+
+                    AssetImage(name: AppTheme.statsTargetWorkerAsset)
+                        .frame(width: 134, height: 96)
+                        .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottomTrailing)
+                        .offset(x: -2, y: 15)
+                        .zIndex(3)
+
+                    AssetImage(name: "coin_pile_v1")
+                        .frame(width: 82, height: 50)
+                        .offset(x: -134, y: -5)
+                        .zIndex(2)
+                }
+                .padding(.top, 20)
+                .padding(.bottom, 36)
             }
-
-            SpeechBubble(text: targetBubbleText, isYellow: false, tailX: 0.52)
-                .frame(width: 142)
-                .offset(x: -10, y: -86)
-                .zIndex(4)
-
-            AssetImage(name: AppTheme.statsTargetWorkerAsset)
-                .frame(width: 134, height: 96)
-                .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottomTrailing)
-                .offset(x: -2, y: 15)
-                .zIndex(3)
-
-            AssetImage(name: "coin_pile_v1")
-                .frame(width: 82, height: 50)
-                .offset(x: -134, y: -5)
-                .zIndex(2)
         }
-        .padding(.top, 20)
-        .padding(.bottom, 36)
     }
 
     private var targetCaption: String {
@@ -504,11 +761,13 @@ private struct OvertimeSummaryMetric: View {
 
 private struct OvertimeRecordsSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Binding var monthAnchor: Date
     @State private var editingRecord: OvertimeRecord?
     @State private var isAddingRecord = false
     @State private var isCalendarExpanded = false
     @State private var selectedDayFilter: Date?
+    let reducesMotion: Bool
     let currentDate: Date
     let summaryProvider: (Date) -> OvertimeSummary
     let addRecord: (Date, Date) -> Void
@@ -530,16 +789,19 @@ private struct OvertimeRecordsSheet: View {
 
     private var defaultNewRecordStart: Date {
         if let selectedDayFilter {
+            if calendar.isDate(selectedDayFilter, inSameDayAs: currentDate) {
+                return currentDate.addingTimeInterval(-60 * 60)
+            }
             return date(on: selectedDayFilter, hour: 19, minute: 0)
         }
         if calendar.isDate(monthAnchor, equalTo: currentDate, toGranularity: .month) {
-            return currentDate
+            return currentDate.addingTimeInterval(-60 * 60)
         }
         return date(on: monthAnchor, hour: 19, minute: 0)
     }
 
     private var defaultNewRecordEnd: Date {
-        defaultNewRecordStart.addingTimeInterval(60 * 60)
+        min(currentDate, defaultNewRecordStart.addingTimeInterval(60 * 60))
     }
 
     var body: some View {
@@ -645,7 +907,7 @@ private struct OvertimeRecordsSheet: View {
                 .accessibilityLabel(L10n.t("查看上个月"))
 
                 Button {
-                    withAnimation(.spring(response: 0.24, dampingFraction: 0.86)) {
+                    withAnimation(prefersReducedMotion ? nil : .spring(response: 0.24, dampingFraction: 0.86)) {
                         isCalendarExpanded.toggle()
                     }
                 } label: {
@@ -708,7 +970,7 @@ private struct OvertimeRecordsSheet: View {
                     Spacer()
                     if selectedDayFilter != nil {
                         Button {
-                            withAnimation(.spring(response: 0.22, dampingFraction: 0.86)) {
+                            withAnimation(prefersReducedMotion ? nil : .spring(response: 0.22, dampingFraction: 0.86)) {
                                 selectedDayFilter = nil
                             }
                         } label: {
@@ -716,7 +978,7 @@ private struct OvertimeRecordsSheet: View {
                                 .font(.caption.weight(.black))
                                 .foregroundStyle(AppTheme.ink)
                                 .padding(.horizontal, 10)
-                                .frame(height: 30)
+                                .frame(minHeight: 44)
                                 .background(AppTheme.coin.opacity(0.86))
                                 .clipShape(Capsule())
                                 .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
@@ -753,7 +1015,7 @@ private struct OvertimeRecordsSheet: View {
         let isSelected = selectedDayFilter.map { calendar.isDate($0, inSameDayAs: day) } ?? false
         let isFuture = day > currentDate && !calendar.isDate(day, inSameDayAs: currentDate)
         Button {
-            withAnimation(.spring(response: 0.22, dampingFraction: 0.86)) {
+            withAnimation(prefersReducedMotion ? nil : .spring(response: 0.22, dampingFraction: 0.86)) {
                 selectedDayFilter = isSelected ? nil : day
             }
         } label: {
@@ -779,6 +1041,7 @@ private struct OvertimeRecordsSheet: View {
             .opacity(isFuture ? 0.45 : 1)
         }
         .buttonStyle(.plain)
+        .disabled(isFuture)
         .accessibilityLabel(calendarDayAccessibilityLabel(for: day, duration: duration))
     }
 
@@ -912,7 +1175,7 @@ private struct OvertimeRecordsSheet: View {
 
     private func moveMonth(by offset: Int) {
         guard let next = calendar.date(byAdding: .month, value: offset, to: monthAnchor) else { return }
-        withAnimation(.spring(response: 0.24, dampingFraction: 0.84)) {
+        withAnimation(prefersReducedMotion ? nil : .spring(response: 0.24, dampingFraction: 0.84)) {
             monthAnchor = next
             selectedDayFilter = nil
         }
@@ -924,6 +1187,10 @@ private struct OvertimeRecordsSheet: View {
         components.minute = minute
         components.second = 0
         return calendar.date(from: components) ?? day
+    }
+
+    private var prefersReducedMotion: Bool {
+        reducesMotion || accessibilityReduceMotion
     }
 }
 
@@ -959,7 +1226,7 @@ private struct OvertimeRecordRow: View {
                 Image(systemName: "square.and.pencil")
                     .font(.system(size: 13, weight: .black))
                     .foregroundStyle(AppTheme.ink)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 44, height: 44)
                     .background(AppTheme.coin.opacity(0.86))
                     .clipShape(Circle())
                     .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1))
@@ -971,7 +1238,7 @@ private struct OvertimeRecordRow: View {
                 Image(systemName: "trash.fill")
                     .font(.system(size: 13, weight: .black))
                     .foregroundStyle(AppTheme.ink)
-                    .frame(width: 32, height: 32)
+                    .frame(width: 44, height: 44)
                     .background(AppTheme.paper.opacity(0.72))
                     .clipShape(Circle())
                     .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1))
@@ -994,11 +1261,255 @@ private struct ExchangeItem: View {
             AssetImage(name: image)
                 .frame(width: 38, height: 38)
             Text(title)
-                .font(.caption2.weight(.bold))
-            Text(hidesSensitiveAmounts ? PrivacyText.hiddenCount : String(format: "%.1f", amount))
                 .font(.caption.weight(.black))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(quantityText)
+                .font(.subheadline.weight(.black))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.76)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(title))
+        .accessibilityValue(Text(quantityText))
+    }
+
+    private var quantityText: String {
+        let quantity = hidesSensitiveAmounts ? PrivacyText.hiddenCount : String(format: "%.1f", amount)
+        return "×\(quantity)"
+    }
+}
+
+private struct SalaryAchievementCompactEntry: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let badges: [SalaryBadge]
+    @State private var showsAll = false
+
+    var body: some View {
+        Button {
+            showsAll = true
+        } label: {
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                : AnyLayout(HStackLayout(spacing: 13))
+            layout {
+                SalaryAchievementMedalArtwork(badge: badges.first, size: 64)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(L10n.t("开薪成就"))
+                        .font(.headline.weight(.black))
+                        .foregroundStyle(AppTheme.ink)
+                    Text(L10n.format("已收下 %@ 份小成就", "\(badges.filter(\.isUnlocked).count)"))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                }
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Spacer(minLength: 4)
+                }
+                Text(L10n.t("查看全部"))
+                    .font(.caption.weight(.black))
+                    .foregroundStyle(AppTheme.ink)
+            }
+            .padding(14)
+            .background(AppTheme.cream)
+            .clipShape(RoundedRectangle(cornerRadius: 19))
+            .overlay(RoundedRectangle(cornerRadius: 19).stroke(AppTheme.outline, lineWidth: 1.4))
+        }
+        .buttonStyle(PayJoyPressStyle())
+        .sheet(isPresented: $showsAll) {
+            NavigationStack {
+                ScrollView {
+                    SalaryAchievementCard(badges: badges)
+                        .padding(AppTheme.pagePadding)
+                }
+                .background(AppTheme.paper)
+                .navigationTitle(L10n.t("开薪成就"))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(L10n.t("关闭")) { showsAll = false }
+                            .foregroundStyle(AppTheme.ink)
+                    }
+                }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
+        .accessibilityLabel(L10n.format("已收下 %@ 份小成就", "\(badges.filter(\.isUnlocked).count)"))
+        .accessibilityHint(L10n.t("查看全部成就"))
+    }
+}
+
+private struct SalaryAchievementCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let badges: [SalaryBadge]
+    @State private var selectedBadge: SalaryBadge?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            let headerLayout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
+                : AnyLayout(HStackLayout(spacing: 14))
+            headerLayout {
+                SalaryAchievementMedalArtwork(badge: badges.first, size: 86)
+                VStack(alignment: .leading, spacing: 7) {
+                    Text(L10n.format("已收下 %@ 份小成就", "\(badges.filter(\.isUnlocked).count)"))
+                        .font(.title3.weight(.black))
+                        .foregroundStyle(AppTheme.ink)
+                    Text(L10n.t("一点点进展，也值得收下。"))
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.textGray)
+                }
+            }
+
+            LazyVGrid(
+                columns: dynamicTypeSize.isAccessibilitySize
+                    ? [GridItem(.flexible())]
+                    : [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)],
+                spacing: 18
+            ) {
+                ForEach(badges) { badge in
+                    achievementMedal(badge)
+                }
+            }
+        }
+        .sheet(item: $selectedBadge) { badge in
+            SalaryBadgeDetailSheet(badge: badge)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    private func achievementMedal(_ badge: SalaryBadge) -> some View {
+        Button {
+            selectedBadge = badge
+        } label: {
+            VStack(spacing: 8) {
+                SalaryAchievementMedalArtwork(badge: badge, size: dynamicTypeSize.isAccessibilitySize ? 112 : 104)
+                Text(badge.title)
+                    .font(.subheadline.weight(.black))
+                    .foregroundStyle(AppTheme.ink)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                Text(badge.isUnlocked ? L10n.t("已收下") : L10n.t("慢慢来，也很好"))
+                    .font(.caption2.weight(.black))
+                    .foregroundStyle(badge.isUnlocked ? AppTheme.ink : AppTheme.textGray)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(badge.title)
+        .accessibilityValue(badge.isUnlocked ? L10n.t("已收下") : "\(Int(badge.progress * 100))%")
+    }
+}
+
+private struct SalaryAchievementMedalArtwork: View {
+    let badge: SalaryBadge?
+    let size: CGFloat
+
+    private var asset: String {
+        switch badge?.id {
+        case "first-payday": return "achievement_first_payday_v1"
+        case "workweek-earned": return "achievement_workweek_earned_v1"
+        case "month-halfway": return "achievement_month_halfway_v1"
+        case "month-quarter": return "achievement_month_quarter_v1"
+        case "month-three-quarter": return "achievement_month_three_quarter_v1"
+        case "month-finish": return "achievement_month_finish_v1"
+        case "payday-direction": return "achievement_payday_direction_v1"
+        case "goal-reached": return "achievement_goal_reached_v1"
+        case "goal-halfway": return "achievement_month_quarter_v1"
+        case "goal-sprint": return "achievement_month_three_quarter_v1"
+        case "calendar-caretaker": return "achievement_workweek_earned_v1"
+        case "calendar-week": return "achievement_month_quarter_v1"
+        case "calendar-collector": return "achievement_goal_reached_v1"
+        case "calendar-month": return "achievement_month_three_quarter_v1"
+        case "calendar-archivist": return "achievement_month_finish_v1"
+        case "calendar-grandmaster": return "achievement_payday_direction_v1"
+        case "calendar-vault": return "achievement_first_payday_v1"
+        case "calendar-yearbook": return "achievement_goal_reached_v1"
+        case "calendar-note": return "achievement_workweek_earned_v1"
+        case "calendar-journal": return "achievement_month_halfway_v1"
+        case "schedule-owner", "paid-leave": return "achievement_month_halfway_v1"
+        case "schedule-master", "rest-planner": return "achievement_goal_reached_v1"
+        case "schedule-director": return "achievement_payday_direction_v1"
+        case "overtime-starter", "weekend-shift": return "achievement_month_quarter_v1"
+        case "overtime-advanced", "weekend-regular": return "achievement_month_three_quarter_v1"
+        case "overtime-hero", "weekend-veteran": return "achievement_month_finish_v1"
+        case "overtime-marathon": return "achievement_payday_direction_v1"
+        case "overtime-logbook": return "achievement_workweek_earned_v1"
+        case "overtime-ledger": return "achievement_goal_reached_v1"
+        default: return "achievement_first_payday_v1"
+        }
+    }
+
+    var body: some View {
+        AssetImage(name: asset)
+            .frame(width: size, height: size)
+            .saturation(badge?.isUnlocked == true ? 1 : 0)
+            .opacity(badge?.isUnlocked == true ? 1 : 0.42)
+            .overlay {
+                if badge?.isUnlocked == false, let badge {
+                    Circle()
+                        .trim(from: 0, to: badge.progress)
+                        .stroke(AppTheme.orange, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .padding(size * 0.08)
+                }
+            }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct SalaryBadgeDetailSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let badge: SalaryBadge
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 22) {
+                    SalaryAchievementMedalArtwork(badge: badge, size: 210)
+                    Text(badge.title)
+                        .font(.title.weight(.black))
+                        .foregroundStyle(AppTheme.ink)
+                    Text(badge.isUnlocked ? L10n.t("已收下") : L10n.t("慢慢来，也很好"))
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                    ComicCard(background: AppTheme.cream, padding: 18) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(badge.subtitle)
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(AppTheme.ink)
+                            if !badge.isUnlocked {
+                                ProgressView(value: badge.progress)
+                                    .tint(AppTheme.orange)
+                                    .accessibilityLabel(L10n.t("进度"))
+                            }
+                            Text(L10n.t("一点点进展，也值得收下。"))
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.textGray)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .multilineTextAlignment(.center)
+                .padding(AppTheme.pagePadding)
+            }
+            .background(AppTheme.paper)
+            .navigationTitle(L10n.t("开薪成就"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(L10n.t("关闭")) { dismiss() }
+                        .foregroundStyle(AppTheme.ink)
+                }
+            }
+        }
     }
 }
 
@@ -1022,15 +1533,15 @@ private extension Date {
     }
 
     var dayNumberText: String {
-        formatted(.dateTime.locale(Locale(identifier: L10n.currentLanguage.localeIdentifier)).day())
+        formatted(.dateTime.locale(Locale(identifier: L10n.currentMarket.localeIdentifier)).day())
     }
 
     var localizedWeekdayText: String {
-        formatted(.dateTime.locale(Locale(identifier: L10n.currentLanguage.localeIdentifier)).weekday(.wide))
+        formatted(.dateTime.locale(Locale(identifier: L10n.currentMarket.localeIdentifier)).weekday(.wide))
     }
 
     var localizedTimeText: String {
-        formatted(.dateTime.locale(Locale(identifier: L10n.currentLanguage.localeIdentifier)).hour().minute())
+        formatted(.dateTime.locale(Locale(identifier: L10n.currentMarket.localeIdentifier)).hour().minute())
     }
 }
 

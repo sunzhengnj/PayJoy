@@ -3,7 +3,7 @@ import Foundation
 final class SalaryCalculator {
     private let calendar: Calendar
 
-    init(calendar: Calendar = .current) {
+    init(calendar: Calendar = .autoupdatingCurrent) {
         self.calendar = calendar
     }
 
@@ -11,27 +11,43 @@ final class SalaryCalculator {
         for date: Date,
         settings: SalarySettings,
         overtimeDateKeys: Set<String> = [],
-        earlyLeaveDateKeys: Set<String> = []
+        earlyLeaveDateKeys: Set<String> = [],
+        record: SalaryDayRecord? = nil
     ) -> EarningsSnapshot {
-        let daySalary = dailySalary(for: settings)
-        let totalSeconds = workingSecondsPerDay(settings: settings)
+        let effectiveSettings = record?.settingsSnapshot ?? settings
+        let daySalary = record?.scheduledAmount ?? dailySalary(for: effectiveSettings)
+        let totalSeconds = workingSecondsPerDay(settings: effectiveSettings)
         let perSecond = totalSeconds > 0 ? daySalary / totalSeconds : 0
 
-        guard isWorkday(date, settings: settings, overtimeDateKeys: overtimeDateKeys) else {
+        if record?.kind == .paidLeave {
+            return EarningsSnapshot(
+                todayEarned: daySalary,
+                todayTotal: daySalary,
+                earnedPerSecond: 0,
+                progress: 1,
+                remainingToday: 0,
+                secondsUntilOffWork: 0,
+                status: .afterWork
+            )
+        }
+
+        let isPaidWorkday = record?.kind == .normal
+            || (record == nil && isWorkday(date, settings: effectiveSettings, overtimeDateKeys: overtimeDateKeys))
+        guard isPaidWorkday else {
             return EarningsSnapshot(
                 todayEarned: 0,
-                todayTotal: daySalary,
-                earnedPerSecond: perSecond,
+                todayTotal: 0,
+                earnedPerSecond: 0,
                 progress: 0,
-                remainingToday: daySalary,
+                remainingToday: 0,
                 secondsUntilOffWork: 0,
                 status: .restDay
             )
         }
 
         let currentMinute = minuteOfDay(for: date)
-        let start = settings.workStart.minutesFromStartOfDay
-        let end = settings.workEnd.minutesFromStartOfDay
+        let start = effectiveSettings.workStart.minutesFromStartOfDay
+        let end = effectiveSettings.workEnd.minutesFromStartOfDay
         let endDate = dateAt(minutesFromStartOfDay: end, matching: date)
         let rawRemaining = max(0, endDate.timeIntervalSince(date))
 
@@ -71,9 +87,9 @@ final class SalaryCalculator {
             )
         }
 
-        let workedSeconds = workedSecondsUntil(date, settings: settings)
+        let workedSeconds = workedSecondsUntil(date, settings: effectiveSettings)
         let earned = min(daySalary, max(0, workedSeconds * perSecond))
-        let status = isLunchBreak(date, settings: settings) ? WorkdayStatus.lunchBreak : .working
+        let status = isLunchBreak(date, settings: effectiveSettings) ? WorkdayStatus.lunchBreak : .working
 
         return EarningsSnapshot(
             todayEarned: earned,
@@ -86,49 +102,100 @@ final class SalaryCalculator {
         )
     }
 
+    func offDutySecondsUntilWorkStart(
+        for date: Date,
+        settings: SalarySettings,
+        earlyLeaveDateKeys: Set<String> = [],
+        records: [SalaryDayRecord] = []
+    ) -> TimeInterval? {
+        let recordsByDate = latestRecordsByDate(records)
+        let currentSnapshot = snapshot(
+            for: date,
+            settings: settings,
+            earlyLeaveDateKeys: earlyLeaveDateKeys,
+            record: recordsByDate[dateKey(for: date)]
+        )
+        guard currentSnapshot.status == .beforeWork else { return nil }
+
+        let startOfToday = calendar.startOfDay(for: date)
+        let previousDayEnd = startOfToday.addingTimeInterval(-1)
+        let previousSnapshot = snapshot(
+            for: previousDayEnd,
+            settings: settings,
+            earlyLeaveDateKeys: earlyLeaveDateKeys,
+            record: recordsByDate[dateKey(for: previousDayEnd)]
+        )
+        guard previousSnapshot.status == .afterWork else { return nil }
+
+        let effectiveSettings = recordsByDate[dateKey(for: date)]?.settingsSnapshot ?? settings
+        let workStart = dateAt(
+            minutesFromStartOfDay: effectiveSettings.workStart.minutesFromStartOfDay,
+            matching: date
+        )
+        let remaining = workStart.timeIntervalSince(date)
+        return remaining > 0 ? remaining : nil
+    }
+
     func periodEarnings(
         for period: StatsPeriod,
         date: Date,
         settings: SalarySettings,
         overtimeDateKeys: Set<String> = [],
-        earlyLeaveDateKeys: Set<String> = []
+        earlyLeaveDateKeys: Set<String> = [],
+        records: [SalaryDayRecord] = [],
+        actualSalaryRecords: [ActualSalaryRecord] = []
     ) -> PeriodEarnings {
-        let today = snapshot(for: date, settings: settings, overtimeDateKeys: overtimeDateKeys, earlyLeaveDateKeys: earlyLeaveDateKeys)
-        let daySalary = dailySalary(for: settings)
+        let recordsByDate = latestRecordsByDate(records)
+        let today = snapshot(
+            for: date,
+            settings: settings,
+            overtimeDateKeys: overtimeDateKeys,
+            earlyLeaveDateKeys: earlyLeaveDateKeys,
+            record: recordsByDate[dateKey(for: date)]
+        )
 
         switch period {
         case .today:
             return PeriodEarnings(earned: today.todayEarned, projected: today.todayTotal, progress: today.progress)
         case .month:
-            let regularToday = snapshot(for: date, settings: settings, earlyLeaveDateKeys: earlyLeaveDateKeys)
-            let projected = settings.salaryType == .monthly ? settings.salaryAmount : daySalary * settings.monthlyPaidDays
-            if settings.salaryType == .monthly || settings.salaryType == .yearly {
-                return fixedSalaryPeriodEarnings(
-                    projected: projected,
-                    component: .month,
-                    date: date,
-                    settings: settings,
-                    todayProgress: regularToday.progress
-                )
-            }
-            let elapsedFullWorkdays = workdaysElapsed(in: .month, before: date, settings: settings, overtimeDateKeys: [])
-            let earned = Double(elapsedFullWorkdays) * daySalary + regularToday.todayEarned
-            return PeriodEarnings(earned: min(projected, earned), projected: projected, progress: projected > 0 ? min(1, earned / projected) : 0)
+            let summary = salaryMonthSummary(
+                for: date,
+                now: date,
+                settings: settings,
+                records: records,
+                completedDateKeys: earlyLeaveDateKeys,
+                actualSalaryRecords: actualSalaryRecords
+            )
+            return PeriodEarnings(
+                earned: summary.earnedAmount,
+                projected: summary.projectedAmount,
+                progress: summary.progress
+            )
         case .year:
-            let regularToday = snapshot(for: date, settings: settings, earlyLeaveDateKeys: earlyLeaveDateKeys)
-            let projected = annualSalary(for: settings)
-            if settings.salaryType == .monthly || settings.salaryType == .yearly {
-                return fixedSalaryPeriodEarnings(
-                    projected: projected,
-                    component: .year,
-                    date: date,
+            let interval = periodInterval(for: .year, date: date)
+            var cursor = interval.start
+            var earned = 0.0
+            var projected = 0.0
+
+            while cursor < interval.end {
+                let summary = salaryMonthSummary(
+                    for: cursor,
+                    now: date,
                     settings: settings,
-                    todayProgress: regularToday.progress
+                    records: records,
+                    completedDateKeys: earlyLeaveDateKeys,
+                    actualSalaryRecords: actualSalaryRecords
                 )
+                earned += summary.earnedAmount
+                projected += summary.projectedAmount
+                cursor = calendar.date(byAdding: .month, value: 1, to: cursor) ?? interval.end
             }
-            let elapsedFullWorkdays = workdaysElapsed(in: .year, before: date, settings: settings, overtimeDateKeys: [])
-            let earned = Double(elapsedFullWorkdays) * daySalary + regularToday.todayEarned
-            return PeriodEarnings(earned: min(projected, earned), projected: projected, progress: projected > 0 ? min(1, earned / projected) : 0)
+
+            return PeriodEarnings(
+                earned: earned,
+                projected: projected,
+                progress: projected > 0 ? min(1, earned / projected) : 0
+            )
         }
     }
 
@@ -137,13 +204,21 @@ final class SalaryCalculator {
         date: Date,
         settings: SalarySettings,
         overtimeDateKeys: Set<String> = [],
-        earlyLeaveDateKeys: Set<String> = []
+        earlyLeaveDateKeys: Set<String> = [],
+        records: [SalaryDayRecord] = []
     ) -> PeriodBreakdown {
-        let today = snapshot(for: date, settings: settings, overtimeDateKeys: overtimeDateKeys, earlyLeaveDateKeys: earlyLeaveDateKeys)
+        let recordsByDate = latestRecordsByDate(records)
+        let today = snapshot(
+            for: date,
+            settings: settings,
+            overtimeDateKeys: overtimeDateKeys,
+            earlyLeaveDateKeys: earlyLeaveDateKeys,
+            record: recordsByDate[dateKey(for: date)]
+        )
 
         switch period {
         case .today:
-            let total = isWorkday(date, settings: settings, overtimeDateKeys: overtimeDateKeys) ? 1 : 0
+            let total = today.todayTotal > 0 ? 1 : 0
             let completed = total == 0 ? 0 : today.progress
             let remaining = total == 0 || today.status == .afterWork ? 0 : 1
             return PeriodBreakdown(
@@ -152,12 +227,15 @@ final class SalaryCalculator {
                 remainingWorkdays: remaining,
                 completedWorkdayEquivalent: completed
             )
-        case .month:
-            let regularToday = snapshot(for: date, settings: settings, earlyLeaveDateKeys: earlyLeaveDateKeys)
-            return periodBreakdown(in: .month, date: date, settings: settings, overtimeDateKeys: [], todayProgress: regularToday.progress)
-        case .year:
-            let regularToday = snapshot(for: date, settings: settings, earlyLeaveDateKeys: earlyLeaveDateKeys)
-            return periodBreakdown(in: .year, date: date, settings: settings, overtimeDateKeys: [], todayProgress: regularToday.progress)
+        case .month, .year:
+            let component: Calendar.Component = period == .month ? .month : .year
+            return calendarPeriodBreakdown(
+                in: component,
+                date: date,
+                settings: settings,
+                recordsByDate: recordsByDate,
+                completedDateKeys: earlyLeaveDateKeys
+            )
         }
     }
 
@@ -274,12 +352,30 @@ final class SalaryCalculator {
         )
     }
 
+    func refreshedFutureSalaryDayRecord(
+        _ record: SalaryDayRecord,
+        for date: Date,
+        now: Date,
+        settings: SalarySettings
+    ) -> SalaryDayRecord {
+        let day = calendar.startOfDay(for: date)
+        guard record.isEstimated, day > calendar.startOfDay(for: now) else { return record }
+
+        var refreshed = record
+        refreshed.settingsSnapshot = settings
+        refreshed.scheduledAmount = amount(for: record.kind, date: day, settings: settings)
+        refreshed.earnedAmount = 0
+        refreshed.updatedAt = now
+        return refreshed
+    }
+
     func salaryMonthSummary(
         for month: Date,
         now: Date,
         settings: SalarySettings,
         records: [SalaryDayRecord],
-        completedDateKeys: Set<String> = []
+        completedDateKeys: Set<String> = [],
+        actualSalaryRecords: [ActualSalaryRecord] = []
     ) -> SalaryMonthSummary {
         let interval = periodInterval(for: .month, date: month)
         var recordsByDate: [String: SalaryDayRecord] = [:]
@@ -315,41 +411,477 @@ final class SalaryCalculator {
             cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? interval.end
         }
 
+        let actualRecord = latestActualSalaryByMonth(
+            actualSalaryRecords.filter { $0.currencyCode == settings.currencyCode }
+        )[monthKey(for: month)]
+        if let actualRecord {
+            earnedAmount = actualRecord.amount
+            projectedAmount = actualRecord.amount
+            estimatedDayCount = 0
+        }
+
         return SalaryMonthSummary(
             earnedAmount: earnedAmount,
             projectedAmount: projectedAmount,
             paidDayCount: paidDayCount,
-            estimatedDayCount: estimatedDayCount
+            estimatedDayCount: estimatedDayCount,
+            actualAmount: actualRecord?.amount
         )
     }
 
-    private func annualSalary(for settings: SalarySettings) -> Double {
-        switch settings.salaryType {
-        case .yearly:
-            return settings.salaryAmount
-        case .monthly:
-            return settings.salaryAmount * 12
-        case .daily:
-            return settings.salaryAmount * settings.monthlyPaidDays * 12
-        case .hourly:
-            return dailySalary(for: settings) * settings.monthlyPaidDays * 12
+    func personalGoalProgress(
+        for wish: WishExperience,
+        now: Date,
+        settings: SalarySettings,
+        records: [SalaryDayRecord],
+        completedDateKeys: Set<String> = []
+    ) -> PersonalGoalProgress {
+        let targetAmount = wish.targetAmount.map { NSDecimalNumber(decimal: $0).doubleValue } ?? 0
+        let today = calendar.startOfDay(for: now)
+        let start = calendar.startOfDay(for: wish.createdAt)
+        var recordsByDate: [String: SalaryDayRecord] = [:]
+        for record in records {
+            let current = recordsByDate[record.dateKey]?.updatedAt ?? .distantPast
+            if record.updatedAt > current {
+                recordsByDate[record.dateKey] = record
+            }
         }
+
+        var cursor = start
+        var earned = 0.0
+        while cursor <= today {
+            let record = recordsByDate[dateKey(for: cursor)]
+            earned += salaryCalendarDay(
+                for: cursor,
+                now: now,
+                settings: settings,
+                record: record,
+                completedDateKeys: completedDateKeys
+            ).earnedAmount
+            cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? today.addingTimeInterval(86_400)
+        }
+
+        let remaining = max(0, targetAmount - earned)
+        let dailyAmount = max(0.01, dailySalary(for: settings))
+        let completionDate = estimatePersonalGoalCompletionDate(
+            remaining: remaining,
+            today: today,
+            now: now,
+            settings: settings,
+            recordsByDate: recordsByDate,
+            completedDateKeys: completedDateKeys
+        )
+
+        return PersonalGoalProgress(
+            earnedAmount: earned,
+            remainingAmount: remaining,
+            progress: targetAmount > 0 ? min(1, max(0, earned / targetAmount)) : 0,
+            estimatedWorkdaysRemaining: Int(ceil(remaining / dailyAmount)),
+            estimatedCompletionDate: completionDate
+        )
     }
 
-    private func fixedSalaryPeriodEarnings(
-        projected: Double,
-        component: Calendar.Component,
-        date: Date,
+    private func estimatePersonalGoalCompletionDate(
+        remaining: Double,
+        today: Date,
+        now: Date,
         settings: SalarySettings,
-        todayProgress: Double
-    ) -> PeriodEarnings {
-        let breakdown = periodBreakdown(in: component, date: date, settings: settings, overtimeDateKeys: [], todayProgress: todayProgress)
-        guard projected > 0, breakdown.totalWorkdays > 0 else {
-            return PeriodEarnings(earned: 0, projected: projected, progress: 0)
+        recordsByDate: [String: SalaryDayRecord],
+        completedDateKeys: Set<String>
+    ) -> Date? {
+        guard remaining > 0 else { return today }
+        var outstanding = remaining
+        var cursor = today
+
+        for _ in 0..<3_660 {
+            let record = recordsByDate[dateKey(for: cursor)]
+            let day = salaryCalendarDay(
+                for: cursor,
+                now: now,
+                settings: settings,
+                record: record,
+                completedDateKeys: completedDateKeys
+            )
+            let available = cursor == today
+                ? max(0, day.scheduledAmount - day.earnedAmount)
+                : day.scheduledAmount
+            outstanding -= available
+            if outstanding <= 0 { return cursor }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { return nil }
+            cursor = next
+        }
+        return nil
+    }
+
+    func weeklyPayReport(
+        now: Date,
+        settings: SalarySettings,
+        records: [SalaryDayRecord],
+        completedDateKeys: Set<String> = []
+    ) -> WeeklyPayReport {
+        let today = calendar.startOfDay(for: now)
+        let interval = calendar.dateInterval(of: .weekOfYear, for: today)
+            ?? DateInterval(start: today, end: calendar.date(byAdding: .day, value: 7, to: today) ?? today)
+        var recordsByDate: [String: SalaryDayRecord] = [:]
+        for record in records {
+            let current = recordsByDate[record.dateKey]?.updatedAt ?? .distantPast
+            if record.updatedAt > current {
+                recordsByDate[record.dateKey] = record
+            }
         }
 
-        let progress = min(1, max(0, breakdown.completedWorkdayEquivalent / Double(breakdown.totalWorkdays)))
-        return PeriodEarnings(earned: projected * progress, projected: projected, progress: progress)
+        var days: [WeeklyPayDay] = []
+        var earnedAmount = 0.0
+        var projectedAmount = 0.0
+        var paidDayCount = 0
+        var totalWorkdays = 0
+        var cursor = interval.start
+
+        while cursor < interval.end {
+            let record = recordsByDate[dateKey(for: cursor)]
+            let calendarDay = salaryCalendarDay(
+                for: cursor,
+                now: now,
+                settings: settings,
+                record: record,
+                completedDateKeys: completedDateKeys
+            )
+            let isPaidKind = calendarDay.kind == .normal || calendarDay.kind == .paidLeave
+            if isPaidKind {
+                totalWorkdays += 1
+                projectedAmount += calendarDay.scheduledAmount
+            }
+            if !calendarDay.isFuture {
+                earnedAmount += calendarDay.earnedAmount
+                if isPaidKind, calendarDay.earnedAmount > 0 {
+                    paidDayCount += 1
+                }
+            }
+            days.append(
+                WeeklyPayDay(
+                    date: cursor,
+                    dateKey: calendarDay.dateKey,
+                    earnedAmount: calendarDay.isFuture ? 0 : calendarDay.earnedAmount,
+                    scheduledAmount: calendarDay.scheduledAmount,
+                    kind: calendarDay.kind,
+                    isFuture: calendarDay.isFuture,
+                    isToday: calendar.isDate(cursor, inSameDayAs: today)
+                )
+            )
+            cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? interval.end
+        }
+
+        return WeeklyPayReport(
+            weekStart: interval.start,
+            weekEnd: interval.end,
+            days: days,
+            earnedAmount: earnedAmount,
+            projectedAmount: projectedAmount,
+            paidDayCount: paidDayCount,
+            totalWorkdays: totalWorkdays
+        )
+    }
+
+    func salaryBadges(
+        now: Date,
+        settings: SalarySettings,
+        records: [SalaryDayRecord],
+        completedDateKeys: Set<String> = [],
+        focusedWish: WishExperience?,
+        wishes _: [WishExperience],
+        overtimeRecords: [OvertimeRecord],
+        unlockedBadgeIDs: Set<String> = []
+    ) -> [SalaryBadge] {
+        let month = salaryMonthSummary(
+            for: now,
+            now: now,
+            settings: settings,
+            records: records,
+            completedDateKeys: completedDateKeys
+        )
+        let week = weeklyPayReport(
+            now: now,
+            settings: settings,
+            records: records,
+            completedDateKeys: completedDateKeys
+        )
+        let overtime = overtimeSummary(
+            in: .month,
+            date: now,
+            now: now,
+            overtimeRecords: overtimeRecords
+        )
+        let goalProgress = focusedWish.flatMap { wish -> PersonalGoalProgress? in
+            guard wish.targetAmount != nil else { return nil }
+            return personalGoalProgress(
+                for: wish,
+                now: now,
+                settings: settings,
+                records: records,
+                completedDateKeys: completedDateKeys
+            )
+        }
+        let savedCalendarDayCount = Set(records.map(\.dateKey)).count
+        let hasEverEarned = month.earnedAmount > 0 || records.contains { $0.earnedAmount > 0 }
+        let workweekPaidDayTarget = max(1, week.totalWorkdays)
+        let specialScheduleCount = records.filter { $0.kind != .normal }.count
+        let paidLeaveCount = records.filter { $0.kind == .paidLeave }.count
+        let restRecordCount = records.filter { $0.kind == .rest }.count
+        let calendarNoteCount = records.filter { !$0.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
+        let overtimeRecordCount = overtimeRecords.count
+        let weekendOvertimeCount = overtimeRecords.filter { record in
+            !settings.workdays.contains(calendar.component(.weekday, from: record.startAt))
+        }.count
+        let badges = [
+            SalaryBadge(
+                id: "first-payday",
+                title: L10n.t("第一次开薪"),
+                subtitle: L10n.t("让钱包先开张"),
+                icon: "sparkles",
+                progress: hasEverEarned ? 1 : 0
+            ),
+            SalaryBadge(
+                id: "workweek-earned",
+                title: L10n.t("稳定产出"),
+                subtitle: L10n.format("本周完成 %@ 个计薪日", "\(workweekPaidDayTarget)"),
+                icon: "calendar.badge.checkmark",
+                progress: min(1, Double(week.paidDayCount) / Double(workweekPaidDayTarget))
+            ),
+            SalaryBadge(
+                id: "month-halfway",
+                title: L10n.t("半程加速"),
+                subtitle: L10n.t("完成本月一半计薪进度"),
+                icon: "gauge.medium",
+                progress: min(1, month.progress / 0.5)
+            ),
+            SalaryBadge(
+                id: "month-quarter",
+                title: L10n.t("开局顺利"),
+                subtitle: L10n.t("完成本月 25% 计薪进度"),
+                icon: "chart.line.uptrend.xyaxis",
+                progress: min(1, month.progress / 0.25)
+            ),
+            SalaryBadge(
+                id: "month-three-quarter",
+                title: L10n.t("稳步向前"),
+                subtitle: L10n.t("完成本月 75% 计薪进度"),
+                icon: "chart.bar.fill",
+                progress: min(1, month.progress / 0.75)
+            ),
+            SalaryBadge(
+                id: "month-finish",
+                title: L10n.t("月度结算"),
+                subtitle: L10n.t("完成本月计薪进度"),
+                icon: "flag.checkered",
+                progress: month.progress
+            ),
+            SalaryBadge(
+                id: "payday-direction",
+                title: L10n.t("目标启程"),
+                subtitle: L10n.t("设置一个开薪目标"),
+                icon: "target",
+                progress: focusedWish == nil ? 0 : 1
+            ),
+            SalaryBadge(
+                id: "goal-reached",
+                title: L10n.t("目标抵达"),
+                subtitle: L10n.t("完成一个开薪目标"),
+                icon: "flag.2.crossed.fill",
+                progress: goalProgress?.progress ?? 0
+            ),
+            SalaryBadge(
+                id: "goal-halfway",
+                title: L10n.t("目标过半"),
+                subtitle: L10n.t("完成开薪目标的 50%"),
+                icon: "scope",
+                progress: min(1, (goalProgress?.progress ?? 0) / 0.5)
+            ),
+            SalaryBadge(
+                id: "goal-sprint",
+                title: L10n.t("目标冲刺"),
+                subtitle: L10n.t("完成开薪目标的 80%"),
+                icon: "figure.run",
+                progress: min(1, (goalProgress?.progress ?? 0) / 0.8)
+            ),
+            SalaryBadge(
+                id: "calendar-caretaker",
+                title: L10n.t("日历匠人"),
+                subtitle: L10n.t("保存 3 条工资日历记录"),
+                icon: "calendar.badge.clock",
+                progress: min(1, Double(savedCalendarDayCount) / 3)
+            ),
+            SalaryBadge(
+                id: "calendar-week",
+                title: L10n.t("周记初成"),
+                subtitle: L10n.t("保存 7 条工资日历记录"),
+                icon: "calendar.day.timeline.leading",
+                progress: min(1, Double(savedCalendarDayCount) / 7)
+            ),
+            SalaryBadge(
+                id: "calendar-collector",
+                title: L10n.t("日历收藏家"),
+                subtitle: L10n.t("保存 10 条工资日历记录"),
+                icon: "calendar.badge.plus",
+                progress: min(1, Double(savedCalendarDayCount) / 10)
+            ),
+            SalaryBadge(
+                id: "calendar-month",
+                title: L10n.t("两周记忆"),
+                subtitle: L10n.t("保存 20 条工资日历记录"),
+                icon: "calendar.circle.fill",
+                progress: min(1, Double(savedCalendarDayCount) / 20)
+            ),
+            SalaryBadge(
+                id: "calendar-archivist",
+                title: L10n.t("日历档案员"),
+                subtitle: L10n.t("保存 30 条工资日历记录"),
+                icon: "archivebox.fill",
+                progress: min(1, Double(savedCalendarDayCount) / 30)
+            ),
+            SalaryBadge(
+                id: "calendar-grandmaster",
+                title: L10n.t("工资档案馆"),
+                subtitle: L10n.t("保存 60 条工资日历记录"),
+                icon: "books.vertical.fill",
+                progress: min(1, Double(savedCalendarDayCount) / 60)
+            ),
+            SalaryBadge(
+                id: "calendar-vault",
+                title: L10n.t("工资资料室"),
+                subtitle: L10n.t("保存 90 条工资日历记录"),
+                icon: "cabinet.fill",
+                progress: min(1, Double(savedCalendarDayCount) / 90)
+            ),
+            SalaryBadge(
+                id: "calendar-yearbook",
+                title: L10n.t("薪资年鉴"),
+                subtitle: L10n.t("保存 180 条工资日历记录"),
+                icon: "book.closed.fill",
+                progress: min(1, Double(savedCalendarDayCount) / 180)
+            ),
+            SalaryBadge(
+                id: "calendar-note",
+                title: L10n.t("备注一下"),
+                subtitle: L10n.t("为工资日历写下第一条备注"),
+                icon: "note.text",
+                progress: calendarNoteCount > 0 ? 1 : 0
+            ),
+            SalaryBadge(
+                id: "calendar-journal",
+                title: L10n.t("工资手账"),
+                subtitle: L10n.t("为 5 条工资日历记录添加备注"),
+                icon: "text.book.closed.fill",
+                progress: min(1, Double(calendarNoteCount) / 5)
+            ),
+            SalaryBadge(
+                id: "schedule-owner",
+                title: L10n.t("日程由我"),
+                subtitle: L10n.t("在工资日历标记一次请假或休息"),
+                icon: "calendar.badge.minus",
+                progress: specialScheduleCount > 0 ? 1 : 0
+            ),
+            SalaryBadge(
+                id: "schedule-master",
+                title: L10n.t("排班达人"),
+                subtitle: L10n.t("在工资日历标记 3 次特殊日程"),
+                icon: "calendar.badge.exclamationmark",
+                progress: min(1, Double(specialScheduleCount) / 3)
+            ),
+            SalaryBadge(
+                id: "paid-leave",
+                title: L10n.t("带薪休整"),
+                subtitle: L10n.t("在工资日历标记一次带薪休假"),
+                icon: "beach.umbrella.fill",
+                progress: paidLeaveCount > 0 ? 1 : 0
+            ),
+            SalaryBadge(
+                id: "schedule-director",
+                title: L10n.t("日程掌舵"),
+                subtitle: L10n.t("在工资日历标记 5 次特殊日程"),
+                icon: "calendar.badge.gearshape",
+                progress: min(1, Double(specialScheduleCount) / 5)
+            ),
+            SalaryBadge(
+                id: "rest-planner",
+                title: L10n.t("休息有数"),
+                subtitle: L10n.t("在工资日历标记 3 次休息日"),
+                icon: "moon.zzz.fill",
+                progress: min(1, Double(restRecordCount) / 3)
+            ),
+            SalaryBadge(
+                id: "overtime-starter",
+                title: L10n.t("加班开张"),
+                subtitle: L10n.t("本月累计 1 小时加班"),
+                icon: "bolt.fill",
+                progress: min(1, overtime.totalHours)
+            ),
+            SalaryBadge(
+                id: "overtime-advanced",
+                title: L10n.t("加班进阶"),
+                subtitle: L10n.t("本月累计 4 小时加班"),
+                icon: "bolt.badge.clock.fill",
+                progress: min(1, overtime.totalHours / 4)
+            ),
+            SalaryBadge(
+                id: "overtime-hero",
+                title: L10n.t("加班英雄"),
+                subtitle: L10n.t("本月加班 8 小时"),
+                icon: "moon.stars.fill",
+                progress: min(1, overtime.totalHours / 8)
+            ),
+            SalaryBadge(
+                id: "overtime-marathon",
+                title: L10n.t("加班马拉松"),
+                subtitle: L10n.t("本月累计 16 小时加班"),
+                icon: "flame.fill",
+                progress: min(1, overtime.totalHours / 16)
+            ),
+            SalaryBadge(
+                id: "overtime-logbook",
+                title: L10n.t("加班留档"),
+                subtitle: L10n.t("记录 3 次加班"),
+                icon: "doc.text.fill",
+                progress: min(1, Double(overtimeRecordCount) / 3)
+            ),
+            SalaryBadge(
+                id: "overtime-ledger",
+                title: L10n.t("加班账本"),
+                subtitle: L10n.t("记录 10 次加班"),
+                icon: "list.bullet.rectangle.fill",
+                progress: min(1, Double(overtimeRecordCount) / 10)
+            ),
+            SalaryBadge(
+                id: "weekend-shift",
+                title: L10n.t("周末出勤"),
+                subtitle: L10n.t("在休息日记录一次加班"),
+                icon: "sun.and.horizon.fill",
+                progress: weekendOvertimeCount > 0 ? 1 : 0
+            ),
+            SalaryBadge(
+                id: "weekend-regular",
+                title: L10n.t("周末常客"),
+                subtitle: L10n.t("在休息日记录 3 次加班"),
+                icon: "sun.max.trianglebadge.exclamationmark.fill",
+                progress: min(1, Double(weekendOvertimeCount) / 3)
+            ),
+            SalaryBadge(
+                id: "weekend-veteran",
+                title: L10n.t("周末熟客"),
+                subtitle: L10n.t("在休息日记录 6 次加班"),
+                icon: "sun.max.fill",
+                progress: min(1, Double(weekendOvertimeCount) / 6)
+            )
+        ]
+        return badges.map {
+            SalaryBadge(
+                id: $0.id,
+                title: $0.title,
+                subtitle: $0.subtitle,
+                icon: $0.icon,
+                progress: $0.progress,
+                isUnlocked: unlockedBadgeIDs.contains($0.id)
+            )
+        }
     }
 
     private func workedSecondsUntil(_ date: Date, settings: SalarySettings) -> TimeInterval {
@@ -416,6 +948,42 @@ final class SalaryCalculator {
         return String(format: "%04d-%02d-%02d", year, month, day)
     }
 
+    func monthKey(for date: Date) -> String {
+        let components = calendar.dateComponents([.year, .month], from: date)
+        return String(format: "%04d-%02d", components.year ?? 0, components.month ?? 0)
+    }
+
+    func paydayDate(forMonthContaining date: Date, paydayDay: Int) -> Date {
+        let monthInterval = periodInterval(for: .month, date: date)
+        let dayRange = calendar.range(of: .day, in: .month, for: monthInterval.start) ?? 1..<2
+        let resolvedDay = min(max(paydayDay, 1), dayRange.count)
+        return calendar.date(byAdding: .day, value: resolvedDay - 1, to: monthInterval.start) ?? monthInterval.start
+    }
+
+    func isPayday(_ date: Date, settings: SalarySettings) -> Bool {
+        guard let paydayDay = settings.paydayDay else { return false }
+        return calendar.isDate(date, inSameDayAs: paydayDate(forMonthContaining: date, paydayDay: paydayDay))
+    }
+
+    func canEnterActualSalary(for month: Date, now: Date, settings: SalarySettings) -> Bool {
+        let monthStart = periodInterval(for: .month, date: month).start
+        let currentMonthStart = periodInterval(for: .month, date: now).start
+        if monthStart < currentMonthStart { return true }
+        guard monthStart == currentMonthStart, let paydayDay = settings.paydayDay else { return false }
+        let payday = paydayDate(forMonthContaining: month, paydayDay: paydayDay)
+        return calendar.startOfDay(for: now) >= calendar.startOfDay(for: payday)
+    }
+
+    private func latestActualSalaryByMonth(_ records: [ActualSalaryRecord]) -> [String: ActualSalaryRecord] {
+        var result: [String: ActualSalaryRecord] = [:]
+        for record in records {
+            if result[record.monthKey]?.updatedAt ?? .distantPast < record.updatedAt {
+                result[record.monthKey] = record
+            }
+        }
+        return result
+    }
+
     private func isWorkday(_ date: Date, settings: SalarySettings, overtimeDateKeys: Set<String>) -> Bool {
         isRegularWorkday(date, settings: settings)
     }
@@ -432,38 +1000,48 @@ final class SalaryCalculator {
         return calendar.date(from: components) ?? date
     }
 
-    private func workdaysElapsed(
-        in component: Calendar.Component,
-        before date: Date,
-        settings: SalarySettings,
-        overtimeDateKeys: Set<String>
-    ) -> Int {
-        let interval = periodInterval(for: component, date: date)
-
-        var count = 0
-        var cursor = interval.start
-        while cursor < calendar.startOfDay(for: date) {
-            if isWorkday(cursor, settings: settings, overtimeDateKeys: overtimeDateKeys) { count += 1 }
-            cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? interval.end
-        }
-        return count
-    }
-
-    private func periodBreakdown(
+    private func calendarPeriodBreakdown(
         in component: Calendar.Component,
         date: Date,
         settings: SalarySettings,
-        overtimeDateKeys: Set<String>,
-        todayProgress: Double
+        recordsByDate: [String: SalaryDayRecord],
+        completedDateKeys: Set<String>
     ) -> PeriodBreakdown {
         let interval = periodInterval(for: component, date: date)
+        let today = calendar.startOfDay(for: date)
+        var cursor = interval.start
+        var total = 0
+        var elapsed = 0
+        var completed = 0.0
+        var remaining = 0
 
-        let total = workdays(in: interval, settings: settings, overtimeDateKeys: overtimeDateKeys)
-        let elapsed = workdaysElapsed(in: component, before: date, settings: settings, overtimeDateKeys: overtimeDateKeys)
-        let todayIsWorkday = isWorkday(date, settings: settings, overtimeDateKeys: overtimeDateKeys)
-        let completed = Double(elapsed) + (todayIsWorkday ? todayProgress : 0)
-        let completedTodayOffset = todayIsWorkday && todayProgress >= 1 ? 1 : 0
-        let remaining = max(0, total - elapsed - completedTodayOffset)
+        while cursor < interval.end {
+            let day = salaryCalendarDay(
+                for: cursor,
+                now: date,
+                settings: settings,
+                record: recordsByDate[dateKey(for: cursor)],
+                completedDateKeys: completedDateKeys
+            )
+            let isPaidDay = day.kind == .normal || day.kind == .paidLeave
+            guard isPaidDay else {
+                cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? interval.end
+                continue
+            }
+
+            total += 1
+            if cursor < today {
+                elapsed += 1
+                completed += 1
+            } else if cursor == today {
+                let progress = day.scheduledAmount > 0 ? day.earnedAmount / day.scheduledAmount : 0
+                completed += progress
+                if progress < 1 { remaining += 1 }
+            } else {
+                remaining += 1
+            }
+            cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? interval.end
+        }
 
         return PeriodBreakdown(
             elapsedFullWorkdays: elapsed,
@@ -473,14 +1051,15 @@ final class SalaryCalculator {
         )
     }
 
-    private func workdays(in interval: DateInterval, settings: SalarySettings, overtimeDateKeys: Set<String>) -> Int {
-        var count = 0
-        var cursor = interval.start
-        while cursor < interval.end {
-            if isWorkday(cursor, settings: settings, overtimeDateKeys: overtimeDateKeys) { count += 1 }
-            cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? interval.end
+    private func latestRecordsByDate(_ records: [SalaryDayRecord]) -> [String: SalaryDayRecord] {
+        var recordsByDate: [String: SalaryDayRecord] = [:]
+        for record in records {
+            let existingUpdate = recordsByDate[record.dateKey]?.updatedAt ?? .distantPast
+            if existingUpdate < record.updatedAt {
+                recordsByDate[record.dateKey] = record
+            }
         }
-        return count
+        return recordsByDate
     }
 
     private func periodInterval(for component: Calendar.Component, date: Date) -> DateInterval {

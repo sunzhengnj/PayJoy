@@ -3,6 +3,8 @@ import SwiftUI
 struct SalaryCalendarView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var monthAnchor = Date()
     @State private var selectedDate = Date()
     @State private var editingDay: SalaryCalendarDay?
@@ -56,6 +58,11 @@ struct SalaryCalendarView: View {
                 appState.isTabBarHidden = false
             }
         }
+        .transaction { transaction in
+            guard prefersReducedMotion else { return }
+            transaction.animation = nil
+            transaction.disablesAnimations = true
+        }
     }
 
     private var monthSummary: SalaryMonthSummary {
@@ -78,6 +85,10 @@ struct SalaryCalendarView: View {
         appState.settings.currencySymbol
     }
 
+    private var prefersReducedMotion: Bool {
+        appState.preferences.reduceMotion || accessibilityReduceMotion
+    }
+
     private var header: some View {
         ZStack {
             Text(L10n.t("工资日历"))
@@ -92,7 +103,7 @@ struct SalaryCalendarView: View {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .black))
                             .foregroundStyle(AppTheme.ink)
-                            .frame(width: 42, height: 42)
+                            .frame(width: 44, height: 44)
                             .background(AppTheme.cream)
                             .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
                             .overlay {
@@ -100,7 +111,7 @@ struct SalaryCalendarView: View {
                                     .stroke(AppTheme.outline, lineWidth: 1.4)
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PayJoyPressStyle(scale: 0.94, reduceMotion: prefersReducedMotion))
                     .accessibilityLabel(L10n.t("返回"))
                 }
 
@@ -127,6 +138,25 @@ struct SalaryCalendarView: View {
                 .foregroundStyle(AppTheme.ink)
                 .frame(maxWidth: .infinity)
                 .lineLimit(1)
+                .minimumScaleFactor(0.62)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+
+            if !isViewingCurrentMonth {
+                Button {
+                    jumpToToday()
+                } label: {
+                    Text(L10n.t("今天"))
+                        .font(.caption.weight(.black))
+                        .foregroundStyle(AppTheme.ink)
+                        .padding(.horizontal, 9)
+                        .frame(minHeight: 44)
+                        .background(AppTheme.coin)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1))
+                }
+                .buttonStyle(PayJoyPressStyle(scale: 0.96, reduceMotion: prefersReducedMotion))
+                .accessibilityLabel(L10n.t("回到今天"))
+            }
 
             monthButton(systemImage: "chevron.right", label: L10n.t("查看下个月")) {
                 moveMonth(by: 1)
@@ -146,35 +176,62 @@ struct SalaryCalendarView: View {
             Image(systemName: systemImage)
                 .font(.system(size: 16, weight: .black))
                 .foregroundStyle(AppTheme.ink)
-                .frame(width: 42, height: 38)
+                .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle(scale: 0.9, reduceMotion: prefersReducedMotion))
         .accessibilityLabel(label)
     }
 
     private var monthSummaryCard: some View {
         ComicCard(background: AppTheme.cream, radius: 20, padding: 14) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(L10n.t("本月已赚"))
-                        .font(.subheadline.weight(.black))
-                        .foregroundStyle(AppTheme.textGray)
-                    Text(PrivacyText.money(monthSummary.earnedAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
-                        .font(.system(size: 34, weight: .black, design: .rounded))
-                        .foregroundStyle(AppTheme.ink)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.58)
-                    Text(L10n.t("按每日计薪快照汇总"))
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(AppTheme.textGray)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(L10n.t("本月已赚"))
+                            .font(.subheadline.weight(.black))
+                            .foregroundStyle(AppTheme.textGray)
+                        Text(PrivacyText.money(monthSummary.earnedAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                            .font(.system(size: 34, weight: .black, design: .rounded))
+                            .foregroundStyle(AppTheme.ink)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.58)
+                        Text(L10n.t("按每日计薪快照汇总"))
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                AssetImage(name: AppTheme.statsCoinWorkerAsset)
-                    .frame(width: 118, height: 86)
-                    .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottomTrailing)
-                    .accessibilityHidden(true)
+                    AssetImage(name: AppTheme.statsCoinWorkerAsset)
+                        .frame(width: 118, height: 86)
+                        .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottomTrailing)
+                        .accessibilityHidden(true)
+                }
+
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack {
+                        Text(L10n.t("本月预计"))
+                            .font(.caption.weight(.black))
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                            .foregroundStyle(AppTheme.textGray)
+                        Spacer()
+                        Text(PrivacyText.compactMoney(monthSummary.projectedAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                            .font(.caption.weight(.black))
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                            .foregroundStyle(AppTheme.ink)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.62)
+                    }
+                    ComicProgressBar(progress: monthSummary.projectedAmount > 0 ? monthSummary.earnedAmount / monthSummary.projectedAmount : 0)
+                }
+                .padding(10)
+                .background(AppTheme.paper.opacity(0.7))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(AppTheme.outline.opacity(0.9), lineWidth: 1.1)
+                }
             }
         }
     }
@@ -183,9 +240,10 @@ struct SalaryCalendarView: View {
         ComicCard(background: AppTheme.cream.opacity(0.72), radius: 20, padding: 10) {
             VStack(spacing: 9) {
                 LazyVGrid(columns: calendarColumns, spacing: 7) {
-                    ForEach(weekdaySymbols, id: \.self) { symbol in
+                    ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                         Text(symbol)
                             .font(.caption2.weight(.black))
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                             .foregroundStyle(AppTheme.textGray)
                             .frame(maxWidth: .infinity)
                     }
@@ -203,6 +261,7 @@ struct SalaryCalendarView: View {
                 legend
             }
         }
+        .sensoryFeedback(.selection, trigger: selectedDate)
     }
 
     private var calendarColumns: [GridItem] {
@@ -232,13 +291,14 @@ struct SalaryCalendarView: View {
         let day = appState.salaryCalendarDay(for: date)
         let isSelected = Calendar.current.isDate(date, inSameDayAs: selectedDate)
         return Button {
-            withAnimation(.spring(response: 0.22, dampingFraction: 0.84)) {
+            withAnimation(prefersReducedMotion ? nil : .spring(response: 0.22, dampingFraction: 0.84)) {
                 selectedDate = date
             }
         } label: {
             VStack(spacing: 3) {
                 Text(date.salaryCalendarDayNumber)
                     .font(.caption.weight(.black))
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     .foregroundStyle(AppTheme.ink)
 
                 Text(calendarCellCaption(for: day))
@@ -261,8 +321,9 @@ struct SalaryCalendarView: View {
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle(scale: 0.95))
         .accessibilityLabel(dayAccessibilityLabel(day))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private func calendarCellCaption(for day: SalaryCalendarDay) -> String {
@@ -294,10 +355,12 @@ struct SalaryCalendarView: View {
                 HStack(spacing: 8) {
                     Text(L10n.t("当日明细"))
                         .font(.headline.weight(.black))
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     Spacer()
                     if selectedDay.isEstimated {
                         Text(L10n.t("估算"))
                             .font(.caption2.weight(.black))
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(AppTheme.cream)
@@ -305,6 +368,7 @@ struct SalaryCalendarView: View {
                     }
                     Text(selectedDate.salaryCalendarDayText)
                         .font(.caption.weight(.black))
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                         .foregroundStyle(AppTheme.textGray)
                     SalaryDayKindBadge(kind: selectedDay.kind)
                 }
@@ -312,40 +376,79 @@ struct SalaryCalendarView: View {
                 .padding(.vertical, 12)
                 .background(AppTheme.coin.opacity(0.34))
 
-                HStack(spacing: 0) {
-                    dayMetric(
-                        title: selectedDay.isFuture ? L10n.t("预计日薪") : L10n.t("当日已赚"),
-                        value: PrivacyText.compactMoney(
-                            selectedDay.isFuture ? selectedDay.scheduledAmount : selectedDay.earnedAmount,
-                            hidden: hidesSensitiveAmounts,
-                            currencySymbol: currencySymbol
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(spacing: 10) {
+                        accessibilityDayMetric(
+                            title: selectedDay.isFuture ? L10n.t("预计日薪") : L10n.t("当日已赚"),
+                            value: selectedDayAmountText
                         )
-                    )
-                    Divider().frame(height: 46).overlay(AppTheme.divider)
-                    dayMetric(title: L10n.t("加班时长"), value: selectedDayOvertime.totalSeconds.salaryCalendarOvertimeText)
-                    Divider().frame(height: 46).overlay(AppTheme.divider)
-                    dayMetric(title: L10n.t("备注"), value: selectedDay.note.isEmpty ? L10n.t("无") : selectedDay.note)
-
-                    Button {
-                        editingDay = selectedDay
-                    } label: {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 15, weight: .black))
-                            .foregroundStyle(AppTheme.ink)
-                            .frame(width: 36, height: 36)
-                            .background(AppTheme.coin)
-                            .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                    .stroke(AppTheme.outline, lineWidth: 1)
-                            }
+                        Divider().overlay(AppTheme.divider)
+                        accessibilityDayMetric(title: L10n.t("加班时长"), value: selectedDayOvertime.totalSeconds.salaryCalendarOvertimeText)
+                        Divider().overlay(AppTheme.divider)
+                        accessibilityDayMetric(title: L10n.t("备注"), value: selectedDay.note.isEmpty ? L10n.t("无") : selectedDay.note)
+                        editSelectedDayButton(expanded: true)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(L10n.t("编辑当日记录"))
-                    .padding(.trailing, 12)
+                    .padding(14)
+                } else {
+                    HStack(spacing: 0) {
+                        dayMetric(
+                            title: selectedDay.isFuture ? L10n.t("预计日薪") : L10n.t("当日已赚"),
+                            value: selectedDayAmountText
+                        )
+                        Divider().frame(height: 46).overlay(AppTheme.divider)
+                        dayMetric(title: L10n.t("加班时长"), value: selectedDayOvertime.totalSeconds.salaryCalendarOvertimeText)
+                        Divider().frame(height: 46).overlay(AppTheme.divider)
+                        dayMetric(title: L10n.t("备注"), value: selectedDay.note.isEmpty ? L10n.t("无") : selectedDay.note)
+                        editSelectedDayButton(expanded: false)
+                            .padding(.trailing, 12)
+                    }
+                    .padding(.vertical, 13)
                 }
-                .padding(.vertical, 13)
             }
+        }
+    }
+
+    private var selectedDayAmountText: String {
+        PrivacyText.compactMoney(
+            selectedDay.isFuture ? selectedDay.scheduledAmount : selectedDay.earnedAmount,
+            hidden: hidesSensitiveAmounts,
+            currencySymbol: currencySymbol
+        )
+    }
+
+    private func editSelectedDayButton(expanded: Bool) -> some View {
+        Button {
+            editingDay = selectedDay
+        } label: {
+            Text(expanded ? L10n.t("编辑当日记录") : L10n.t("编辑"))
+                .font(.caption.weight(.black))
+                .foregroundStyle(AppTheme.ink)
+                .lineLimit(1)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .padding(.horizontal, 11)
+                .frame(maxWidth: expanded ? .infinity : nil)
+                .frame(height: 44)
+                .background(AppTheme.coin)
+                .clipShape(Capsule())
+                .overlay {
+                    Capsule().stroke(AppTheme.outline, lineWidth: 1)
+                }
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.95))
+        .accessibilityLabel(L10n.t("编辑当日记录"))
+    }
+
+    private func accessibilityDayMetric(title: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(title)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(AppTheme.textGray)
+            Spacer(minLength: 8)
+            Text(value)
+                .font(.headline.weight(.black))
+                .foregroundStyle(AppTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.68)
         }
     }
 
@@ -370,7 +473,7 @@ struct SalaryCalendarView: View {
                 AssetImage(name: "coin_single_v1")
                     .frame(width: 42, height: 42)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(L10n.t("本月预计"))
+                    Text(L10n.t("本月概览"))
                         .font(.caption.weight(.bold))
                         .foregroundStyle(AppTheme.textGray)
                     Text(PrivacyText.compactMoney(monthSummary.projectedAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
@@ -383,6 +486,11 @@ struct SalaryCalendarView: View {
                         .foregroundStyle(AppTheme.textGray)
                     Text(L10n.t("%@ 天", "\(monthSummary.paidDayCount)"))
                         .font(.headline.weight(.black))
+                    if monthSummary.estimatedDayCount > 0 {
+                        Text(L10n.t("估算") + " " + "\(monthSummary.estimatedDayCount)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                    }
                 }
             }
         }
@@ -395,13 +503,24 @@ struct SalaryCalendarView: View {
 
     private func moveMonth(by value: Int) {
         guard let newMonth = Calendar.current.date(byAdding: .month, value: value, to: monthAnchor) else { return }
-        withAnimation(.spring(response: 0.24, dampingFraction: 0.86)) {
+        withAnimation(prefersReducedMotion ? nil : .spring(response: 0.24, dampingFraction: 0.86)) {
             monthAnchor = monthStart(for: newMonth)
             if Calendar.current.isDate(monthAnchor, equalTo: appState.now, toGranularity: .month) {
                 selectedDate = Calendar.current.startOfDay(for: appState.now)
             } else {
                 selectedDate = monthAnchor
             }
+        }
+    }
+
+    private var isViewingCurrentMonth: Bool {
+        Calendar.current.isDate(monthAnchor, equalTo: appState.now, toGranularity: .month)
+    }
+
+    private func jumpToToday() {
+        withAnimation(prefersReducedMotion ? nil : .spring(response: 0.24, dampingFraction: 0.86)) {
+            monthAnchor = monthStart(for: appState.now)
+            selectedDate = Calendar.current.startOfDay(for: appState.now)
         }
     }
 
@@ -412,6 +531,7 @@ struct SalaryCalendarView: View {
 
 private struct SalaryDayEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let day: SalaryCalendarDay
     let defaultKind: SalaryDayKind
     let save: (SalaryDayKind, String) -> Void
@@ -454,7 +574,7 @@ private struct SalaryDayEditorSheet: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(L10n.t("日期状态"))
                             .font(.headline.weight(.black))
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 2), spacing: 10) {
+                        LazyVGrid(columns: editorColumns, spacing: 10) {
                             ForEach(SalaryDayKind.allCases) { kind in
                                 Button {
                                     selectedKind = kind
@@ -466,10 +586,6 @@ private struct SalaryDayEditorSheet: View {
                                         Text(kind.title)
                                             .font(.subheadline.weight(.black))
                                         Spacer()
-                                        if selectedKind == kind {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .foregroundStyle(AppTheme.ink)
-                                        }
                                     }
                                     .foregroundStyle(AppTheme.ink)
                                     .padding(12)
@@ -480,9 +596,13 @@ private struct SalaryDayEditorSheet: View {
                                             .stroke(AppTheme.outline, lineWidth: selectedKind == kind ? 1.4 : 1)
                                     }
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(PayJoyPressStyle(scale: 0.97))
+                                .accessibilityLabel(kind.title)
+                                .accessibilityValue(selectedKind == kind ? L10n.t("已选择") : L10n.t("未选择"))
+                                .accessibilityAddTraits(selectedKind == kind ? .isSelected : [])
                             }
                         }
+                        .sensoryFeedback(.selection, trigger: selectedKind)
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
@@ -516,9 +636,9 @@ private struct SalaryDayEditorSheet: View {
                                     .stroke(AppTheme.outline, lineWidth: 1.3)
                             }
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PayJoyPressStyle(scale: 0.98))
 
-                    if day.kind != defaultKind || !day.note.isEmpty {
+                    if day.hasSavedRecord {
                         Button(L10n.t("恢复默认排班")) {
                             restore()
                             dismiss()
@@ -543,6 +663,13 @@ private struct SalaryDayEditorSheet: View {
             }
         }
     }
+
+    private var editorColumns: [GridItem] {
+        Array(
+            repeating: GridItem(.flexible(), spacing: 10),
+            count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
+        )
+    }
 }
 
 private struct SalaryDayKindBadge: View {
@@ -555,6 +682,7 @@ private struct SalaryDayKindBadge: View {
                 .frame(width: 8, height: 8)
             Text(kind.title)
                 .font(.caption.weight(.black))
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         }
         .foregroundStyle(AppTheme.ink)
         .padding(.horizontal, 9)

@@ -93,6 +93,13 @@ struct WidgetColors {
         }
     }
 
+    static func personalGoalWorkerAsset(for theme: AppVisualTheme = current) -> String {
+        switch theme {
+        case .classic: "payday_goal_worker_original_v1"
+        case .pink, .luckyCat, .midnight: moyuWorkerAsset(for: theme)
+        }
+    }
+
     static func liveWorkerAsset(for theme: AppVisualTheme = current) -> String {
         switch theme {
         case .classic: "widget_desk_worker_original"

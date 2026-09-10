@@ -1,0 +1,13 @@
+{
+  "images" : [
+    {
+      "filename" : "payday_rocket_midnight_v1.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

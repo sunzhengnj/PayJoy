@@ -24,5 +24,8 @@ artifacts/
 .xcodebuildmcp/
 
 # Local QA / screenshot outputs
+.audit/
+.codex-artifacts/
+.codex-derived-data*/
 AppStoreScreenshots/
 design-qa.md
