@@ -147,6 +147,7 @@ struct StatsView: View {
                         .frame(width: 74, height: 54)
                         .scaleEffect(AppTheme.cardArtworkScale, anchor: .bottom)
                         .offset(x: -32, y: -49)
+                        .comicIdleBob(enabled: !prefersReducedMotion, amplitude: 3, rotation: 1.6, duration: 2.6)
                         .zIndex(2)
                 }
             }
@@ -1287,23 +1288,36 @@ private struct SalaryAchievementCompactEntry: View {
     let badges: [SalaryBadge]
     @State private var showsAll = false
 
+    private var collectedCount: Int {
+        badges.filter(\.isUnlocked).count
+    }
+
+    private var previewBadges: [SalaryBadge] {
+        let collected = badges.filter(\.isUnlocked)
+        if !collected.isEmpty {
+            return Array(collected.prefix(3))
+        }
+        return Array(badges.prefix(3))
+    }
+
     var body: some View {
         Button {
             showsAll = true
         } label: {
             let layout = dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
-                : AnyLayout(HStackLayout(spacing: 13))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: 13))
             layout {
-                SalaryAchievementMedalArtwork(badge: badges.first, size: 64)
+                SalaryAchievementPinStack(badges: previewBadges, size: dynamicTypeSize.isAccessibilitySize ? 48 : 40)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 5) {
                     Text(L10n.t("开薪成就"))
                         .font(.headline.weight(.black))
                         .foregroundStyle(AppTheme.ink)
-                    Text(L10n.format("已收下 %@ 份小成就", "\(badges.filter(\.isUnlocked).count)"))
+                    Text(L10n.format("已收下 %@ 份小成就", "\(collectedCount)"))
                         .font(.caption.weight(.bold))
                         .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if !dynamicTypeSize.isAccessibilitySize {
                     Spacer(minLength: 4)
@@ -1314,8 +1328,11 @@ private struct SalaryAchievementCompactEntry: View {
             }
             .padding(14)
             .background(AppTheme.cream)
-            .clipShape(RoundedRectangle(cornerRadius: 19))
-            .overlay(RoundedRectangle(cornerRadius: 19).stroke(AppTheme.outline, lineWidth: 1.4))
+            .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 19, style: .continuous)
+                    .stroke(AppTheme.outline, lineWidth: 1.4)
+            }
         }
         .buttonStyle(PayJoyPressStyle())
         .sheet(isPresented: $showsAll) {
@@ -1337,41 +1354,77 @@ private struct SalaryAchievementCompactEntry: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
-        .accessibilityLabel(L10n.format("已收下 %@ 份小成就", "\(badges.filter(\.isUnlocked).count)"))
+        .accessibilityLabel(L10n.format("已收下 %@ 份小成就", "\(collectedCount)"))
         .accessibilityHint(L10n.t("查看全部成就"))
     }
 }
 
-private struct SalaryAchievementCard: View {
+private struct SalaryAchievementPinStack: View {
+    let badges: [SalaryBadge]
+    let size: CGFloat
+
+    var body: some View {
+        HStack(spacing: -size * 0.28) {
+            ForEach(Array(badges.enumerated()), id: \.element.id) { index, badge in
+                SalaryAchievementMedalArtwork(badge: badge, size: size, showsProgress: false)
+                    .zIndex(Double(badges.count - index))
+            }
+        }
+        .padding(.trailing, size * 0.12)
+    }
+}
+
+struct SalaryAchievementCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let badges: [SalaryBadge]
     @State private var selectedBadge: SalaryBadge?
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            let headerLayout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
-                : AnyLayout(HStackLayout(spacing: 14))
-            headerLayout {
-                SalaryAchievementMedalArtwork(badge: badges.first, size: 86)
-                VStack(alignment: .leading, spacing: 7) {
-                    Text(L10n.format("已收下 %@ 份小成就", "\(badges.filter(\.isUnlocked).count)"))
-                        .font(.title3.weight(.black))
-                        .foregroundStyle(AppTheme.ink)
-                    Text(L10n.t("一点点进展，也值得收下。"))
-                        .font(.subheadline)
-                        .foregroundStyle(AppTheme.textGray)
-                }
-            }
+    private var collectedCount: Int {
+        badges.filter(\.isUnlocked).count
+    }
 
-            LazyVGrid(
-                columns: dynamicTypeSize.isAccessibilitySize
-                    ? [GridItem(.flexible())]
-                    : [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)],
-                spacing: 18
-            ) {
-                ForEach(badges) { badge in
-                    achievementMedal(badge)
+    private var groupedBadges: [(SalaryBadgeFamily, [SalaryBadge])] {
+        SalaryBadgeFamily.allCases.compactMap { family in
+            let items = badges
+                .filter { $0.family == family }
+                .sorted {
+                    if $0.isUnlocked != $1.isUnlocked {
+                        return $0.isUnlocked && !$1.isUnlocked
+                    }
+                    return $0.progress > $1.progress
+                }
+            return items.isEmpty ? nil : (family, items)
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            collectionHeader
+
+            ForEach(groupedBadges, id: \.0) { family, items in
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(family.title)
+                            .font(.headline.weight(.black))
+                            .foregroundStyle(AppTheme.ink)
+                        Spacer(minLength: 8)
+                        Text("\(items.filter(\.isUnlocked).count)/\(items.count)")
+                            .font(.caption.weight(.black))
+                            .foregroundStyle(AppTheme.textGray)
+                            .monospacedDigit()
+                    }
+                    .accessibilityElement(children: .combine)
+
+                    LazyVGrid(
+                        columns: dynamicTypeSize.isAccessibilitySize
+                            ? [GridItem(.flexible())]
+                            : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+                        spacing: 12
+                    ) {
+                        ForEach(items) { badge in
+                            achievementMedal(badge)
+                        }
+                    }
                 }
             }
         }
@@ -1382,78 +1435,101 @@ private struct SalaryAchievementCard: View {
         }
     }
 
+    private var collectionHeader: some View {
+        let headerLayout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
+        return headerLayout {
+            SalaryAchievementPinStack(
+                badges: Array(badges.filter(\.isUnlocked).prefix(3)).nilIfEmpty ?? Array(badges.prefix(3)),
+                size: dynamicTypeSize.isAccessibilitySize ? 56 : 50
+            )
+            VStack(alignment: .leading, spacing: 7) {
+                Text(L10n.format("已收下 %@ 份小成就", "\(collectedCount)"))
+                    .font(.title3.weight(.black))
+                    .foregroundStyle(AppTheme.ink)
+                Text(L10n.t("一点点进展，也值得收下。"))
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.textGray)
+            }
+        }
+    }
+
     private func achievementMedal(_ badge: SalaryBadge) -> some View {
         Button {
             selectedBadge = badge
         } label: {
-            VStack(spacing: 8) {
-                SalaryAchievementMedalArtwork(badge: badge, size: dynamicTypeSize.isAccessibilitySize ? 112 : 104)
+            VStack(spacing: 10) {
+                SalaryAchievementPinPlate(badge: badge, size: dynamicTypeSize.isAccessibilitySize ? 118 : 96)
                 Text(badge.title)
                     .font(.subheadline.weight(.black))
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.78)
                 Text(badge.isUnlocked ? L10n.t("已收下") : L10n.t("慢慢来，也很好"))
                     .font(.caption2.weight(.black))
                     .foregroundStyle(badge.isUnlocked ? AppTheme.ink : AppTheme.textGray)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 4)
-            .contentShape(Rectangle())
+            .padding(.horizontal, 10)
+            .padding(.top, 14)
+            .padding(.bottom, 12)
+            .background(badge.isUnlocked ? AppTheme.highlightCardBackground : AppTheme.cream)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(AppTheme.outline, lineWidth: 1.4)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PayJoyPressStyle(scale: 0.98))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(badge.title)
-        .accessibilityValue(badge.isUnlocked ? L10n.t("已收下") : "\(Int(badge.progress * 100))%")
+        .accessibilityValue(badge.isUnlocked ? L10n.t("已收下") : "\(Int((badge.progress * 100).rounded()))%")
+    }
+}
+
+private struct SalaryAchievementPinPlate: View {
+    let badge: SalaryBadge
+    let size: CGFloat
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(AppTheme.paper.opacity(badge.isUnlocked ? 0.92 : 0.64))
+            Circle()
+                .stroke(AppTheme.outline.opacity(0.55), style: StrokeStyle(lineWidth: 1.2, dash: [4, 3]))
+            if badge.isUnlocked {
+                Circle()
+                    .stroke(AppTheme.coin.opacity(0.55), lineWidth: 3)
+                    .padding(3)
+            } else {
+                Circle()
+                    .trim(from: 0, to: badge.progress)
+                    .stroke(AppTheme.orange, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .padding(3)
+            }
+            SalaryAchievementMedalArtwork(badge: badge, size: size * 0.82, showsProgress: false)
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 }
 
 private struct SalaryAchievementMedalArtwork: View {
     let badge: SalaryBadge?
-    let size: CGFloat
-
-    private var asset: String {
-        switch badge?.id {
-        case "first-payday": return "achievement_first_payday_v1"
-        case "workweek-earned": return "achievement_workweek_earned_v1"
-        case "month-halfway": return "achievement_month_halfway_v1"
-        case "month-quarter": return "achievement_month_quarter_v1"
-        case "month-three-quarter": return "achievement_month_three_quarter_v1"
-        case "month-finish": return "achievement_month_finish_v1"
-        case "payday-direction": return "achievement_payday_direction_v1"
-        case "goal-reached": return "achievement_goal_reached_v1"
-        case "goal-halfway": return "achievement_month_quarter_v1"
-        case "goal-sprint": return "achievement_month_three_quarter_v1"
-        case "calendar-caretaker": return "achievement_workweek_earned_v1"
-        case "calendar-week": return "achievement_month_quarter_v1"
-        case "calendar-collector": return "achievement_goal_reached_v1"
-        case "calendar-month": return "achievement_month_three_quarter_v1"
-        case "calendar-archivist": return "achievement_month_finish_v1"
-        case "calendar-grandmaster": return "achievement_payday_direction_v1"
-        case "calendar-vault": return "achievement_first_payday_v1"
-        case "calendar-yearbook": return "achievement_goal_reached_v1"
-        case "calendar-note": return "achievement_workweek_earned_v1"
-        case "calendar-journal": return "achievement_month_halfway_v1"
-        case "schedule-owner", "paid-leave": return "achievement_month_halfway_v1"
-        case "schedule-master", "rest-planner": return "achievement_goal_reached_v1"
-        case "schedule-director": return "achievement_payday_direction_v1"
-        case "overtime-starter", "weekend-shift": return "achievement_month_quarter_v1"
-        case "overtime-advanced", "weekend-regular": return "achievement_month_three_quarter_v1"
-        case "overtime-hero", "weekend-veteran": return "achievement_month_finish_v1"
-        case "overtime-marathon": return "achievement_payday_direction_v1"
-        case "overtime-logbook": return "achievement_workweek_earned_v1"
-        case "overtime-ledger": return "achievement_goal_reached_v1"
-        default: return "achievement_first_payday_v1"
-        }
-    }
+    var size: CGFloat
+    var showsProgress = true
 
     var body: some View {
-        AssetImage(name: asset)
+        AssetImage(name: badge?.artworkName ?? "achievement_first_payday_v1")
             .frame(width: size, height: size)
-            .saturation(badge?.isUnlocked == true ? 1 : 0)
-            .opacity(badge?.isUnlocked == true ? 1 : 0.42)
+            .saturation(badge?.isUnlocked == true ? 1 : 0.86)
+            .opacity(badge?.isUnlocked == true ? 1 : 0.62)
             .overlay {
-                if badge?.isUnlocked == false, let badge {
+                if showsProgress, badge?.isUnlocked == false, let badge {
                     Circle()
                         .trim(from: 0, to: badge.progress)
                         .stroke(AppTheme.orange, style: StrokeStyle(lineWidth: 3, lineCap: .round))
@@ -1461,27 +1537,33 @@ private struct SalaryAchievementMedalArtwork: View {
                         .padding(size * 0.08)
                 }
             }
-        .accessibilityHidden(true)
+            .accessibilityHidden(true)
     }
 }
 
 private struct SalaryBadgeDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let badge: SalaryBadge
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 22) {
-                    SalaryAchievementMedalArtwork(badge: badge, size: 210)
-                    Text(badge.title)
-                        .font(.title.weight(.black))
-                        .foregroundStyle(AppTheme.ink)
-                    Text(badge.isUnlocked ? L10n.t("已收下") : L10n.t("慢慢来，也很好"))
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(AppTheme.textGray)
+                VStack(spacing: 20) {
+                    SalaryAchievementPinPlate(badge: badge, size: dynamicTypeSize.isAccessibilitySize ? 196 : 228)
+                    VStack(spacing: 8) {
+                        Text(badge.title)
+                            .font(.title.weight(.black))
+                            .foregroundStyle(AppTheme.ink)
+                        Text(badge.isUnlocked ? L10n.t("已收下") : L10n.t("慢慢来，也很好"))
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                    }
                     ComicCard(background: AppTheme.cream, padding: 18) {
                         VStack(alignment: .leading, spacing: 12) {
+                            Text(badge.family.title)
+                                .font(.caption.weight(.black))
+                                .foregroundStyle(AppTheme.textGray)
                             Text(badge.subtitle)
                                 .font(.subheadline.weight(.bold))
                                 .foregroundStyle(AppTheme.ink)
@@ -1510,6 +1592,12 @@ private struct SalaryBadgeDetailSheet: View {
                 }
             }
         }
+    }
+}
+
+private extension Array {
+    var nilIfEmpty: [Element]? {
+        isEmpty ? nil : self
     }
 }
 

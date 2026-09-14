@@ -1,6 +1,6 @@
 # App Store metadata — English (U.S.)
 
-Updated: 2026-08-12
+Updated: 2026-09-14
 
 `ClockJoy` is the confirmed public name for the U.S. release. Keep the existing bundle ID, App Group, CloudKit container, StoreKit product IDs, repository paths, and internal Swift type names unchanged.
 
@@ -14,11 +14,11 @@ Updated: 2026-08-12
 
 ## Keywords
 
-98/100 bytes, comma-separated with no spaces:
+100/100 bytes, comma-separated with no spaces:
 
-`salary,wage,hourly,paycheck,income,overtime,clock,out,job,focus,motivation,desk,office,reward,goal`
+`salary,wage,hourly,paycheck,income,overtime,lock,screen,shift,live,activity,clock,out,goal,job,focus`
 
-Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `widgets`, `work`, or `timer` to the keyword field because those terms already appear in the name or subtitle. Do not use `PayJoy`, competitor names, or unrelated financial terms.
+Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `widgets`, `work`, or `timer` to the keyword field because those terms already appear in the name or subtitle. `lock,screen` and `live,activity` cover Lock Screen and Live Activities as two-token searches. Do not use `PayJoy`, competitor names, or unrelated financial terms.
 
 ## Promotional text
 

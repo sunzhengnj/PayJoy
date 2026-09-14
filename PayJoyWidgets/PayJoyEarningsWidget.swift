@@ -113,13 +113,17 @@ struct PayJoyEarningsWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PayJoyWidgetProvider()) { entry in
             PayJoyWidgetView(entry: entry)
-                .containerBackground(for: .widget) {
-                    WidgetColors.paper
-                }
         }
         .configurationDisplayName(L10n.t("开薪实时收入"))
         .description(L10n.t("不用打开 App，也能看到今天赚了多少。"))
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .accessoryCircular,
+            .accessoryRectangular,
+            .accessoryInline
+        ])
     }
 }
 
@@ -136,24 +140,144 @@ struct PayJoyWidgetView: View {
     }
 
     var body: some View {
-        ZStack {
-            WidgetColors.paper
-            if let offDutySecondsUntilWorkStart = entry.offDutySecondsUntilWorkStart {
-                offDutyWidget(secondsUntilWorkStart: offDutySecondsUntilWorkStart)
+        Group {
+            if isAccessoryFamily {
+                accessoryWidget
+                    .widgetAccentable()
             } else {
-                switch family {
-                case .systemSmall:
-                    smallWidget
-                case .systemLarge:
-                    largeWidget
-                default:
-                    mediumWidget
+                ZStack {
+                    WidgetColors.paper
+                    if let offDutySecondsUntilWorkStart = entry.offDutySecondsUntilWorkStart {
+                        offDutyWidget(secondsUntilWorkStart: offDutySecondsUntilWorkStart)
+                    } else {
+                        switch family {
+                        case .systemSmall:
+                            smallWidget
+                        case .systemLarge:
+                            largeWidget
+                        default:
+                            mediumWidget
+                        }
+                    }
                 }
+                .foregroundStyle(WidgetColors.ink)
+                .widgetAccentable(false)
             }
         }
-        .foregroundStyle(WidgetColors.ink)
-        .widgetAccentable(false)
         .unredacted()
+        .containerBackground(for: .widget) {
+            if isAccessoryFamily {
+                AccessoryWidgetBackground()
+            } else {
+                WidgetColors.paper
+            }
+        }
+    }
+
+    private var isAccessoryFamily: Bool {
+        switch family {
+        case .accessoryCircular, .accessoryRectangular, .accessoryInline:
+            true
+        default:
+            false
+        }
+    }
+
+    @ViewBuilder
+    private var accessoryWidget: some View {
+        switch family {
+        case .accessoryCircular:
+            accessoryCircularWidget
+        case .accessoryInline:
+            Text(accessoryInlineText)
+                .font(.headline.weight(.black))
+        default:
+            accessoryRectangularWidget
+        }
+    }
+
+    private var accessoryCircularWidget: some View {
+        Gauge(value: accessoryProgress) {
+            Text(accessoryShortTime)
+                .font(.system(size: 11, weight: .black, design: .rounded))
+                .minimumScaleFactor(0.55)
+                .lineLimit(1)
+        } currentValueLabel: {
+            Text(accessoryShortTime)
+                .font(.system(size: 11, weight: .black, design: .rounded))
+                .minimumScaleFactor(0.55)
+                .lineLimit(1)
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .accessibilityLabel(accessoryAccessibilityLabel)
+    }
+
+    private var accessoryRectangularWidget: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(accessoryTitle)
+                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .lineLimit(1)
+            Text(accessoryShortTime)
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            Text("\(Int(accessoryProgress * 100))%")
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessoryAccessibilityLabel)
+    }
+
+    private var accessoryProgress: Double {
+        if entry.offDutySecondsUntilWorkStart != nil { return 1 }
+        switch entry.snapshot.status {
+        case .afterWork, .restDay:
+            return entry.snapshot.status == .afterWork ? 1 : 0
+        default:
+            return min(1, max(0, entry.snapshot.progress))
+        }
+    }
+
+    private var accessoryTitle: String {
+        if entry.offDutySecondsUntilWorkStart != nil {
+            return L10n.t("下次上班")
+        }
+        switch entry.snapshot.status {
+        case .afterWork:
+            return L10n.t("今日到账")
+        case .restDay:
+            return L10n.t("休息日")
+        case .lunchBreak:
+            return L10n.t("午休暂停")
+        case .beforeWork:
+            return L10n.t("钱包热身中")
+        case .working:
+            return L10n.t("下班倒计时")
+        }
+    }
+
+    private var accessoryShortTime: String {
+        if let offDuty = entry.offDutySecondsUntilWorkStart {
+            return offDuty.shortCountdownText
+        }
+        switch entry.snapshot.status {
+        case .afterWork:
+            return L10n.t("收工")
+        case .restDay:
+            return L10n.t("休息")
+        default:
+            return entry.snapshot.secondsUntilOffWork.shortCountdownText
+        }
+    }
+
+    private var accessoryInlineText: String {
+        "\(accessoryTitle) \(accessoryShortTime)"
+    }
+
+    private var accessoryAccessibilityLabel: String {
+        "\(accessoryTitle)，\(accessoryShortTime)，\(Int(accessoryProgress * 100))%"
     }
 
     @ViewBuilder

@@ -146,7 +146,7 @@ private struct WeeklyPayRhythmNode: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(weekdayTitle) \(Calendar.current.component(.day, from: day.date))，\(day.kind.title)")
-        .accessibilityValue("\(Int(day.progress * 100))%")
+        .accessibilityValue("\(Int((day.progress * 100).rounded()))%")
     }
 
     private var weekdayTitle: String {

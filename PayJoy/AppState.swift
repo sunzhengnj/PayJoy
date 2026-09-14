@@ -482,6 +482,17 @@ final class AppState {
         calculator.isPayday(now, settings: settings)
     }
 
+    var paydaySoonDays: Int? {
+        guard settings.paydayDay != nil,
+              !isTodayPayday,
+              activeOvertimeRecord == nil,
+              snapshot.status != .restDay,
+              !shouldShowWeeklyEcho else { return nil }
+        guard let days = calculator.daysUntilPayday(from: now, settings: settings),
+              (1...7).contains(days) else { return nil }
+        return days
+    }
+
     var todayPaydayAmount: Double {
         salaryMonthSummary(for: now).actualAmount ?? salaryMonthSummary(for: now).projectedAmount
     }
@@ -621,7 +632,7 @@ final class AppState {
     }
 
     var canCreateWish: Bool {
-        hasEffectivePro || activeWishes.count < 3
+        hasEffectivePro || activeWishes.count < 2
     }
 
     @discardableResult
@@ -637,7 +648,7 @@ final class AppState {
         let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedTitle.isEmpty, canCreateWish else { return nil }
 
-        let canBecomeActive = activeWishes.count < 3
+        let canBecomeActive = hasEffectivePro || activeWishes.count < 2
         let shouldFocus = canBecomeActive && focusedWish == nil
         let wish = WishExperience(
             title: cleanedTitle,
@@ -667,7 +678,8 @@ final class AppState {
         guard let index = wishExperiences.firstIndex(where: { $0.id == id }) else { return }
         if status == .active,
            !wishExperiences[index].isActive,
-           activeWishes.count >= 3 {
+           !hasEffectivePro,
+           activeWishes.count >= 2 {
             return
         }
         wishExperiences[index].status = status
@@ -1184,13 +1196,15 @@ final class AppState {
     private static var screenshotNow: Date {
         let calendarScreen = screenshotScreen == "calendar"
         let afterMidnightScreen = screenshotScreen == "home-after-midnight"
+        let restDayScreen = screenshotScreen == "home-rest-day"
+        let weeklyEchoScreen = screenshotScreen == "weekly-echo"
         var components = DateComponents()
         components.calendar = Calendar(identifier: .gregorian)
         components.timeZone = TimeZone(identifier: "Asia/Shanghai")
         components.year = 2026
         components.month = calendarScreen ? 7 : 6
-        components.day = calendarScreen ? 14 : 3
-        components.hour = afterMidnightScreen ? 0 : 15
+        components.day = calendarScreen ? 14 : (restDayScreen ? 7 : (weeklyEchoScreen ? 5 : 3))
+        components.hour = afterMidnightScreen ? 0 : (weeklyEchoScreen ? 19 : 15)
         components.minute = afterMidnightScreen ? 18 : 24
         return components.date ?? Date()
     }
@@ -1234,10 +1248,15 @@ final class AppState {
             showCoinRain: true,
             reduceMotion: true,
             showDecimalCents: true,
-            isProUnlocked: ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_PRO_LOCKED"] != "1",
+            isProUnlocked: !screenshotProLocked,
             hideSensitiveAmounts: screenshotScreen == "privacy" ||
                 ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_HIDE_AMOUNTS"] == "1",
             hasCompletedInitialSetup: true,
+            unlockedBadgeIDs: [
+                "first-payday", "workweek-earned", "month-quarter", "payday-direction",
+                "calendar-caretaker", "calendar-week", "calendar-collector", "calendar-note",
+                "schedule-owner", "paid-leave", "overtime-starter", "overtime-logbook", "weekend-shift"
+            ],
             appLockEnabled: false,
             appLockPasscodeSalt: nil,
             appLockPasscodeHash: nil
@@ -1269,7 +1288,7 @@ final class AppState {
             ]
         }
 
-        if screenshotScreen == "home-after-midnight" {
+        if screenshotScreen == "home-after-midnight" || screenshotScreen == "home-rest-day" || screenshotScreen == "weekly-echo" {
             return []
         }
 
@@ -1372,7 +1391,27 @@ final class AppState {
 
     private static var screenshotEngagementState: EngagementState {
         let receipts: [ClosingCapsule]
-        if screenshotScreen == "closing-receipt-complete" {
+        if screenshotScreen == "weekly-echo" {
+            let weekdays = ["2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05"]
+            receipts = weekdays.enumerated().map { index, dateKey in
+                ClosingCapsule(
+                    id: "screenshot-weekly-echo-\(index)",
+                    dateKey: dateKey,
+                    createdAt: screenshotNow.addingTimeInterval(TimeInterval(index - weekdays.count) * 86_400),
+                    messageIndex: index,
+                    earnedAmount: 720 + Double(index) * 28,
+                    currencyCode: screenshotSettings.currencyCode,
+                    workProgress: 0.72 + Double(index) * 0.06,
+                    wishProgress: 0.31,
+                    wishID: screenshotWishExperiences.first?.id,
+                    wishTitle: screenshotWishExperiences.first?.title,
+                    companionID: CompanionProfile.defaultValue.id,
+                    mood: DailyMood.allCases[index % DailyMood.allCases.count],
+                    tone: .gentle,
+                    revealsSalary: false
+                )
+            }
+        } else if screenshotScreen == "closing-receipt-complete" {
             receipts = [
                 ClosingCapsule(
                     id: "screenshot-closing-receipt",
@@ -1438,6 +1477,24 @@ final class AppState {
             || snapshot.status == .afterWork
             || hasLeftWorkEarlyToday
             || todayOvertimeDuration > 0
+    }
+
+    var currentWeekDateKeys: [String] {
+        calculator.mondayWeekDateKeys(for: now)
+    }
+
+    var currentWeekClosingReceipts: [ClosingCapsule] {
+        let keys = Set(currentWeekDateKeys)
+        return engagementState.capsules.filter { keys.contains($0.dateKey) }
+            .sorted { $0.dateKey < $1.dateKey }
+    }
+
+    var shouldShowWeeklyEcho: Bool {
+        guard activeOvertimeRecord == nil,
+              !currentWeekClosingReceipts.isEmpty else { return false }
+        let weekday = Calendar.current.component(.weekday, from: now)
+        if weekday == 1 || weekday == 7 { return true }
+        return weekday == 6 && (snapshot.status == .afterWork || hasLeftWorkEarlyToday)
     }
 
     func recordPaywallViewed() {
@@ -2127,10 +2184,15 @@ final class AppState {
 
     private static var unlocksProForLocalDebug: Bool {
         #if DEBUG
-        isScreenshotMode && ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_PRO_LOCKED"] != "1"
+        isScreenshotMode && !screenshotProLocked
         #else
         false
         #endif
+    }
+
+    private static var screenshotProLocked: Bool {
+        ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_PRO_LOCKED"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("PAYJOY_SCREENSHOT_PRO_LOCKED=1")
     }
 
     private func resetAppIconToClassicIfNeeded() {

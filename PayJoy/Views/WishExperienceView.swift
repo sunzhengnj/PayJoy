@@ -4,19 +4,32 @@ import SwiftUI
 import UIKit
 @preconcurrency import Vision
 
+private enum WishSheet: Identifiable {
+    case capture
+    case progress(WishExperience)
+    case realization(WishExperience)
+
+    var id: String {
+        switch self {
+        case .capture:
+            "capture"
+        case .progress(let wish):
+            "progress-\(wish.id)"
+        case .realization(let wish):
+            "realization-\(wish.id)"
+        }
+    }
+}
+
 struct WishExperienceView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var showsCapture = false
-    @State private var progressWish: WishExperience?
-    @State private var realizingWish: WishExperience?
+    @State private var presentedSheet: WishSheet?
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 14) {
-                titleBlock
-
                 if let wish = appState.focusedWish {
                     focusedWishCard(wish)
                     otherWishes(excluding: wish.id)
@@ -32,24 +45,32 @@ struct WishExperienceView: View {
             .padding(.bottom, 90)
         }
         .background(AppTheme.paper.ignoresSafeArea())
-        .navigationBarHidden(true)
-        .sheet(isPresented: $showsCapture) {
-            WishCaptureSheet()
-                .environment(appState)
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            titleBlock
+                .padding(.horizontal, AppTheme.pagePadding)
+                .padding(.top, 10)
+                .padding(.bottom, 12)
+                .background(AppTheme.paper)
         }
-        .sheet(item: $progressWish) { wish in
-            WishProgressEditorSheet(wish: wish) { progress in
-                appState.updateWishProgress(id: wish.id, progress: progress)
-                progressWish = nil
-            }
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
-            .presentationBackground(AppTheme.paper)
-        }
-        .sheet(item: $realizingWish) { wish in
-            WishRealizationSheet(wish: wish) { assetReference in
-                appState.completeWish(id: wish.id, realizedAssetReference: assetReference)
-                realizingWish = nil
+        .sheet(item: $presentedSheet) { sheet in
+            switch sheet {
+            case .capture:
+                WishCaptureSheet()
+                    .environment(appState)
+            case .progress(let wish):
+                WishProgressEditorSheet(wish: wish) { progress in
+                    appState.updateWishProgress(id: wish.id, progress: progress)
+                    presentedSheet = nil
+                }
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(AppTheme.paper)
+            case .realization(let wish):
+                WishRealizationSheet(wish: wish) { assetReference in
+                    appState.completeWish(id: wish.id, realizedAssetReference: assetReference)
+                    presentedSheet = nil
+                }
             }
         }
         .transaction { transaction in
@@ -95,7 +116,7 @@ struct WishExperienceView: View {
 
     private var captureWishButton: some View {
         Button {
-            showsCapture = true
+            presentedSheet = .capture
         } label: {
             HStack(spacing: 7) {
                 Circle()
@@ -144,7 +165,7 @@ struct WishExperienceView: View {
                                 appState.setWishStatus(id: wish.id, status: .paused)
                             }
                             Button(L10n.t("它已经发生了"), systemImage: "checkmark.seal.fill") {
-                                realizingWish = wish
+                                presentedSheet = .realization(wish)
                             }
                         } label: {
                             Text(L10n.t("管理愿望"))
@@ -179,7 +200,7 @@ struct WishExperienceView: View {
                 Text(L10n.t("我的进度"))
                     .font(.subheadline.weight(.black))
                 Spacer()
-                Text("\(Int(progress * 100))%")
+                Text("\(Int((progress * 100).rounded()))%")
                     .font(.title3.weight(.black))
                     .monospacedDigit()
             }
@@ -200,7 +221,7 @@ struct WishExperienceView: View {
                 }
                 Spacer(minLength: 0)
                 Button {
-                    progressWish = wish
+                    presentedSheet = .progress(wish)
                 } label: {
                     Text(L10n.t("更新进度"))
                         .font(.caption.weight(.black))
@@ -242,7 +263,7 @@ struct WishExperienceView: View {
                                     .font(.subheadline.weight(.black))
                                     .foregroundStyle(AppTheme.ink)
                                     .lineLimit(2)
-                                Text(L10n.format("当前进度 %d%%", Int((wish.progress ?? 0) * 100)))
+                                Text(L10n.format("当前进度 %d%%", Int(((wish.progress ?? 0) * 100).rounded())))
                                     .font(.caption.weight(.bold))
                                     .foregroundStyle(AppTheme.textGray)
                             }
@@ -280,7 +301,7 @@ struct WishExperienceView: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(AppTheme.textGray)
                 PrimaryButton(title: L10n.t("添加这个愿望")) {
-                    showsCapture = true
+                    presentedSheet = .capture
                 }
             }
         }

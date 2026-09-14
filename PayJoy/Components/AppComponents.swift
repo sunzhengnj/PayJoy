@@ -42,12 +42,86 @@ struct ComicProgressBar: View {
                 Capsule()
                     .fill(AppTheme.coin)
                     .frame(width: max(12, proxy.size.width * CGFloat(min(1, max(0, progress)))))
+                    .animation(.spring(response: 0.46, dampingFraction: 0.84), value: progress)
             }
             .overlay {
                 Capsule().stroke(AppTheme.outline, lineWidth: 1.4)
             }
         }
         .frame(height: 13)
+    }
+}
+
+struct ComicIdleBob: ViewModifier {
+    var enabled: Bool
+    var amplitude: CGFloat = 3.5
+    var rotation: Double = 1.2
+    var duration: Double = 2.5
+    @State private var lifted = false
+
+    func body(content: Content) -> some View {
+        content
+            .offset(y: enabled && lifted ? -amplitude : amplitude * 0.12)
+            .rotationEffect(.degrees(enabled && lifted ? rotation : -rotation * 0.28))
+            .onAppear(perform: startIfNeeded)
+            .onChange(of: enabled) { _, isEnabled in
+                if isEnabled {
+                    startIfNeeded()
+                } else {
+                    lifted = false
+                }
+            }
+    }
+
+    private func startIfNeeded() {
+        guard enabled, !lifted else { return }
+        withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
+            lifted = true
+        }
+    }
+}
+
+struct ComicTwinkleField: View {
+    var enabled: Bool
+
+    private let sparks: [(x: CGFloat, y: CGFloat, size: CGFloat, speed: Double, phase: Double)] = [
+        (0.10, 0.16, 12, 2.1, 0.2),
+        (0.74, 0.10, 10, 1.7, 1.1),
+        (0.90, 0.38, 14, 2.4, 1.8),
+        (0.16, 0.58, 9, 1.9, 0.6),
+        (0.58, 0.07, 11, 2.2, 1.4)
+    ]
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: enabled ? 1 / 12 : 120)) { timeline in
+            GeometryReader { proxy in
+                ForEach(sparks.indices, id: \.self) { index in
+                    let spark = sparks[index]
+                    let wave = enabled
+                        ? 0.5 + 0.5 * sin(timeline.date.timeIntervalSinceReferenceDate * spark.speed + spark.phase)
+                        : 0
+                    AssetImage(name: "decor_sparkle_v1")
+                        .frame(width: spark.size, height: spark.size)
+                        .opacity(enabled ? 0.28 + 0.72 * wave : 0)
+                        .scaleEffect(0.72 + wave * 0.45)
+                        .position(x: proxy.size.width * spark.x, y: proxy.size.height * spark.y)
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+extension View {
+    func comicIdleBob(
+        enabled: Bool,
+        amplitude: CGFloat = 3.5,
+        rotation: Double = 1.2,
+        duration: Double = 2.5
+    ) -> some View {
+        modifier(ComicIdleBob(enabled: enabled, amplitude: amplitude, rotation: rotation, duration: duration))
     }
 }
 
@@ -348,6 +422,8 @@ extension View {
 }
 
 private struct ComicTabButton: View {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.payJoyReduceMotion) private var appReduceMotion
     let tab: AppTab
     let isSelected: Bool
     let action: () -> Void
@@ -377,6 +453,8 @@ private struct ComicTabButton: View {
                     Image(systemName: tab.icon)
                         .font(.system(size: isSelected ? 24 : 22, weight: .black))
                         .symbolRenderingMode(.monochrome)
+                        .symbolEffect(.bounce, value: isSelected)
+                        .symbolEffectsRemoved(accessibilityReduceMotion || appReduceMotion)
                         .frame(height: 24)
                     Text(tab.title)
                         .font(.system(size: 11, weight: .black, design: .rounded))

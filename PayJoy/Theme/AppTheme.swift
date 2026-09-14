@@ -396,6 +396,16 @@ extension TimeInterval {
         let seconds = total % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
+
+    var shortCountdownText: String {
+        let totalMinutes = max(0, Int(self) / 60)
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+        if hours > 0 {
+            return String(format: "%d:%02d", hours, minutes)
+        }
+        return "\(minutes)m"
+    }
 }
 
 extension Date {

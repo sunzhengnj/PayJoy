@@ -181,6 +181,7 @@ struct PaydayCelebrationView: View {
             .rotationEffect(.degrees(heroArrived ? 0 : -9))
             .offset(x: heroArrived ? 0 : -72, y: heroArrived ? 0 : 74)
             .opacity(heroArrived ? 1 : 0)
+            .comicIdleBob(enabled: heroArrived && !prefersReducedMotion, amplitude: 5, rotation: 2.2, duration: 2.8)
             .accessibilityHidden(true)
     }
 
@@ -236,6 +237,38 @@ struct PaydayCelebrationView: View {
         } catch {
             shareError = L10n.t("分享图生成失败，请稍后再试。")
         }
+    }
+}
+
+struct PaydaySoonCard: View {
+    let daysUntilPayday: Int
+
+    var body: some View {
+        ComicCard(background: AppTheme.highlightCardBackground, padding: 13) {
+            HStack(spacing: 10) {
+                AssetImage(name: AppTheme.paydayRocketAsset)
+                    .frame(width: 72, height: 60)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline.weight(.black))
+                    Text(L10n.t("到时候会有一个小彩蛋。"))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
+    }
+
+    private var title: String {
+        daysUntilPayday == 1
+            ? L10n.t("明天发薪")
+            : L10n.format("还有 %d 天发薪", daysUntilPayday)
     }
 }
 

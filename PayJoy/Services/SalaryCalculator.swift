@@ -940,6 +940,27 @@ final class SalaryCalculator {
         return settings.workdays.contains(weekday)
     }
 
+    func mondayWeekStart(for date: Date) -> Date {
+        let weekday = calendar.component(.weekday, from: date)
+        let daysFromMonday = (weekday + 5) % 7
+        let start = calendar.date(byAdding: .day, value: -daysFromMonday, to: date) ?? date
+        return calendar.startOfDay(for: start)
+    }
+
+    func mondayWeekDateKeys(for date: Date) -> [String] {
+        let start = mondayWeekStart(for: date)
+        return (0..<7).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: start).map(dateKey(for:))
+        }
+    }
+
+    func date(fromDateKey key: String) -> Date? {
+        let parts = key.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+            .map { calendar.startOfDay(for: $0) }
+    }
+
     func dateKey(for date: Date) -> String {
         let components = calendar.dateComponents([.year, .month, .day], from: date)
         let year = components.year ?? 0
@@ -963,6 +984,21 @@ final class SalaryCalculator {
     func isPayday(_ date: Date, settings: SalarySettings) -> Bool {
         guard let paydayDay = settings.paydayDay else { return false }
         return calendar.isDate(date, inSameDayAs: paydayDate(forMonthContaining: date, paydayDay: paydayDay))
+    }
+
+    func daysUntilPayday(from date: Date, settings: SalarySettings) -> Int? {
+        guard let paydayDay = settings.paydayDay else { return nil }
+        let today = calendar.startOfDay(for: date)
+        var payday = calendar.startOfDay(for: paydayDate(forMonthContaining: date, paydayDay: paydayDay))
+        if payday == today {
+            return nil
+        }
+        if payday < today {
+            guard let nextMonth = calendar.date(byAdding: .month, value: 1, to: date) else { return nil }
+            payday = calendar.startOfDay(for: paydayDate(forMonthContaining: nextMonth, paydayDay: paydayDay))
+        }
+        guard payday > today else { return nil }
+        return calendar.dateComponents([.day], from: today, to: payday).day
     }
 
     func canEnterActualSalary(for month: Date, now: Date, settings: SalarySettings) -> Bool {

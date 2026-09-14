@@ -129,7 +129,7 @@ final class SalaryCalculatorTests: XCTestCase {
     }
 
     @MainActor
-    func testFreeWishCollectionAllowsThreeActiveWishes() {
+    func testFreeWishCollectionAllowsTwoActiveWishes() {
         let suiteName = "PayJoyTests.Wishes.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -147,9 +147,32 @@ final class SalaryCalculatorTests: XCTestCase {
             )
         }
 
-        XCTAssertEqual(appState.activeWishes.count, 3)
+        XCTAssertEqual(appState.activeWishes.count, 2)
         XCTAssertFalse(appState.canCreateWish)
         XCTAssertEqual(appState.activeWishes.filter(\.isFocused).count, 1)
+    }
+
+    @MainActor
+    func testProWishCollectionHasNoActiveWishLimit() {
+        let suiteName = "PayJoyTests.ProWishes.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = SettingsStore(defaults: defaults, sharedDefaults: nil)
+        var preferences = AppPreferences.defaultValue
+        preferences.isProUnlocked = true
+        store.savePreferences(preferences)
+        let appState = AppState(
+            store: store,
+            cloudKit: PayJoyCloudKitService(container: nil, keyValueStore: nil),
+            now: date("2026-05-18 09:00:00")
+        )
+
+        for index in 1...4 {
+            _ = appState.createWish(title: "愿望 \(index)", captureSource: .text)
+        }
+
+        XCTAssertEqual(appState.activeWishes.count, 4)
+        XCTAssertTrue(appState.canCreateWish)
     }
 
     func testLegacyGoalAndSalaryWishesMigrateIntoUnifiedWishStorage() throws {
@@ -843,6 +866,31 @@ final class SalaryCalculatorTests: XCTestCase {
             XCTAssertTrue(badges.first(where: { $0.id == id })?.isUnlocked == true, id)
         }
         XCTAssertFalse(badges.contains { $0.id.hasPrefix("wish-") })
+    }
+
+    func testSalaryBadgesUseUniqueOriginalArtworkAndFamilies() {
+        let badges = SalaryCalculator().salaryBadges(
+            now: date("2026-05-18 09:00:00"),
+            settings: .defaultValue,
+            records: [],
+            focusedWish: nil,
+            wishes: [],
+            overtimeRecords: []
+        )
+
+        XCTAssertEqual(badges.count, 34)
+        XCTAssertEqual(Set(badges.map(\.artworkName)).count, 34)
+        XCTAssertEqual(
+            Dictionary(grouping: badges, by: \.family).mapValues(\.count),
+            [
+                .paydayProgress: 6,
+                .wish: 4,
+                .calendar: 8,
+                .journal: 7,
+                .overtime: 9
+            ]
+        )
+        XCTAssertTrue(badges.allSatisfy { $0.artworkName == "achievement_\($0.id.replacingOccurrences(of: "-", with: "_"))_v1" })
     }
 
     func testBeforeWorkWorkingAndAfterWorkStates() {
@@ -1758,6 +1806,107 @@ final class SalaryCalculatorTests: XCTestCase {
             from: JSONEncoder().encode(configured)
         )
         XCTAssertEqual(restored.paydayDay, 25)
+    }
+
+    func testDaysUntilPaydayIgnoresUnsetAndTodayAndUsesNextMonthAfterPayday() {
+        var settings = SalarySettings.defaultValue
+        XCTAssertNil(calculator.daysUntilPayday(from: date("2026-05-18 09:00:00"), settings: settings))
+
+        settings.paydayDay = 25
+        XCTAssertEqual(calculator.daysUntilPayday(from: date("2026-05-18 09:00:00"), settings: settings), 7)
+        XCTAssertEqual(calculator.daysUntilPayday(from: date("2026-05-24 23:59:00"), settings: settings), 1)
+        XCTAssertNil(calculator.daysUntilPayday(from: date("2026-05-25 08:00:00"), settings: settings))
+        XCTAssertEqual(calculator.daysUntilPayday(from: date("2026-05-26 08:00:00"), settings: settings), 30)
+
+        settings.paydayDay = 31
+        XCTAssertEqual(calculator.daysUntilPayday(from: date("2026-02-20 12:00:00"), settings: settings), 8)
+        XCTAssertNil(calculator.daysUntilPayday(from: date("2026-02-28 12:00:00"), settings: settings))
+    }
+
+    @MainActor
+    func testPaydaySoonCardStaysOffOnPaydayRestDaysOvertimeAndFarDates() {
+        let suiteName = "PayJoyTests.PaydaySoon.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let state = AppState(
+            store: SettingsStore(defaults: defaults, sharedDefaults: nil),
+            now: date("2026-05-18 15:00:00")
+        )
+        var settings = state.settings
+        settings.paydayDay = 25
+        state.settings = settings
+        XCTAssertEqual(state.paydaySoonDays, 7)
+
+        state.now = date("2026-05-25 15:00:00")
+        XCTAssertNil(state.paydaySoonDays)
+        XCTAssertTrue(state.isTodayPayday)
+
+        state.now = date("2026-05-15 15:00:00")
+        XCTAssertNil(state.paydaySoonDays)
+
+        state.now = date("2026-05-23 15:00:00")
+        XCTAssertNil(state.paydaySoonDays)
+
+        state.now = date("2026-05-21 19:30:00")
+        state.startOvertimeNow()
+        XCTAssertNil(state.paydaySoonDays)
+    }
+
+    func testMondayWeekStartAlignsToMonday() {
+        XCTAssertEqual(calculator.dateKey(for: calculator.mondayWeekStart(for: date("2026-05-18 09:00:00"))), "2026-05-18")
+        XCTAssertEqual(calculator.dateKey(for: calculator.mondayWeekStart(for: date("2026-05-20 15:00:00"))), "2026-05-18")
+        XCTAssertEqual(calculator.dateKey(for: calculator.mondayWeekStart(for: date("2026-05-17 12:00:00"))), "2026-05-11")
+        XCTAssertEqual(
+            calculator.mondayWeekDateKeys(for: date("2026-05-20 15:00:00")),
+            [
+                "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21",
+                "2026-05-22", "2026-05-23", "2026-05-24"
+            ]
+        )
+    }
+
+    @MainActor
+    func testWeeklyEchoAppearsOnWeekendAndFridayAfterWorkOnlyWhenReceiptsExist() {
+        let suiteName = "PayJoyTests.WeeklyEcho.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let state = AppState(
+            store: SettingsStore(defaults: defaults, sharedDefaults: nil),
+            now: date("2026-05-20 15:00:00")
+        )
+        XCTAssertFalse(state.shouldShowWeeklyEcho)
+
+        var engagement = state.engagementState
+        engagement.capsules = [
+            ClosingCapsule(
+                id: "week-echo",
+                dateKey: "2026-05-20",
+                createdAt: date("2026-05-20 19:00:00"),
+                messageIndex: 0,
+                earnedAmount: 400,
+                currencyCode: .CNY,
+                workProgress: 1,
+                wishProgress: nil,
+                wishID: nil,
+                wishTitle: nil,
+                companionID: CompanionProfile.defaultValue.id,
+                mood: .steady,
+                tone: .gentle,
+                revealsSalary: false
+            )
+        ]
+        state.engagementState = engagement
+        XCTAssertFalse(state.shouldShowWeeklyEcho)
+
+        state.now = date("2026-05-22 19:10:00")
+        XCTAssertTrue(state.shouldShowWeeklyEcho)
+
+        state.now = date("2026-05-23 10:00:00")
+        XCTAssertTrue(state.shouldShowWeeklyEcho)
+
+        state.now = date("2026-05-21 19:30:00")
+        state.startOvertimeNow()
+        XCTAssertFalse(state.shouldShowWeeklyEcho)
     }
 
     func testPaydayUsesLastCalendarDayWhenConfiguredDayDoesNotExist() {

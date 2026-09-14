@@ -25,10 +25,14 @@ private enum ScreenshotScreen: String {
     case root
     case home
     case homeAfterMidnight = "home-after-midnight"
+    case homeRestDay = "home-rest-day"
     case countdown
     case stats
     case statsActualSalary = "stats-actual-salary"
     case statsLower = "stats-lower"
+    case achievements
+    case achievementsLower = "achievements-lower"
+    case weeklyEcho = "weekly-echo"
     case weeklyReport = "weekly-report"
     case weeklyReportCompact = "weekly-report-compact"
     case dailyReport = "daily-report"
@@ -88,10 +92,23 @@ private struct ScreenshotHostView: View {
             switch screen {
             case .root:
                 AppRootView()
-            case .home, .homeAfterMidnight, .countdown:
+            case .home, .homeAfterMidnight, .homeRestDay, .countdown:
                 NavigationStack { HomeView() }
             case .stats, .statsActualSalary, .statsLower:
                 NavigationStack { StatsView() }
+            case .achievements, .achievementsLower:
+                NavigationStack {
+                    ScrollView {
+                        SalaryAchievementCard(badges: appState.salaryBadges)
+                            .padding(AppTheme.pagePadding)
+                    }
+                    .background(AppTheme.paper.ignoresSafeArea())
+                    .defaultScrollAnchor(screen == .achievementsLower ? .bottom : .top)
+                    .navigationTitle(L10n.t("开薪成就"))
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+            case .weeklyEcho:
+                WeeklyEchoSheet()
             case .weeklyReport:
                 ScreenshotWeeklyReportView()
             case .weeklyReportCompact:

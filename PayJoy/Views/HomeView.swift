@@ -14,9 +14,14 @@ struct HomeView: View {
     @State private var isBossModePresented = false
     @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
+    @State private var showsWeeklyEcho = false
 
     var body: some View {
         ZStack {
+            if !prefersReducedMotion {
+                ComicTwinkleField(enabled: true)
+                    .opacity(shouldShowRewardRain ? 0.32 : 0.9)
+            }
             if shouldShowRewardRain {
                 CoinRainLayer(style: appState.activeOvertimeRecord == nil ? .coin : .redPacket)
                     .allowsHitTesting(false)
@@ -32,6 +37,8 @@ struct HomeView: View {
                     }
                     if appState.isTodayPayday {
                         PaydayTodayCard()
+                    } else if let paydaySoonDays = appState.paydaySoonDays {
+                        PaydaySoonCard(daysUntilPayday: paydaySoonDays)
                     }
                     EarningsCard(
                         snapshot: appState.snapshot,
@@ -44,6 +51,11 @@ struct HomeView: View {
                     if appState.canOpenClosingReceipt {
                         ClosingReceiptHomeCard(receipt: appState.todayClosingReceipt) {
                             appState.openClosingReceipt()
+                        }
+                    }
+                    if appState.shouldShowWeeklyEcho {
+                        WeeklyEchoHomeCard(receiptCount: appState.currentWeekClosingReceipts.count) {
+                            showsWeeklyEcho = true
                         }
                     }
                     if appState.activeOvertimeRecord != nil || appState.canStartOvertime || appState.todayOvertimeDuration > 0 {
@@ -65,6 +77,30 @@ struct HomeView: View {
                                 overtimePresentation = .manual(defaultStart: appState.defaultOvertimeStartDate, defaultEnd: appState.defaultOvertimeEndDate)
                             }
                         )
+                    }
+                    if appState.snapshot.status == .restDay {
+                        WeeklyPayReportCard(
+                            report: appState.weeklyPayReport,
+                            hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                            currencySymbol: appState.settings.currencySymbol,
+                            style: .compact
+                        )
+                        HStack(spacing: 10) {
+                            SmallMetricCard(
+                                title: L10n.t("下次上班"),
+                                value: offDutySecondsUntilWorkStart?.countdownText ?? L10n.t("休息中"),
+                                caption: L10n.t("不着急，先好好休息")
+                            )
+                            SmallMetricCard(
+                                title: L10n.t("本周战报"),
+                                value: PrivacyText.compactMoney(
+                                    appState.weeklyPayReport.earnedAmount,
+                                    hidden: appState.preferences.hideSensitiveAmounts,
+                                    currencySymbol: appState.settings.currencySymbol
+                                ),
+                                caption: L10n.t("本周已赚")
+                            )
+                        }
                     }
                     if [.beforeWork, .working, .lunchBreak].contains(appState.snapshot.status) {
                         ProgressSummaryCard(snapshot: appState.snapshot, hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol)
@@ -198,6 +234,12 @@ struct HomeView: View {
                 .presentationBackground(AppTheme.paper)
             }
         }
+        .sheet(isPresented: $showsWeeklyEcho) {
+            WeeklyEchoSheet()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(AppTheme.paper)
+        }
         .onAppear {
             refreshBubble(force: true)
             if ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_SCREEN"] == "boss" {
@@ -307,6 +349,7 @@ struct HomeView: View {
                         AssetImage(name: "coin_single_v1")
                             .frame(width: 34, height: 34)
                             .rotationEffect(.degrees(22))
+                            .comicIdleBob(enabled: !prefersReducedMotion, amplitude: 5, rotation: 8, duration: 2.8)
                             .frame(maxWidth: .infinity, alignment: .topTrailing)
                             .padding(.trailing, 48)
                             .offset(y: 22)
@@ -314,6 +357,7 @@ struct HomeView: View {
                         AssetImage(name: "coin_single_v1")
                             .frame(width: 26, height: 26)
                             .rotationEffect(.degrees(-24))
+                            .comicIdleBob(enabled: !prefersReducedMotion, amplitude: 4, rotation: -7, duration: 3.2)
                             .frame(maxWidth: .infinity, alignment: .topTrailing)
                             .padding(.trailing, 118)
                             .offset(y: 102)
@@ -375,18 +419,37 @@ struct HomeView: View {
                 .frame(height: 116)
                 .scaleEffect(showsRestPresentation ? 1 : AppTheme.heroArtworkScale, anchor: .bottom)
                 .offset(y: showsRestPresentation ? 0 : AppTheme.heroArtworkYOffset)
+                .comicIdleBob(
+                    enabled: !prefersReducedMotion,
+                    amplitude: showsRestPresentation ? 2.2 : 4.2,
+                    rotation: showsRestPresentation ? 0.6 : 1.4,
+                    duration: showsRestPresentation ? 3.2 : 2.4
+                )
             SpeechBubble(text: heroBubbleText, isYellow: false, tailX: 0.24, lineLimit: 3)
                 .frame(width: 136)
                 .offset(x: -6, y: -6)
+                .id(heroBubbleText)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.86).combined(with: .opacity),
+                    removal: .opacity
+                ))
         }
         .frame(maxWidth: .infinity)
         .frame(height: max(100, AppTheme.heroSectionHeight - 18))
+        .animation(prefersReducedMotion ? nil : .spring(response: 0.34, dampingFraction: 0.72), value: heroBubbleText)
     }
 
     private func refreshBubble(force: Bool) {
         let now = Date()
         guard force || now.timeIntervalSince(lastBubbleRefresh) > 30 else { return }
-        heroBubbleText = Self.randomBubbleText(for: appState, excluding: heroBubbleText)
+        let next = Self.randomBubbleText(for: appState, excluding: heroBubbleText)
+        if prefersReducedMotion {
+            heroBubbleText = next
+        } else {
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.72)) {
+                heroBubbleText = next
+            }
+        }
         lastBubbleRefresh = now
     }
 
@@ -685,6 +748,242 @@ private struct EarlyLeaveConfirmationOverlay: View {
     }
 }
 
+private struct WeeklyEchoHomeCard: View {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    let receiptCount: Int
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ComicCard(background: AppTheme.highlightCardBackground, padding: 14) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(L10n.t("本周收工回声"))
+                            .font(.headline.weight(.black))
+                        Text(L10n.format("已收下 %d 天", receiptCount))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                        Text(L10n.t("这一周也值得被看见。"))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.textGray)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    AssetImage(name: AppTheme.heroWorkerAsset)
+                        .frame(width: 86, height: 68)
+                        .accessibilityHidden(true)
+                }
+            }
+        }
+        .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: accessibilityReduceMotion))
+        .accessibilityLabel(L10n.t("本周收工回声"))
+        .accessibilityValue(L10n.format("已收下 %d 天", receiptCount))
+    }
+}
+
+struct WeeklyEchoSheet: View {
+    @Environment(AppState.self) private var appState
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @State private var shareItem: ClosingReceiptShareItem?
+    @State private var shareError: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 18) {
+                    WeeklyEchoPoster(
+                        weekDateKeys: appState.currentWeekDateKeys,
+                        receipts: appState.currentWeekClosingReceipts,
+                        companionAssetName: appState.selectedCompanion.avatarAssetName
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(AppTheme.outline, lineWidth: 1.6)
+                    }
+
+                    if let shareError {
+                        Text(shareError)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.red)
+                    }
+
+                    PrimaryButton(title: L10n.t("分享这一周"), reduceMotion: accessibilityReduceMotion) {
+                        exportSharePoster()
+                    }
+                }
+                .padding(AppTheme.pagePadding)
+            }
+            .background(AppTheme.paper)
+            .navigationTitle(L10n.t("本周收工回声"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(L10n.t("关闭")) { dismiss() }
+                        .foregroundStyle(AppTheme.ink)
+                }
+            }
+            .sheet(item: $shareItem) { item in
+                ClosingReceiptActivityView(activityItems: [item.caption, item.url])
+            }
+        }
+    }
+
+    @MainActor
+    private func exportSharePoster() {
+        let poster = WeeklyEchoPoster(
+            weekDateKeys: appState.currentWeekDateKeys,
+            receipts: appState.currentWeekClosingReceipts,
+            companionAssetName: appState.selectedCompanion.avatarAssetName
+        )
+        .frame(width: 360, height: 500)
+        .environment(\.dynamicTypeSize, .large)
+
+        let renderer = ImageRenderer(content: poster)
+        renderer.scale = 3
+        guard let image = renderer.uiImage, let data = image.pngData() else {
+            shareError = L10n.t("分享图生成失败，请稍后再试。")
+            return
+        }
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ClockJoy-Weekly-Echo.png")
+        do {
+            try data.write(to: url, options: .atomic)
+            shareError = nil
+            shareItem = ClosingReceiptShareItem(
+                url: url,
+                caption: [
+                    L10n.t("这一周也值得被看见。"),
+                    L10n.format("已收下 %d 天", appState.currentWeekClosingReceipts.count),
+                    MarketCampaignLink.url(for: appState.preferences.resolvedMarket).absoluteString
+                ].joined(separator: "\n")
+            )
+            appState.recordClosingCapsuleShared()
+        } catch {
+            shareError = L10n.t("分享图生成失败，请稍后再试。")
+        }
+    }
+}
+
+private struct WeeklyEchoPoster: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let weekDateKeys: [String]
+    let receipts: [ClosingCapsule]
+    let companionAssetName: String
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text(L10n.t("这一周收下了"))
+                .font(.title2.weight(.black))
+            Text(L10n.format("已收下 %d 天", receipts.count))
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(AppTheme.textGray)
+
+            AssetImage(name: companionAssetName)
+                .frame(width: 108, height: 108)
+                .background(AppTheme.coin.opacity(0.24))
+                .clipShape(Circle())
+                .accessibilityHidden(true)
+
+            if dynamicTypeSize.isAccessibilitySize {
+                LazyVGrid(
+                    columns: [GridItem(.flexible()), GridItem(.flexible())],
+                    spacing: 8
+                ) {
+                    ForEach(weekDateKeys, id: \.self) { key in
+                        accessibleWeekDayStamp(for: key)
+                    }
+                }
+            } else {
+                HStack(spacing: 6) {
+                    ForEach(weekDateKeys, id: \.self) { key in
+                        weekDayStamp(for: key)
+                    }
+                }
+            }
+
+            Text(L10n.t("这一周也值得被看见。"))
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.textGray)
+                .multilineTextAlignment(.center)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, minHeight: 420)
+        .background(
+            LinearGradient(
+                colors: [AppTheme.coin.opacity(0.54), AppTheme.highlightCardBackground, AppTheme.paper],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .foregroundStyle(AppTheme.ink)
+    }
+
+    private func weekDayStamp(for dateKey: String) -> some View {
+        let receipt = receipts.first { $0.dateKey == dateKey }
+        return VStack(spacing: 4) {
+            Text(weekdayLabel(for: dateKey))
+                .font(.caption2.weight(.black))
+                .foregroundStyle(AppTheme.textGray)
+            Text(receipt?.mood?.emoji ?? "·")
+                .font(.title3)
+                .opacity(receipt == nil ? 0.28 : 1)
+            Text(receipt.map { "\(Int(($0.workProgress * 100).rounded()))%" } ?? "—")
+                .font(.caption2.weight(.black))
+                .monospacedDigit()
+                .foregroundStyle(receipt == nil ? AppTheme.textGray : AppTheme.ink)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(AppTheme.paper.opacity(receipt == nil ? 0.42 : 0.78))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel(for: dateKey, receipt: receipt))
+    }
+
+    private func accessibleWeekDayStamp(for dateKey: String) -> some View {
+        let receipt = receipts.first { $0.dateKey == dateKey }
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(weekdayLabel(for: dateKey))
+                    .font(.headline.weight(.black))
+                    .foregroundStyle(AppTheme.textGray)
+                Text(receipt?.mood?.emoji ?? "·")
+                    .font(.title3)
+                    .opacity(receipt == nil ? 0.28 : 1)
+                Spacer(minLength: 0)
+            }
+            Text(receipt.map { "\(Int(($0.workProgress * 100).rounded()))%" } ?? "—")
+                .font(.headline.weight(.black))
+                .monospacedDigit()
+                .foregroundStyle(receipt == nil ? AppTheme.textGray : AppTheme.ink)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(AppTheme.paper.opacity(receipt == nil ? 0.42 : 0.78))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel(for: dateKey, receipt: receipt))
+    }
+
+    private func weekdayLabel(for dateKey: String) -> String {
+        guard let date = SalaryCalculator().date(fromDateKey: dateKey) else { return "" }
+        return date.formatted(
+            Date.FormatStyle.dateTime
+                .weekday(.narrow)
+                .locale(Locale(identifier: L10n.currentLanguage.localeIdentifier))
+        )
+    }
+
+    private func accessibilityLabel(for dateKey: String, receipt: ClosingCapsule?) -> String {
+        let weekday = weekdayLabel(for: dateKey)
+        guard let receipt else { return "\(weekday)，—" }
+        let mood = receipt.mood?.title ?? ""
+        return "\(weekday)，\(mood)，\(Int((receipt.workProgress * 100).rounded()))%"
+    }
+}
+
 private struct ClosingReceiptHomeCard: View {
     @Environment(AppState.self) private var appState
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
@@ -727,6 +1026,7 @@ private struct ClosingReceiptHomeCard: View {
                 AssetImage(name: appState.selectedCompanion.avatarAssetName)
                     .frame(width: 104, height: 104)
                     .offset(x: -4, y: 8)
+                    .comicIdleBob(enabled: !prefersReducedMotion, amplitude: 3, rotation: 1.5, duration: 2.5)
                     .accessibilityHidden(true)
             }
             .frame(minHeight: 126)
@@ -1100,7 +1400,7 @@ private struct ClosingReceiptDetailView: View {
                     title: L10n.t(showsAmount ? "今日已赚" : "今日完成度"),
                     value: showsAmount
                         ? capsule.earnedAmount.compactMoneyText(currencySymbol: receiptCurrencySymbol)
-                        : "\(Int(capsule.workProgress * 100))%"
+                        : "\(Int((capsule.workProgress * 100).rounded()))%"
                 )
                 capsuleMetric(
                     title: capsule.wishTitle ?? L10n.t("愿望进度"),
@@ -1136,7 +1436,7 @@ private struct ClosingReceiptDetailView: View {
     private var shareText: String {
         let amountLine = showsAmount
             ? capsule.earnedAmount.compactMoneyText(currencySymbol: receiptCurrencySymbol)
-            : "\(Int(capsule.workProgress * 100))%"
+            : "\(Int((capsule.workProgress * 100).rounded()))%"
         return [
             L10n.t(capsule.messageKey),
             "\(L10n.t(showsAmount ? "今日已赚" : "今日完成度"))：\(amountLine)",
@@ -1256,7 +1556,7 @@ private struct ClosingReceiptSharePoster: View {
                     title: L10n.t(showsAmount ? "今日已赚" : "今日完成度"),
                     value: showsAmount
                         ? capsule.earnedAmount.compactMoneyText(currencySymbol: currencySymbol)
-                        : "\(Int(capsule.workProgress * 100))%"
+                        : "\(Int((capsule.workProgress * 100).rounded()))%"
                 )
                 metric(
                     title: capsule.wishTitle ?? L10n.t("愿望进度"),
@@ -1409,7 +1709,7 @@ struct ClosingReceiptHistoryView: View {
 
             Spacer(minLength: 4)
 
-            Text("\(Int(receipt.workProgress * 100))%")
+            Text("\(Int((receipt.workProgress * 100).rounded()))%")
                 .font(.headline.weight(.black))
                 .foregroundStyle(AppTheme.ink)
                 .monospacedDigit()
@@ -2118,8 +2418,11 @@ private struct EarningsCard: View {
                         .font(.system(size: 54, weight: .black, design: .rounded))
                         .minimumScaleFactor(0.64)
                         .lineLimit(1)
+                        .monospacedDigit()
+                        .contentTransition(reduceMotion || hidesSensitiveAmounts ? .identity : .numericText())
                         .scaleEffect(pulse ? 1.045 : 1)
                         .animation(reduceMotion ? nil : .spring(response: 0.2, dampingFraction: 0.5), value: pulse)
+                        .animation(reduceMotion ? nil : .snappy(duration: 0.22), value: amountText)
                     Text(PrivacyText.perSecond(snapshot.earnedPerSecond, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                         .font(.caption.weight(.bold))
                         .foregroundStyle(AppTheme.textGray)
@@ -2280,9 +2583,15 @@ private struct FallingCoin: Identifiable {
 }
 
 private struct ProgressSummaryCard: View {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.payJoyReduceMotion) private var appReduceMotion
     let snapshot: EarningsSnapshot
     let hidesSensitiveAmounts: Bool
     let currencySymbol: String
+
+    private var reduceMotion: Bool {
+        accessibilityReduceMotion || appReduceMotion
+    }
 
     var body: some View {
         ComicCard {
@@ -2293,10 +2602,13 @@ private struct ProgressSummaryCard: View {
                             .font(.headline.weight(.heavy))
                         Text("\(snapshot.progress * 100, specifier: "%.1f")%")
                             .font(.system(size: 29, weight: .black, design: .rounded))
+                            .monospacedDigit()
+                            .contentTransition(reduceMotion ? .identity : .numericText())
                     }
                     Spacer()
                     AssetImage(name: "decor_sun_progress_v1")
                         .frame(width: 42, height: 42)
+                        .comicIdleBob(enabled: !reduceMotion, amplitude: 2.4, rotation: 6, duration: 3.1)
                 }
                 ComicProgressBar(progress: snapshot.progress)
                 HStack {
@@ -2312,6 +2624,8 @@ private struct ProgressSummaryCard: View {
 }
 
 private struct SmallMetricCard: View {
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.payJoyReduceMotion) private var appReduceMotion
     let title: String
     let value: String
     let caption: String
@@ -2325,6 +2639,8 @@ private struct SmallMetricCard: View {
                     .font(.system(size: 23, weight: .black, design: .rounded))
                     .minimumScaleFactor(0.72)
                     .lineLimit(1)
+                    .monospacedDigit()
+                    .contentTransition(accessibilityReduceMotion || appReduceMotion ? .identity : .numericText())
                 Text(caption)
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(AppTheme.muted)
@@ -2363,6 +2679,7 @@ private struct MoyuCard: View {
                 AssetImage(name: AppTheme.moyuWorkerAsset)
                     .frame(width: 118, height: 100)
                     .scaleEffect(AppTheme.cardArtworkScale, anchor: .trailing)
+                    .comicIdleBob(enabled: !reduceMotion, amplitude: 3.2, rotation: 1.1, duration: 2.7)
                     .accessibilityHidden(true)
             }
         }

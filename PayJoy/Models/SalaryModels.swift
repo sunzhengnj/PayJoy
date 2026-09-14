@@ -1327,6 +1327,26 @@ struct WeeklyPayReport: Equatable {
     }
 }
 
+enum SalaryBadgeFamily: String, CaseIterable, Identifiable {
+    case paydayProgress
+    case wish
+    case calendar
+    case journal
+    case overtime
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .paydayProgress: L10n.t("开薪进度")
+        case .wish: L10n.t("愿望足迹")
+        case .calendar: L10n.t("日历收藏")
+        case .journal: L10n.t("手账排班")
+        case .overtime: L10n.t("加班时光")
+        }
+    }
+}
+
 struct SalaryBadge: Equatable, Identifiable {
     let id: String
     let title: String
@@ -1336,6 +1356,25 @@ struct SalaryBadge: Equatable, Identifiable {
 
     var isUnlocked: Bool {
         progress >= 1
+    }
+
+    var family: SalaryBadgeFamily {
+        switch id {
+        case "first-payday", "workweek-earned", "month-quarter", "month-halfway", "month-three-quarter", "month-finish":
+            return .paydayProgress
+        case "payday-direction", "goal-halfway", "goal-sprint", "goal-reached":
+            return .wish
+        case "calendar-note", "calendar-journal", "schedule-owner", "schedule-master", "schedule-director", "paid-leave", "rest-planner":
+            return .journal
+        case let value where value.hasPrefix("calendar-"):
+            return .calendar
+        default:
+            return .overtime
+        }
+    }
+
+    var artworkName: String {
+        "achievement_\(id.replacingOccurrences(of: "-", with: "_"))_v1"
     }
 
     init(id: String, title: String, subtitle: String, icon: String, progress: Double, isUnlocked: Bool = false) {

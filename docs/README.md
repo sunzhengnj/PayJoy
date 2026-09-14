@@ -1,14 +1,32 @@
-# 开薪 / ClockJoy 法律与支持页面
+# 开薪 / ClockJoy 产品站与法律页面
 
-这个目录用于 GitHub Pages 托管。
+这个目录用于 GitHub Pages 托管。`index.html` 是产品落地页（SEO / GEO 用），法律页仍是 `privacy.html`、`terms.html`、`support.html`。
 
-- 根目录页面会根据 `?lang=` 参数或浏览器语言自动切换为简体中文、繁体中文、英文、日文或韩文。
-- 同时也提供了固定语言路径页面，便于直接分享或在 App 内按语言跳转：
-  - `zh-hans/`
-  - `zh-hant/`
-  - `en/`
-  - `ja/`
-  - `ko/`
+产品首页：
+
+```text
+https://sunzhengnj.github.io/PayJoy/
+https://sunzhengnj.github.io/PayJoy/en/
+https://sunzhengnj.github.io/PayJoy/zh-hant/
+https://sunzhengnj.github.io/PayJoy/ja/
+https://sunzhengnj.github.io/PayJoy/ko/
+```
+
+指南（给搜索引擎和问答模型引用）：
+
+```text
+https://sunzhengnj.github.io/PayJoy/guides/countdown.html
+https://sunzhengnj.github.io/PayJoy/guides/vs-calculator.html
+https://sunzhengnj.github.io/PayJoy/guides/lock-screen.html
+```
+
+App Store 文案审计与可粘贴稿在 [`app-store/`](app-store/AUDIT.md)。
+
+---
+
+# 法律与支持页面
+
+法律页仍是根目录的 `privacy.html`、`terms.html`、`support.html`、`delete-account.html`、`legal.html`。它们会根据 `?lang=` 或浏览器语言切换文案。`zh-hans/` 等语言目录里的法律页继续重定向到这些根文件；各语言目录的 `index.html` 则是对应语言的产品首页。
 
 ## 页面
 

@@ -2111,25 +2111,15 @@ struct ProPaywallSheet: View {
         ZStack {
             ProPaywallBackground()
 
-            ScrollViewReader { _ in
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ProPaywallHeader(subtitle: context.subtitle) {
-                            dismiss()
-                        }
-                        ProPassCoverCard(
-                            isUnlocked: appState.hasEffectivePro,
-                            description: context.coverDescription
-                        )
-                        if context == .salaryReport {
-                            ProSalaryReportBenefitCard()
-                        }
-                        ProMissionBoard()
-                        ProThemeBenefitsCard()
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 16) {
+                    ProPassportArtwork {
+                        dismiss()
                     }
-                    .padding(AppTheme.pagePadding)
-                    .padding(.bottom, 122)
                 }
+                .padding(.horizontal, AppTheme.pagePadding)
+                .padding(.top, 6)
+                .padding(.bottom, 136)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -2184,14 +2174,14 @@ struct ProPaywallSheet: View {
                 .foregroundStyle(.white.opacity(0.54))
             }
             .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.top, 10)
+            .padding(.top, 8)
             .padding(.bottom, 8)
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .background {
                 LinearGradient(
                     colors: [
-                        Color(hex: 0x092E31).opacity(0.96),
-                        Color(hex: 0x071A20).opacity(0.98)
+                        Color(hex: 0x0B2430).opacity(0.96),
+                        Color(hex: 0x07151D).opacity(0.98)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -2246,12 +2236,19 @@ struct ProPaywallSheet: View {
             .frame(maxWidth: .infinity)
             .frame(minHeight: 52)
             .padding(.vertical, 2)
-            .background(AppTheme.coin)
+            .background(
+                LinearGradient(
+                    colors: [Color(hex: 0xFFE27B), Color(hex: 0xFFC54A)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
             .clipShape(RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: AppTheme.buttonRadius, style: .continuous)
-                    .stroke(AppTheme.outline, lineWidth: 1.5)
+                    .stroke(Color.white.opacity(0.58), lineWidth: 1)
             }
+            .shadow(color: Color(hex: 0xFFC54A).opacity(0.24), radius: 13, x: 0, y: 6)
         }
         .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: prefersReducedMotion))
         .disabled(!appState.canStartProPrimaryAction)
@@ -2354,27 +2351,54 @@ struct ProPaywallSheet: View {
     }
 }
 
+private struct ProPassportArtwork: View {
+    let onClose: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Image("pro_passport_reference_v1")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 610, alignment: .top)
+                .clipped()
+
+            Button(action: onClose) {
+                Color.clear
+                    .frame(width: 66, height: 66)
+            }
+            .buttonStyle(.plain)
+            .contentShape(Circle())
+            .padding(.top, 8)
+            .padding(.trailing, 8)
+            .accessibilityLabel(L10n.t("关闭会员页面"))
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(L10n.t("开薪权益：无限愿望、工资报告、实际薪资、完整回执历史、更多回执语气、iCloud 同步、密码保护、午休设置与提醒、老板键、全部主题与图标。"))
+    }
+}
+
 private struct ProPaywallBackground: View {
     var body: some View {
         let isMidnight = AppTheme.current == .midnight
         ZStack {
             LinearGradient(
                 colors: isMidnight
-                    ? [Color(hex: 0x07101F), Color(hex: 0x0D2430), Color(hex: 0x11131F)]
-                    : [Color(hex: 0x071A20), Color(hex: 0x073B3A), Color(hex: 0x1F1806)],
+                    ? [Color(hex: 0x091224), Color(hex: 0x16254A), Color(hex: 0x0C302F)]
+                    : [Color(hex: 0x091C2C), Color(hex: 0x0B4540), Color(hex: 0x172D49)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             Circle()
-                .fill(AppTheme.coin.opacity(isMidnight ? 0.12 : 0.28))
-                .frame(width: 260, height: 260)
-                .blur(radius: 28)
-                .offset(x: 145, y: -260)
+                .fill(Color(hex: 0xFFD15A).opacity(isMidnight ? 0.12 : 0.22))
+                .frame(width: 280, height: 280)
+                .blur(radius: 42)
+                .offset(x: 150, y: -285)
             Circle()
-                .fill(Color(hex: 0x2F8F86).opacity(isMidnight ? 0.1 : 0.22))
-                .frame(width: 260, height: 260)
-                .blur(radius: 36)
-                .offset(x: -150, y: 300)
+                .fill(Color(hex: 0x7B9CFF).opacity(isMidnight ? 0.1 : 0.17))
+                .frame(width: 310, height: 310)
+                .blur(radius: 52)
+                .offset(x: -165, y: 290)
         }
         .ignoresSafeArea()
     }
@@ -2411,9 +2435,17 @@ private struct ProPaywallHeader: View {
     }
 
     private var proTitle: some View {
-        Text(L10n.t("开薪会员"))
-            .font(.system(size: 31, weight: .black, design: .rounded))
-            .foregroundStyle(.white)
+        HStack(spacing: 8) {
+            Text("薪")
+                .font(.system(size: 13, weight: .black, design: .rounded))
+                .foregroundStyle(Color(hex: 0x073D3B))
+                .frame(width: 30, height: 30)
+                .background(AppTheme.coin)
+                .clipShape(Circle())
+            Text(L10n.t("开薪会员"))
+                .font(.system(size: 27, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+        }
     }
 
     private var subtitleText: some View {
@@ -2425,14 +2457,13 @@ private struct ProPaywallHeader: View {
 
     private var closeButton: some View {
         Button(action: onClose) {
-            Image(systemName: "xmark")
+            Text("×")
                 .font(.system(size: 15, weight: .black))
-                .foregroundStyle(AppTheme.ink)
+                .foregroundStyle(.white)
                 .frame(width: 46, height: 46)
-                .background(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.96) : Color.white.opacity(0.94))
+                .background(Color.white.opacity(0.14))
                 .clipShape(Circle())
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.3))
-                .shadow(color: Color.black.opacity(0.24), radius: 0, x: 2, y: 2)
+                .overlay(Circle().stroke(Color.white.opacity(0.32), lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L10n.t("关闭会员页面"))
@@ -2444,195 +2475,71 @@ private struct ProPassCoverCard: View {
     let description: String
 
     var body: some View {
-        let isMidnight = AppTheme.current == .midnight
-        ZStack {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(isMidnight ? Color(hex: 0x172238) : Color(hex: 0xFFE8A3))
-                .overlay {
-                    LinearGradient(
-                        colors: isMidnight
-                            ? [Color.white.opacity(0.08), AppTheme.coin.opacity(0.34), AppTheme.orange.opacity(0.12)]
-                            : [Color.white.opacity(0.32), AppTheme.coin.opacity(0.92), AppTheme.orange.opacity(0.28)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(AppTheme.outline, lineWidth: 2.35)
-                }
-                .shadow(color: AppTheme.coin.opacity(isMidnight ? 0.12 : 0.26), radius: 18, x: 0, y: 10)
+        ZStack(alignment: .topLeading) {
+            AssetImage(name: "pro_passport_cover_v1", contentMode: .fill)
+                .frame(maxWidth: .infinity)
+                .frame(height: 278)
+                .clipped()
 
-            ProHalftonePattern()
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            LinearGradient(
+                colors: [Color(hex: 0x052D2C).opacity(0.96), Color.clear],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
 
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(L10n.t("会员卡"))
-                            .font(.system(size: 15, weight: .black, design: .rounded))
-                            .tracking(1.3)
-                            .foregroundStyle(AppTheme.ink.opacity(0.68))
-                        Text(passTitle)
-                            .font(.system(size: 31, weight: .black, design: .rounded))
-                            .foregroundStyle(AppTheme.ink)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.78)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text(description)
-                            .font(.caption.weight(.black))
-                            .foregroundStyle(AppTheme.ink.opacity(0.68))
-                            .lineSpacing(2)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .layoutPriority(1)
-                            .frame(maxWidth: 236, alignment: .leading)
-                    }
-                    Spacer()
-                    ProSeal()
-                        .frame(width: 70, height: 70)
-                        .offset(x: 2, y: 0)
-                }
-
-                Spacer(minLength: 4)
-
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 6) {
-                        ProPill(text: L10n.t("非订阅"))
-                        ProPill(text: L10n.t("可恢复"))
-                    }
-                    ProPill(text: L10n.t("全部权益"))
-                }
+            VStack(alignment: .leading, spacing: 7) {
+                Text("PAYJOY · LIFE PASS")
+                    .font(.caption2.weight(.black))
+                    .tracking(1.2)
+                    .foregroundStyle(AppTheme.coin.opacity(0.88))
+                Text(passTitle)
+                    .font(.system(size: 31, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.76)
+                Text(L10n.t("给努力一张长期通行证"))
+                    .font(.subheadline.weight(.black))
+                    .foregroundStyle(AppTheme.coin)
+                Text(description)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .lineSpacing(2)
+                    .lineLimit(3)
+                    .frame(maxWidth: 205, alignment: .leading)
+                Spacer(minLength: 0)
+                Text(L10n.t("一次买断，永久拥有"))
+                    .font(.caption.weight(.black))
+                    .foregroundStyle(Color(hex: 0x073D3B))
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 7)
+                    .background(AppTheme.coin)
+                    .clipShape(Capsule())
             }
             .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxHeight: .infinity, alignment: .topLeading)
 
             AssetImage(name: AppTheme.proPaywallWorkerAsset)
-                .frame(width: 150, height: 112)
-                .offset(x: 98, y: 58)
-
-            ProTicketCutout()
-                .frame(width: 24, height: 150)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .offset(x: 12)
+                .frame(width: 138, height: 104)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(.trailing, 8)
+                .padding(.bottom, 2)
         }
-        .frame(height: 226)
+        .frame(height: 278)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(AppTheme.coin.opacity(0.7), lineWidth: 1.2)
+        }
+        .shadow(color: Color.black.opacity(0.3), radius: 18, x: 0, y: 10)
         .dynamicTypeSize(...DynamicTypeSize.large)
         .accessibilityElement(children: .combine)
     }
 
     private var passTitle: String {
         if isUnlocked {
-            return L10n.t("已开通")
+            return L10n.t("会员已开通")
         }
-        return L10n.t("一次买断")
-    }
-}
-
-private struct ProSeal: View {
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.96) : Color.white.opacity(0.95))
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.45))
-
-            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                .fill(AppTheme.coin)
-                .frame(width: 48, height: 34)
-                .rotationEffect(.degrees(-8))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 13, style: .continuous)
-                        .stroke(AppTheme.outline, lineWidth: 1.2)
-                        .rotationEffect(.degrees(-8))
-                }
-
-            Text(L10n.t("会员"))
-                .font(.system(size: 13, weight: .black, design: .rounded))
-                .foregroundStyle(AppTheme.ink)
-                .rotationEffect(.degrees(-8))
-
-            ForEach(0..<3, id: \.self) { index in
-                Circle()
-                    .fill(Color.white.opacity(0.86))
-                    .frame(width: [6, 4, 5][index])
-                    .overlay(Circle().stroke(AppTheme.outline.opacity(0.55), lineWidth: 0.7))
-                    .offset(x: [-23, 23, 8][index], y: [-20, -18, 23][index])
-            }
-        }
-    }
-}
-
-private struct ProThemeStackIcon: View {
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.96) : Color.white.opacity(0.94))
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
-
-            themeCard(color: Color(hex: 0xFFE8A3), icon: "sparkles", rotation: -12, offset: CGSize(width: -17, height: 10))
-            themeCard(color: Color(hex: 0xFF9CC4), icon: "paintpalette.fill", rotation: 6, offset: CGSize(width: 5, height: -5))
-            themeCard(color: Color(hex: 0xFFD86A), icon: "app.badge.fill", rotation: 17, offset: CGSize(width: 19, height: 13))
-        }
-    }
-
-    private func themeCard(color: Color, icon: String, rotation: Double, offset: CGSize) -> some View {
-        RoundedRectangle(cornerRadius: 11, style: .continuous)
-            .fill(color)
-            .frame(width: 42, height: 36)
-            .overlay {
-                RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .stroke(AppTheme.outline, lineWidth: 1.1)
-            }
-            .overlay {
-                Image(systemName: icon)
-                    .font(.system(size: 13, weight: .black))
-                    .foregroundStyle(AppTheme.ink)
-            }
-            .rotationEffect(.degrees(rotation))
-            .offset(offset)
-            .shadow(color: Color.black.opacity(0.16), radius: 0, x: 1.5, y: 1.5)
-    }
-}
-
-private struct ProTicketCutout: View {
-    var body: some View {
-        VStack(spacing: 18) {
-            ForEach(0..<4, id: \.self) { _ in
-                Circle()
-                    .fill(Color(hex: 0x0A2E2D))
-                    .frame(width: 18, height: 18)
-                    .overlay(Circle().stroke(AppTheme.outline.opacity(0.22), lineWidth: 1))
-            }
-        }
-    }
-}
-
-private struct ProHalftonePattern: View {
-    var body: some View {
-        GeometryReader { proxy in
-            let columns = 8
-            let rows = 5
-            ForEach(0..<(columns * rows), id: \.self) { index in
-                let col = index % columns
-                let row = index / columns
-                Circle()
-                    .fill(AppTheme.ink.opacity(0.08))
-                    .frame(width: 7 + CGFloat((col + row) % 3) * 2, height: 7 + CGFloat((col + row) % 3) * 2)
-                    .position(
-                        x: proxy.size.width * 0.08 + CGFloat(col) * 35,
-                        y: proxy.size.height * 0.18 + CGFloat(row) * 28
-                    )
-            }
-
-            Path { path in
-                path.move(to: CGPoint(x: proxy.size.width * 0.42, y: 42))
-                path.addLine(to: CGPoint(x: proxy.size.width * 0.62, y: 65))
-                path.move(to: CGPoint(x: proxy.size.width * 0.37, y: 78))
-                path.addLine(to: CGPoint(x: proxy.size.width * 0.58, y: 104))
-            }
-            .stroke(AppTheme.outline.opacity(0.14), style: StrokeStyle(lineWidth: 4, lineCap: .round))
-        }
+        return L10n.t("人生加薪护照")
     }
 }
 
@@ -2686,158 +2593,103 @@ private struct ProSalaryReportBenefitCard: View {
 }
 
 private struct ProMissionBoard: View {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(AppTheme.cream.opacity(0.95))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(AppTheme.outline, lineWidth: 1.6)
-                }
-                .shadow(color: Color.black.opacity(0.16), radius: 0, x: 3, y: 3)
-
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L10n.t("会员权益"))
-                            .font(.headline.weight(.black))
-                            .foregroundStyle(AppTheme.ink)
-                        Text(L10n.t("开通后立即生效"))
-                            .font(.caption2.weight(.black))
-                            .foregroundStyle(AppTheme.textGray)
-                    }
-                    Spacer()
-                    Text("7/7")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                        .foregroundStyle(AppTheme.ink)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(AppTheme.coin)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(AppTheme.outline, lineWidth: 1.1))
-                }
-
-                LazyVGrid(columns: missionColumns, spacing: 8) {
-                    ProMissionItem(index: "01", title: L10n.t("工资报告"), detail: L10n.t("随主题变化的原创报告"))
-                    ProMissionItem(index: "02", title: L10n.t("实时活动"), detail: L10n.t("实时收入"))
-                    ProMissionItem(index: "03", title: L10n.t("iCloud 同步"), detail: L10n.t("换机恢复"))
-                    ProMissionItem(index: "04", title: L10n.t("密码保护"), detail: L10n.t("隐私加锁"))
-                    ProMissionItem(index: "05", title: L10n.t("老板键"), detail: L10n.t("秒变计算器"))
-                    ProMissionItem(index: "06", title: L10n.t("午休时间"), detail: L10n.t("暂停计薪"))
-                    ProMissionItem(index: "07", title: L10n.t("主题 / 图标"), detail: L10n.t("自由切换"))
-                }
-            }
-            .padding(14)
-        }
-        .frame(minHeight: 326)
-    }
-
-    private var missionColumns: [GridItem] {
-        if dynamicTypeSize.isAccessibilitySize {
-            return [GridItem(.flexible())]
-        }
-        return [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
-    }
-}
-
-private struct ProMissionItem: View {
-    let index: String
-    let title: String
-    let detail: String
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Text(index)
-                .font(.system(size: 11, weight: .black, design: .rounded))
-                .foregroundStyle(AppTheme.ink)
-                .frame(width: 32, height: 30)
-                .background(AppTheme.coin)
-                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .stroke(AppTheme.outline, lineWidth: 1)
-                }
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title)
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(AppTheme.ink)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(detail)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(AppTheme.textGray)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .background(AppTheme.current == .midnight ? AppTheme.softSurface.opacity(0.82) : Color(hex: 0xF4EFE3))
-        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                .stroke(AppTheme.outline.opacity(0.84), lineWidth: 1)
-        }
-    }
-}
-
-private struct ProThemeBenefitsCard: View {
-    var body: some View {
-        let isMidnight = AppTheme.current == .midnight
-        ZStack(alignment: .bottomTrailing) {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: isMidnight ? [Color(hex: 0x10263B), Color(hex: 0x111A2E)] : [Color(hex: 0x0D4741), Color(hex: 0x172D20)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(AppTheme.coin.opacity(isMidnight ? 0.55 : 0.85), lineWidth: 1.5)
-                }
-                .shadow(color: Color.black.opacity(0.18), radius: 0, x: 3, y: 3)
-
-            HStack(alignment: .center, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(L10n.t("主题与图标"))
-                        .font(.headline.weight(.black))
+        VStack(alignment: .leading, spacing: 13) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(L10n.t("开薪权益"))
+                        .font(.title3.weight(.black))
                         .foregroundStyle(.white)
-                    Text(L10n.t("主题、App 图标和整套视觉装饰，开通后立即可切换。"))
-                        .font(.caption.weight(.black))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineSpacing(2)
-                    HStack(spacing: 6) {
-                        ProDarkPill(text: L10n.t("主题"))
-                        ProDarkPill(text: L10n.t("图标"))
-                        ProDarkPill(text: L10n.t("装饰"))
-                    }
+                    Text(L10n.t("解锁更完整的开薪体验"))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                Spacer()
+                Text("10 / 10")
+                    .font(.caption.weight(.black))
+                    .foregroundStyle(Color(hex: 0x073D3B))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(AppTheme.coin)
+                    .clipShape(Capsule())
+            }
+
+            HStack(alignment: .center, spacing: 13) {
+                Text("∞")
+                    .font(.system(size: 39, weight: .black, design: .rounded))
+                    .foregroundStyle(Color(hex: 0x073D3B))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(L10n.t("愿望不设上限"))
+                        .font(.headline.weight(.black))
+                        .foregroundStyle(Color(hex: 0x073D3B))
+                    Text(L10n.t("免费版最多同时保留 2 个；会员不限。"))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color(hex: 0x315A55))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
-                ProThemeStackIcon()
-                    .frame(width: 92, height: 92)
-                .rotationEffect(.degrees(7))
             }
-            .padding(16)
+            .padding(14)
+            .background(Color(hex: 0xFFE49A))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(AppTheme.coin.opacity(0.9), lineWidth: 1.2)
+            }
+
+            ProPassportBenefitPage(
+                assetName: "pro_passport_benefits_left_v1",
+                titles: [
+                    L10n.t("无限愿望"),
+                    L10n.t("实际薪资记录"),
+                    L10n.t("更多回执语气"),
+                    L10n.t("密码保护"),
+                    L10n.t("老板键")
+                ]
+            )
+
+            ProPassportBenefitPage(
+                assetName: "pro_passport_benefits_right_v1",
+                titles: [
+                    L10n.t("工资报告"),
+                    L10n.t("完整回执历史"),
+                    L10n.t("iCloud 同步"),
+                    L10n.t("午休设置与提醒"),
+                    L10n.t("全部主题 / 图标")
+                ]
+            )
         }
-        .frame(height: 132)
     }
 }
 
-private struct ProDarkPill: View {
-    let text: String
+private struct ProPassportBenefitPage: View {
+    let assetName: String
+    let titles: [String]
 
     var body: some View {
-        Text(text)
-            .font(.caption2.weight(.black))
-            .foregroundStyle(AppTheme.ink)
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .background(AppTheme.coin)
-            .clipShape(Capsule())
+        AssetImage(name: assetName, contentMode: .fit)
+            .aspectRatio(0.75, contentMode: .fit)
+            .overlay {
+                GeometryReader { proxy in
+                    VStack(spacing: 0) {
+                        ForEach(Array(titles.enumerated()), id: \.offset) { _, title in
+                            Text(title)
+                                .font(.system(size: 13, weight: .black, design: .rounded))
+                                .foregroundStyle(Color(hex: 0x173E3A))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.68)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                                .padding(.horizontal, 40)
+                                .padding(.bottom, 8)
+                        }
+                    }
+                    .padding(.vertical, proxy.size.height * 0.018)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .shadow(color: Color.black.opacity(0.24), radius: 14, x: 0, y: 8)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(titles.joined(separator: "、"))
     }
 }
 
@@ -3182,7 +3034,7 @@ private struct SettingsRow: View {
         if !detail.isEmpty {
             Text(detail)
                 .font(.caption.weight(.bold))
-                .foregroundStyle(AppTheme.muted)
+                .foregroundStyle(AppTheme.textGray)
                 .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
                 .minimumScaleFactor(0.78)
                 .fixedSize(horizontal: false, vertical: dynamicTypeSize.isAccessibilitySize)
