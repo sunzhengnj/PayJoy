@@ -19,8 +19,13 @@ Operating manual for the daily agent that owns the GitHub Pages site end-to-end.
 6. Mark the topic `[done YYYY-MM-DD]` in `QUEUE.md`; promote the next three open topics to `[next]` if fewer than three remain marked next.
 7. Append an entry to `LOG.md`.
 8. Commit to `main` with a clear message, e.g. `seo: add EN guide <slug> for ClockJoy`.
+9. **Also write one social draft** under `marketing/posts/` when capacity allows (see section below).
 
 **Cadence:** one substantial page per weekday. Do not spam thin pages.
+
+## Also write one social draft
+
+After the SEO page steps (or when the SEO queue is blocked), write **one** social draft under [`../posts/`](../posts/) using [`../posts/QUEUE.md`](../posts/QUEUE.md). Do not publish until the user asks — drafts stay `draft`/`ready`; posting is browser + human-gated. See [`../posts/README.md`](../posts/README.md).
 
 ## GEO rules (generative engine optimization)
 
