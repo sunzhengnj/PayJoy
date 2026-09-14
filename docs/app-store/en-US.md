@@ -1,5 +1,7 @@
 # App Store metadata — English (U.S.)
 
+> **ASC live description still may contain PayJoy — apply this paste when agent has App Store Connect access.**
+
 Updated: 2026-09-14
 
 `ClockJoy` is the confirmed public name for the U.S. release. Keep the existing bundle ID, App Group, CloudKit container, StoreKit product IDs, repository paths, and internal Swift type names unchanged.
@@ -18,7 +20,7 @@ Updated: 2026-09-14
 
 `salary,wage,hourly,paycheck,income,overtime,lock,screen,shift,live,activity,clock,out,goal,job,focus`
 
-Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `widgets`, `work`, or `timer` to the keyword field because those terms already appear in the name or subtitle. `lock,screen` and `live,activity` cover Lock Screen and Live Activities as two-token searches. Do not use `PayJoy`, competitor names, or unrelated financial terms.
+Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `widgets`, `work`, or `timer` to the keyword field because those terms already appear in the name or subtitle. `lock,screen` and `live,activity` cover Lock Screen and Live Activities as two-token searches. Do not use the internal repo name, competitor names, or unrelated financial terms in the keyword field.
 
 ## Promotional text
 
@@ -76,7 +78,7 @@ Do not change multiple metadata fields at the same time during measurement.
 
 ## Submission checks
 
-- Confirm the U.S. App Store name is no longer `PayJoy`.
+- Confirm the U.S. App Store name is ClockJoy (not the internal repo name).
 - Confirm the installed English app and widget names are both `ClockJoy`.
 - Confirm the English screenshots contain no Chinese UI or copy.
 - Confirm Support URL, Privacy Policy URL, and Terms show `ClockJoy` when opened in English.
