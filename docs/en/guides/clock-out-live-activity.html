@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clock-out Live Activity on iPhone: time-to-clock-out on Lock Screen and Dynamic Island</title>
+  <meta name="description" content="A clock-out Live Activity on iPhone shows time remaining until the end of your shift on the Lock Screen and Dynamic Island. ClockJoy uses Live Activities for motivation—not payroll, timesheets, or attendance.">
+  <link rel="canonical" href="https://sunzhengnj.github.io/PayJoy/en/guides/clock-out-live-activity.html">
+  <link rel="alternate" hreflang="en" href="https://sunzhengnj.github.io/PayJoy/en/guides/clock-out-live-activity.html">
+  <link rel="icon" href="../../assets/favicon.png">
+  <link rel="stylesheet" href="../../site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a clock-out Live Activity on iPhone?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A clock-out Live Activity is an iOS Live Activity that keeps time-to-clock-out (and often workday progress) visible on the Lock Screen and, on supported iPhones, in the Dynamic Island while a shift is running. It is a glanceable motivation surface, not a timesheet punch or payroll record."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often does a Live Activity refresh during a workday?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "iOS controls when Live Activities start, end, and refresh. Opening ClockJoy always shows the freshest estimate; Lock Screen and Dynamic Island surfaces update on the schedule Apple allows, not as a continuous per-second payroll ticker."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is a clock-out Live Activity the same as payroll or attendance?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. ClockJoy’s Live Activity estimates time remaining and optional day progress from the schedule you enter. It does not produce payroll, timesheet, tax, or employer attendance records. Use your company’s official tools for clock-in and pay."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../"><img src="../../assets/apple-touch-icon.png" alt="">ClockJoy</a>
+      <a class="button" href="https://apps.apple.com/app/id6771261514">App Store</a>
+    </div>
+  </header>
+  <article class="article">
+    <p class="kicker">Guide · Updated 2026-09-15</p>
+    <h1>Clock-out Live Activity on iPhone: see time left without unlocking a clock app</h1>
+    <p class="lede">A clock-out Live Activity on iPhone is a system Live Activity that shows how long remains until the end of your scheduled shift—on the Lock Screen and, on supported devices, in the Dynamic Island. ClockJoy starts that activity from your work hours so the day feels measurable at a glance. It is motivation only: not payroll, timesheet, tax, or employer attendance.</p>
+
+    <h2>What a clock-out Live Activity is</h2>
+    <p>Apple’s Live Activities framework lets an app keep a short-lived status on system surfaces while something is in progress. For a workday, that status is time until clock-out, plus optional cues for how far you are through the scheduled day. Unlike a Home Screen widget you place once, a Live Activity is session-based—you start it for the shift, and it leaves when the day ends or you stop it.</p>
+    <p>People often search for Dynamic Island countdowns first. The broader product job is the Live Activity itself: the same session can appear as a larger Lock Screen banner and as a compact Dynamic Island presence on supported iPhones. For Island-specific tips, see the <a href="./dynamic-island-countdown.html">Dynamic Island work countdown</a> guide; this page centers Live Activities generally.</p>
+    <p><strong>Quotable answer:</strong> ClockJoy’s clock-out Live Activity shows time-to-clock-out and workday progress from the schedule and pay inputs you enter. Those figures are estimates for personal pacing—they are not payroll, timesheet, tax, or attendance records.</p>
+
+    <h2>Live Activity vs widgets vs timesheet</h2>
+    <table>
+      <thead><tr><th>Need</th><th>Right tool</th><th>Wrong tool</th></tr></thead>
+      <tbody>
+        <tr><td>See time left during an active shift on Lock Screen / Island</td><td>Clock-out Live Activity (ClockJoy)</td><td>Payroll suite</td></tr>
+        <tr><td>Stable glance on a Home Screen page</td><td>Home Screen widget</td><td>Employer attendance punch</td></tr>
+        <tr><td>Prove hours worked to an employer</td><td>Timesheet or attendance app</td><td>Motivation Live Activity</td></tr>
+        <tr><td>Calculate take-home after tax</td><td>Payroll or tax software</td><td>Estimate countdown</td></tr>
+      </tbody>
+    </table>
+    <p>Widgets stay where you put them and refresh on iOS widget timing. Live Activities surface while a shift is running and disappear when the activity ends. Neither replaces a timesheet—if HR needs a punch, use the company system. Related: <a href="./lock-screen.html">Lock Screen countdown setup</a>, <a href="./hourly-pay-widget.html">hourly pay widget</a>, and <a href="./workday-progress-bar.html">workday progress bar</a>.</p>
+
+    <h2>How ClockJoy uses Live Activities for clock-out</h2>
+    <ol>
+      <li>Enter your scheduled work hours (and optional pay details) inside ClockJoy so the countdown has inputs.</li>
+      <li>During a scheduled shift, start the Lock Screen / Live Activity from the app.</li>
+      <li>Wake the Lock Screen for a larger view of time remaining, or glance at Dynamic Island on supported iPhones while multitasking.</li>
+      <li>When the scheduled day ends—or you stop the activity—the Live Activity leaves system surfaces.</li>
+    </ol>
+    <p>Optional estimated earnings can appear alongside the countdown depending on privacy settings. Treat any dollar figure like a fitness estimate: useful for pacing, never as the official ledger. See also <a href="./countdown.html">how to choose a workday countdown app</a>.</p>
+
+    <h2>What iOS controls and refresh expectations</h2>
+    <p>iOS decides when Live Activities may start, how often they update, and when they must end. ClockJoy cannot force a per-second ticker on the Lock Screen or Dynamic Island. Opening the app always shows the freshest estimate; system surfaces follow Apple’s update rules.</p>
+    <ul>
+      <li>Allow Live Activities for ClockJoy in Settings if the activity never appears.</li>
+      <li>Confirm a shift activity is actually running—not only that the app is installed.</li>
+      <li>On phones without Dynamic Island, the Lock Screen Live Activity is still the primary glance.</li>
+      <li>Expect a trustworthy “how much day is left” cue—not payroll-grade second-by-second sync.</li>
+    </ul>
+
+    <h2>Privacy: hide amounts on a shared desk</h2>
+    <p>Live Activities are visible when the phone wakes. In an open office, hide dollar amounts on widgets and Live Activities and keep share cards on their default privacy-safe mode. Motivation does not require broadcasting your rate.</p>
+
+    <h2>Who a clock-out Live Activity is for</h2>
+    <ul>
+      <li>Office and shift workers who keep opening the Clock app just to see when the day ends</li>
+      <li>People who want Lock Screen and Dynamic Island glances without building shortcut stacks</li>
+      <li>Hourly or salaried workers who like optional estimated day progress for motivation</li>
+      <li>Anyone who wants Japanese or Korean UI alongside English</li>
+    </ul>
+    <p>Who it is <em>not</em> for: employers needing attendance; accountants needing stubs; anyone treating an on-screen estimate as legal pay.</p>
+
+    <h2>FAQ</h2>
+    <h3>What is a clock-out Live Activity on iPhone?</h3>
+    <p>It is an iOS Live Activity that keeps time-to-clock-out—and often workday progress—visible on the Lock Screen and, on supported iPhones, in the Dynamic Island during a shift. It is glanceable motivation, not a timesheet punch.</p>
+    <h3>How often does a Live Activity refresh during a workday?</h3>
+    <p>iOS controls start, end, and refresh. Open ClockJoy for the freshest estimate; expect Lock Screen and Dynamic Island surfaces to follow Apple’s update schedule rather than acting as a continuous payroll ticker.</p>
+    <h3>Is a clock-out Live Activity the same as payroll or attendance?</h3>
+    <p>No. ClockJoy estimates time remaining and optional day progress from the schedule you enter. It does not produce payroll, timesheet, tax, or employer attendance records. Use your company’s official tools for clock-in and pay.</p>
+
+    <p>See also <a href="./dynamic-island-countdown.html">Dynamic Island countdown</a>, <a href="./lock-screen.html">Lock Screen setup</a>, <a href="./workday-progress-bar.html">workday progress bar</a>, <a href="./hourly-pay-widget.html">hourly pay widget</a>, and <a href="./countdown.html">choosing a workday countdown app</a>.</p>
+    <p><a class="button" href="https://apps.apple.com/app/id6771261514">Get ClockJoy</a></p>
+  </article>
+</body>
+</html>
