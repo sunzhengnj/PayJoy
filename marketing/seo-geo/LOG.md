@@ -4,6 +4,38 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-09-15 — clock-out Live Activity EN guide
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Clock-out Live Activity iPhone → `/en/guides/clock-out-live-activity.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` (new guide-card first; meta mentions Live Activity / clock-out)
+- Updated `docs/sitemap.xml` (new EN URL + `en/guides/` lastmod 2026-09-15)
+- Social draft: `marketing/posts/2026-09-15-x-lock-screen-end-of-shift.md` (X @ycbhsz Lock Screen tip)
+- No App Store Connect edits
+- No CN twin this batch
+
+**Brand check:** new public copy uses ClockJoy only (PayJoy = repo path / GitHub Pages URL only).
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/clock-out-live-activity.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+
+**Failures / follow-ups**
+
+- CN twin for clock-out Live Activity: deferred (capacity).
+- ASC live metadata: not touched.
+
+**Next queue items:** salary progress vs timesheet; best Lock Screen countdown for work; freelancer day earnings estimate.
+
+---
+
 ## 2026-09-14 — first automated EN GEO batch
 
 **Status:** shipped (pipeline bootstrap)
