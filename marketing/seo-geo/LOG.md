@@ -4,6 +4,38 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-09-18 — salary progress vs timesheet EN guide
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Salary progress vs timesheet → `/en/guides/salary-progress-vs-timesheet.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` (new guide-card first; meta mentions salary progress vs timesheet)
+- Updated `docs/sitemap.xml` (new EN URL + `en/guides/` lastmod 2026-09-18)
+- Social draft: `marketing/posts/2026-09-18-linkedin-workday-countdown-boundary.md` (LinkedIn boundary / countdown; EN-only)
+- No App Store Connect edits
+- No CN twin this batch
+
+**Brand check:** new public copy uses ClockJoy only (PayJoy = repo path / GitHub Pages URL only).
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/salary-progress-vs-timesheet.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+
+**Failures / follow-ups**
+
+- CN twin for salary progress vs timesheet: deferred (capacity).
+- ASC live metadata: not touched.
+
+**Next queue items:** best Lock Screen countdown for work; freelancer day earnings estimate; overtime day tracker for motivation.
+
+---
+
 ## 2026-09-15 — clock-out Live Activity EN guide
 
 **Status:** shipped
