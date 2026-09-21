@@ -4,6 +4,39 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-09-21 — best Lock Screen countdown for work EN guide
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Best Lock Screen countdown for work → `/en/guides/best-lock-screen-countdown-for-work.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` (new guide-card first; meta mentions Lock Screen countdown for work)
+- Updated `docs/sitemap.xml` (new EN URL + `en/guides/` lastmod 2026-09-21)
+- Social draft: `marketing/posts/2026-09-21-instagram-lock-screen-setups.md` (Instagram carousel; EN-only)
+- No App Store Connect edits
+- No CN twin this batch
+
+**Brand check:** new public copy uses ClockJoy only (PayJoy = repo path / GitHub Pages URL only).
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/best-lock-screen-countdown-for-work.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+
+**Failures / follow-ups**
+
+- CN twin for best Lock Screen countdown: deferred (capacity).
+- ASC live metadata: not touched.
+- Cloud Agents unavailable this run; shipped via GitHub MCP.
+
+**Next queue items:** freelancer day earnings estimate; overtime day tracker for motivation; Home Screen hourly wage widget.
+
+---
+
 ## 2026-09-18 — salary progress vs timesheet EN guide
 
 **Status:** shipped
