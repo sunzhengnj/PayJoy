@@ -20,6 +20,7 @@
 		00000000000000000000010B /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020B /* StatsView.swift */; };
 		00000000000000000000010C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020C /* ProfileView.swift */; };
 		00000000000000000000010D /* SalaryCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020D /* SalaryCalculatorTests.swift */; };
+		00000000000000000000017F /* TabChromeLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000268 /* TabChromeLayoutTests.swift */; };
 		00000000000000000000010E /* PayJoyActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020E /* PayJoyActivityAttributes.swift */; };
 		00000000000000000000010F /* PayJoyWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000020F /* PayJoyWidgetsBundle.swift */; };
 		000000000000000000000110 /* PayJoyEarningsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000210 /* PayJoyEarningsWidget.swift */; };
@@ -134,6 +135,7 @@
 		00000000000000000000020B /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		00000000000000000000020C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		00000000000000000000020D /* SalaryCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculatorTests.swift; sourceTree = "<group>"; };
+		000000000000000000000268 /* TabChromeLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabChromeLayoutTests.swift; sourceTree = "<group>"; };
 		00000000000000000000020E /* PayJoyActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyActivityAttributes.swift; sourceTree = "<group>"; };
 		00000000000000000000020F /* PayJoyWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyWidgetsBundle.swift; sourceTree = "<group>"; };
 		000000000000000000000210 /* PayJoyEarningsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyEarningsWidget.swift; sourceTree = "<group>"; };
@@ -369,6 +371,7 @@
 			isa = PBXGroup;
 			children = (
 				00000000000000000000020D /* SalaryCalculatorTests.swift */,
+				000000000000000000000268 /* TabChromeLayoutTests.swift */,
 			);
 			path = PayJoyTests;
 			sourceTree = "<group>";
@@ -651,6 +654,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00000000000000000000010D /* SalaryCalculatorTests.swift in Sources */,
+				00000000000000000000017F /* TabChromeLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

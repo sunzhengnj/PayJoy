@@ -166,10 +166,17 @@ final class SalaryCalculator {
                 completedDateKeys: earlyLeaveDateKeys,
                 actualSalaryRecords: actualSalaryRecords
             )
+            let breakdown = periodBreakdown(
+                for: .month,
+                date: date,
+                settings: settings,
+                earlyLeaveDateKeys: earlyLeaveDateKeys,
+                records: records
+            )
             return PeriodEarnings(
                 earned: summary.earnedAmount,
                 projected: summary.projectedAmount,
-                progress: summary.progress
+                progress: breakdown.workdayProgress
             )
         case .year:
             let interval = periodInterval(for: .year, date: date)
@@ -191,10 +198,18 @@ final class SalaryCalculator {
                 cursor = calendar.date(byAdding: .month, value: 1, to: cursor) ?? interval.end
             }
 
+            let breakdown = periodBreakdown(
+                for: .year,
+                date: date,
+                settings: settings,
+                earlyLeaveDateKeys: earlyLeaveDateKeys,
+                records: records
+            )
+
             return PeriodEarnings(
                 earned: earned,
                 projected: projected,
-                progress: projected > 0 ? min(1, earned / projected) : 0
+                progress: breakdown.workdayProgress
             )
         }
     }

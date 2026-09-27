@@ -35,7 +35,7 @@ struct StatsView: View {
         .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $showsProSalaryReport) {
-            ProSalaryReportView()
+            ProSalaryReportView(period: selectedPeriod)
         }
         .navigationDestination(isPresented: $showsActualSalaryHistory) {
             ActualSalaryHistoryView()
@@ -376,16 +376,33 @@ struct StatsView: View {
     }
 
     private var exchangeCard: some View {
-        ComicCard {
-            VStack(alignment: .leading, spacing: 12) {
-                Text(L10n.t("换算一下，你已经赚到："))
-                    .font(.headline.weight(.heavy))
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
-                    ExchangeItem(image: "exchange_milk_tea_v1", title: L10n.t("奶茶"), amount: period.earned / 19, hidesSensitiveAmounts: hidesSensitiveAmounts)
-                    ExchangeItem(image: "exchange_coffee_v1", title: L10n.t("咖啡"), amount: period.earned / 32, hidesSensitiveAmounts: hidesSensitiveAmounts)
-                    ExchangeItem(image: "exchange_hotpot_v1", title: L10n.t("火锅"), amount: period.earned / 150, hidesSensitiveAmounts: hidesSensitiveAmounts)
-                    ExchangeItem(image: "exchange_iphone_v1", title: "iPhone", amount: period.earned / 5999, hidesSensitiveAmounts: hidesSensitiveAmounts)
+        ComicCard(background: AppTheme.softSurface, padding: 14) {
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("\(selectedPeriod.title) \(L10n.t("统计"))")
+                        .font(.headline.weight(.black))
+                    Text(L10n.t("每一段认真工作的时间，都已经被记下。"))
+                        .font(.subheadline.weight(.heavy))
+                        .foregroundStyle(AppTheme.textGray)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.76)
+
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("\(L10n.t("已完成")) \(L10n.t("%@ 天", String(format: "%.1f", breakdown.completedWorkdayEquivalent)))")
+                            .font(.caption.weight(.black))
+                            .foregroundStyle(AppTheme.ink)
+                        Spacer(minLength: 8)
+                        Text("\(Int((period.progress * 100).rounded()))%")
+                            .font(.subheadline.weight(.black))
+                            .monospacedDigit()
+                    }
+
+                    ComicProgressBar(progress: period.progress)
                 }
+
+                AssetImage(name: AppTheme.statsTargetWorkerAsset)
+                    .frame(width: 82, height: 76)
+                    .accessibilityHidden(true)
             }
         }
     }
@@ -446,7 +463,8 @@ struct StatsView: View {
             }
         } label: {
             ProSalaryReportEntryCard(
-                summary: appState.salaryMonthSummary(for: appState.now),
+                period: selectedPeriod,
+                earnings: period,
                 hidesSensitiveAmounts: hidesSensitiveAmounts,
                 currencySymbol: currencySymbol
             )
@@ -495,19 +513,19 @@ struct StatsView: View {
                     overtimeMonthAnchor = appState.now
                     isOvertimeSheetPresented = true
                 } label: {
-                    HStack(spacing: 7) {
+                    HStack(spacing: 6) {
                         Image(systemName: "tablecells.fill")
-                            .font(.system(size: 14, weight: .black))
+                            .font(.system(size: 13, weight: .black))
                         Text(L10n.t("查看汇总表"))
-                            .font(.subheadline.weight(.black))
+                            .font(.caption.weight(.black))
                     }
                     .foregroundStyle(AppTheme.ink)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .padding(.vertical, 11)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 38)
                     .background(AppTheme.coin)
-                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay {
-                        RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .stroke(AppTheme.outline, lineWidth: 1.2)
                     }
                 }
@@ -1248,38 +1266,6 @@ private struct OvertimeRecordRow: View {
             .accessibilityLabel(L10n.t("删除这条加班记录"))
         }
         .padding(.vertical, 3)
-    }
-}
-
-private struct ExchangeItem: View {
-    let image: String
-    let title: String
-    let amount: Double
-    let hidesSensitiveAmounts: Bool
-
-    var body: some View {
-        VStack(spacing: 5) {
-            AssetImage(name: image)
-                .frame(width: 38, height: 38)
-            Text(title)
-                .font(.caption.weight(.black))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Text(quantityText)
-                .font(.subheadline.weight(.black))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.76)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(title))
-        .accessibilityValue(Text(quantityText))
-    }
-
-    private var quantityText: String {
-        let quantity = hidesSensitiveAmounts ? PrivacyText.hiddenCount : String(format: "%.1f", amount)
-        return "×\(quantity)"
     }
 }
 

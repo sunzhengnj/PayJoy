@@ -65,7 +65,7 @@
          </TestableReference>
       </Testables>
       <StoreKitConfigurationFileReference
-         identifier = "container:PayJoy/Configuration/PayJoy.storekit">
+         identifier = "../PayJoy/Configuration/PayJoy.storekit">
       </StoreKitConfigurationFileReference>
    </TestAction>
    <LaunchAction
@@ -90,7 +90,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "container:PayJoy/Configuration/PayJoy.storekit">
+         identifier = "../PayJoy/Configuration/PayJoy.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

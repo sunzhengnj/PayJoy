@@ -36,7 +36,8 @@ private extension AppVisualTheme {
 
 struct ProSalaryReportEntryCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    let summary: SalaryMonthSummary
+    let period: StatsPeriod
+    let earnings: PeriodEarnings
     let hidesSensitiveAmounts: Bool
     let currencySymbol: String
 
@@ -58,11 +59,11 @@ struct ProSalaryReportEntryCard: View {
             )
 
             VStack(alignment: .leading, spacing: 7) {
-                Text(L10n.t("工资报告"))
+                Text(periodReportTitle)
                     .font(.caption.weight(.black))
                     .foregroundStyle(entryCardMuted)
 
-                Text(L10n.t("这个月的努力，有一份好看的答案。"))
+                Text(periodReportSubtitle)
                     .font(.headline.weight(.black))
                     .foregroundStyle(entryCardInk)
                     .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? 230 : 250, alignment: .leading)
@@ -70,7 +71,7 @@ struct ProSalaryReportEntryCard: View {
                     .minimumScaleFactor(0.82)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text(PrivacyText.money(summary.earnedAmount, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                Text(PrivacyText.money(earnings.earned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
                     .font(.system(size: 29, weight: .black, design: .rounded))
                     .foregroundStyle(entryCardInk)
                     .lineLimit(1)
@@ -109,6 +110,22 @@ struct ProSalaryReportEntryCard: View {
     private var entryCardMuted: Color {
         Color(hex: 0x625D54)
     }
+
+    private var periodReportTitle: String {
+        "\(period.title)\(reportTitleSeparator)\(L10n.t("工资报告"))"
+    }
+
+    private var periodReportSubtitle: String {
+        switch period {
+        case .today: L10n.t("每一段认真工作的时间，都已经被记下。")
+        case .month: L10n.t("这个月的努力，有一份好看的答案。")
+        case .year: L10n.t("这一年的努力，值得认真回看。")
+        }
+    }
+
+    private var reportTitleSeparator: String {
+        L10n.currentLanguage == .en ? " " : ""
+    }
 }
 
 struct ProSalaryReportView: View {
@@ -117,12 +134,15 @@ struct ProSalaryReportView: View {
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @State private var showsSharePoster: Bool
     private let reportThemeOverride: AppVisualTheme?
+    private let period: StatsPeriod
 
     init(
+        period: StatsPeriod = .month,
         initialStyle: AppVisualTheme? = nil,
         showsSharePosterInitially: Bool = false
     ) {
         _showsSharePoster = State(initialValue: showsSharePosterInitially)
+        self.period = period
         reportThemeOverride = initialStyle
     }
 
@@ -158,7 +178,7 @@ struct ProSalaryReportView: View {
                 style: selectedStyle,
                 monthTitle: monthTitle,
                 amountText: PrivacyText.money(
-                    currentSummary.earnedAmount,
+                    periodEarnings.earned,
                     hidden: false,
                     currencySymbol: appState.settings.currencySymbol
                 ),
@@ -178,6 +198,10 @@ struct ProSalaryReportView: View {
 
     private var currentSummary: SalaryMonthSummary {
         appState.salaryMonthSummary(for: appState.now)
+    }
+
+    private var periodEarnings: PeriodEarnings {
+        appState.periodEarnings(for: period)
     }
 
     private var previousMonthDate: Date {
@@ -233,7 +257,7 @@ struct ProSalaryReportView: View {
                     .font(.system(size: 28, weight: .black, design: .rounded))
                     .foregroundStyle(reportInk)
 
-                Text(PrivacyText.money(currentSummary.earnedAmount, hidden: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol))
+                Text(PrivacyText.money(periodEarnings.earned, hidden: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol))
                     .font(.system(size: 42, weight: .black, design: .rounded))
                     .foregroundStyle(reportInk)
                     .minimumScaleFactor(0.58)
@@ -287,37 +311,37 @@ struct ProSalaryReportView: View {
         case .classic:
             ReportInsightCard(
                 icon: "bolt.fill",
-                title: L10n.t("本月能量"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: L10n.t("每一个工作日，都在给钱包充电。"),
-                progress: currentSummary.progress,
+                progress: periodEarnings.progress,
                 accent: selectedStyle.reportAccent
             )
         case .pink:
             ReportInsightCard(
                 icon: "heart.fill",
-                title: L10n.t("本月桃气"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: comparisonDetail,
-                progress: currentSummary.progress,
+                progress: periodEarnings.progress,
                 accent: selectedStyle.reportAccent
             )
         case .luckyCat:
             ReportInsightCard(
                 icon: "pawprint.fill",
-                title: L10n.t("本月好运"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: L10n.t("每一笔收入，都在稳稳靠近你。"),
-                progress: currentSummary.progress,
+                progress: periodEarnings.progress,
                 accent: selectedStyle.reportAccent
             )
         case .midnight:
             ReportInsightCard(
                 icon: "moon.stars.fill",
-                title: L10n.t("深夜进度"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: L10n.t("夜色里的专注，也在变成收入。"),
-                progress: currentSummary.progress,
+                progress: periodEarnings.progress,
                 accent: selectedStyle.reportAccent
             )
         }
@@ -418,6 +442,21 @@ struct ProSalaryReportView: View {
     }
 
     private var monthTitle: String {
+        if period == .today {
+            return appState.now.formatted(
+                Date.FormatStyle.dateTime
+                    .month(.wide)
+                    .day()
+                    .locale(Locale(identifier: L10n.currentLanguage.localeIdentifier))
+            )
+        }
+        if period == .year {
+            return appState.now.formatted(
+                Date.FormatStyle.dateTime
+                    .year()
+                    .locale(Locale(identifier: L10n.currentLanguage.localeIdentifier))
+            )
+        }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: L10n.currentLanguage.localeIdentifier)
         formatter.setLocalizedDateFormatFromTemplate("yyyyMMMM")
@@ -438,6 +477,7 @@ struct ProSalaryReportView: View {
     }
 
     private var comparisonText: String {
+        guard period == .month else { return L10n.t("正在积累") }
         guard let comparisonRatio else { return L10n.t("第一份报告正在积累中") }
         if abs(comparisonRatio) < 0.005 {
             return L10n.t("按当前计划，与上月基本持平")
@@ -449,6 +489,7 @@ struct ProSalaryReportView: View {
     }
 
     private var comparisonDetail: String {
+        guard period == .month else { return L10n.t("每一段认真工作的时间，都已经被记下。") }
         guard let comparisonRatio else { return L10n.t("继续使用后，就能看到每月变化。") }
         if abs(comparisonRatio) < 0.005 {
             return L10n.t("这个月正在按计划稳稳推进。")
@@ -476,33 +517,37 @@ struct ProSalaryReportView: View {
         switch selectedStyle {
         case .classic:
             SalaryReportShareInsight(
-                title: L10n.t("本月能量"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: L10n.t("每一个工作日，都在给钱包充电。"),
-                progress: currentSummary.progress
+                progress: periodEarnings.progress
             )
         case .pink:
             SalaryReportShareInsight(
-                title: L10n.t("本月战绩"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: comparisonDetail,
-                progress: currentSummary.progress
+                progress: periodEarnings.progress
             )
         case .luckyCat:
             SalaryReportShareInsight(
-                title: L10n.t("本月好运"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: L10n.t("每一笔收入，都在稳稳靠近你。"),
-                progress: currentSummary.progress
+                progress: periodEarnings.progress
             )
         case .midnight:
             SalaryReportShareInsight(
-                title: L10n.t("深夜进度"),
-                value: String(format: "%.0f%%", currentSummary.progress * 100),
+                title: periodProgressTitle,
+                value: String(format: "%.0f%%", periodEarnings.progress * 100),
                 detail: L10n.t("夜色里的专注，也在变成收入。"),
-                progress: currentSummary.progress
+                progress: periodEarnings.progress
             )
         }
+    }
+
+    private var periodProgressTitle: String {
+        "\(period.title) \(L10n.t("进度"))"
     }
 }
 

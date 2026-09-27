@@ -9,11 +9,17 @@ struct AppRootView: View {
     var body: some View {
         @Bindable var appState = appState
 
-        GeometryReader { proxy in
-            let needsInitialSetup = !appState.preferences.hasCompletedInitialSetup
-            ZStack(alignment: .bottom) {
-                AppTheme.paper.ignoresSafeArea()
+        let needsInitialSetup = !appState.preferences.hasCompletedInitialSetup
+        let barVisible = !appState.isTabBarHidden && !needsInitialSetup
 
+        GeometryReader { proxy in
+            let bottomSafeArea = proxy.safeAreaInsets.bottom
+            let occupancy = TabChromeLayout.occupancy(
+                barVisible: barVisible,
+                bottomSafeArea: bottomSafeArea
+            )
+            let padding = occupancy.paddingInSafeAreaRespectingContainer(bottomSafeArea: bottomSafeArea)
+            ZStack(alignment: .bottom) {
                 Group {
                     if needsInitialSetup {
                         NavigationStack { EmotionalOnboardingView() }
@@ -30,12 +36,11 @@ struct AppRootView: View {
                         }
                     }
                 }
-                .padding(.bottom, appState.isTabBarHidden || needsInitialSetup ? 0 : 58)
+                .padding(.bottom, padding.contentBottomInset)
 
-                if !appState.isTabBarHidden && !needsInitialSetup {
+                if barVisible {
                     ComicTabBar(selectedTab: $appState.selectedTab)
-                        .padding(.bottom, max(-22, -proxy.safeAreaInsets.bottom + 8))
-                        .ignoresSafeArea(.container, edges: .bottom)
+                        .padding(.bottom, padding.barBottomOffset)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
@@ -51,6 +56,8 @@ struct AppRootView: View {
                     .zIndex(20)
                 }
             }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .background(AppTheme.paper.ignoresSafeArea())
             .animation(prefersReducedMotion ? nil : .spring(response: 0.28, dampingFraction: 0.82), value: appState.isTabBarHidden)
             .animation(prefersReducedMotion ? nil : .easeOut(duration: 0.16), value: appState.shouldShowPrivacyShield)
         }

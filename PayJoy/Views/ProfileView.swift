@@ -506,6 +506,8 @@ struct ProfileDetailSheet: View {
                     ThemeSettingsSheet()
                 } else if sheet == .language {
                     LanguageSettingsSheet()
+                } else if sheet == .help {
+                    HelpFeedbackSheet()
                 } else {
                     detailBody
                 }
@@ -921,6 +923,118 @@ struct ProfileDetailSheet: View {
             preferences[keyPath: keyPath] = newValue
             appState.preferences = preferences
         }
+    }
+}
+
+private struct HelpFeedbackSheet: View {
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 14) {
+                ComicCard(background: AppTheme.highlightCardBackground) {
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("?")
+                            .font(.system(size: 22, weight: .black, design: .rounded))
+                            .foregroundStyle(AppTheme.ink)
+                            .frame(width: 42, height: 42)
+                            .background(AppTheme.coin)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L10n.t("规则、支持与法律信息"))
+                                .font(.headline.weight(.black))
+                            Text(L10n.t("计算规则：月薪按月薪 / 21.75 估算日薪，年薪按年薪 / 12 / 21.75，时薪按每日工作时长计算。默认周一到周五计薪。"))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(AppTheme.textGray)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+
+                ComicCard(padding: 0) {
+                    VStack(spacing: 0) {
+                        Button(action: requestAppStoreReview) {
+                            helpRow(
+                                index: "01",
+                                title: L10n.t("去 App Store 给开薪评分"),
+                                subtitle: L10n.t("轻点即可打开系统评分"),
+                                emphasized: true
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        Divider().overlay(AppTheme.divider).padding(.leading, 58)
+
+                        Link(destination: PayJoyLegalLinks.support) {
+                            helpRow(index: "02", title: L10n.t("支持与反馈"), subtitle: nil)
+                        }
+                    }
+                }
+
+                ComicCard(padding: 0) {
+                    VStack(spacing: 0) {
+                        Link(destination: PayJoyLegalLinks.privacy) {
+                            helpRow(index: "03", title: L10n.t("隐私政策"), subtitle: nil)
+                        }
+                        Divider().overlay(AppTheme.divider).padding(.leading, 58)
+                        Link(destination: PayJoyLegalLinks.terms) {
+                            helpRow(index: "04", title: L10n.t("服务条款"), subtitle: nil)
+                        }
+                        Divider().overlay(AppTheme.divider).padding(.leading, 58)
+                        Link(destination: PayJoyLegalLinks.deleteAccount) {
+                            helpRow(index: "05", title: L10n.t("账号删除说明"), subtitle: nil)
+                        }
+                    }
+                }
+            }
+            .padding(AppTheme.pagePadding)
+            .padding(.bottom, 36)
+        }
+    }
+
+    private func helpRow(index: String, title: String, subtitle: String?, emphasized: Bool = false) -> some View {
+        HStack(spacing: 12) {
+            Text(index)
+                .font(.system(size: 11, weight: .black, design: .rounded))
+                .foregroundStyle(AppTheme.ink)
+                .frame(width: 34, height: 34)
+                .background(emphasized ? AppTheme.coin : AppTheme.softSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(emphasized ? AppTheme.outline : AppTheme.divider, lineWidth: 1)
+                }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.black))
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.textGray)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            Text("›")
+                .font(.title3.weight(.black))
+                .foregroundStyle(AppTheme.textGray)
+        }
+        .foregroundStyle(AppTheme.ink)
+        .padding(.horizontal, 14)
+        .padding(.vertical, subtitle == nil ? 13 : 12)
+        .contentShape(Rectangle())
+    }
+
+    private func requestAppStoreReview() {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }) else {
+            return
+        }
+        SKStoreReviewController.requestReview(in: windowScene)
     }
 }
 
@@ -1558,13 +1672,24 @@ private struct LanguageSettingsSheet: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 14) {
                 ComicCard(background: AppTheme.highlightCardBackground) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(L10n.t("选择语言"))
-                            .font(.headline.weight(.heavy))
-                        Text(L10n.t("默认跟随手机语言，也可以在这里固定为繁体中文、日文、英语或韩文。"))
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(AppTheme.textGray)
-                            .lineSpacing(2)
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("Aa")
+                            .font(.system(size: 17, weight: .black, design: .rounded))
+                            .foregroundStyle(AppTheme.ink)
+                            .frame(width: 42, height: 42)
+                            .background(AppTheme.coin)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L10n.t("选择语言"))
+                                .font(.headline.weight(.black))
+                            Text(L10n.t("默认跟随手机语言，也可以在这里固定为繁体中文、日文、英语或韩文。"))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(AppTheme.textGray)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
                 }
 
@@ -2119,7 +2244,7 @@ struct ProPaywallSheet: View {
                 }
                 .padding(.horizontal, AppTheme.pagePadding)
                 .padding(.top, 6)
-                .padding(.bottom, 136)
+                .padding(.bottom, 12)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -2356,25 +2481,25 @@ private struct ProPassportArtwork: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            Image("pro_passport_reference_v1")
-                .resizable()
-                .scaledToFill()
+            AssetImage(name: "pro_passport_artwork_v3", contentMode: .fit)
                 .frame(maxWidth: .infinity)
-                .frame(height: 610, alignment: .top)
-                .clipped()
+                .accessibilityHidden(true)
 
             Button(action: onClose) {
-                Color.clear
-                    .frame(width: 66, height: 66)
+                Text("×")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.96))
+                    .frame(width: 52, height: 52)
+                    .background(Color(hex: 0x0A4A4D).opacity(0.2))
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.28), lineWidth: 1))
             }
             .buttonStyle(.plain)
             .contentShape(Circle())
-            .padding(.top, 8)
-            .padding(.trailing, 8)
+            .padding(.top, 7)
+            .padding(.trailing, 7)
             .accessibilityLabel(L10n.t("关闭会员页面"))
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(L10n.t("开薪权益：无限愿望、工资报告、实际薪资、完整回执历史、更多回执语气、iCloud 同步、密码保护、午休设置与提醒、老板键、全部主题与图标。"))
     }
 }
 
@@ -2642,7 +2767,7 @@ private struct ProMissionBoard: View {
                 titles: [
                     L10n.t("无限愿望"),
                     L10n.t("实际薪资记录"),
-                    L10n.t("更多回执语气"),
+                    L10n.t("更多功能"),
                     L10n.t("密码保护"),
                     L10n.t("老板键")
                 ]

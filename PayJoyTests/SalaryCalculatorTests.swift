@@ -1169,6 +1169,34 @@ final class SalaryCalculatorTests: XCTestCase {
         XCTAssertEqual(earnings.earned, 10_000 * expectedProgress, accuracy: 0.001)
     }
 
+    func testActualSalaryDoesNotMarkCurrentMonthProgressComplete() {
+        var settings = SalarySettings.defaultValue
+        settings.salaryType = .monthly
+        settings.salaryAmount = 10_000
+        settings.monthlyPaidDays = 21.75
+
+        let now = date("2026-05-18 12:00:00")
+        let actual = ActualSalaryRecord(
+            monthKey: "2026-05",
+            amount: 9_560,
+            currencyCode: settings.currencyCode,
+            updatedAt: now
+        )
+
+        let earnings = calculator.periodEarnings(
+            for: .month,
+            date: now,
+            settings: settings,
+            actualSalaryRecords: [actual]
+        )
+        let expectedProgress = (11 + 3.0 / 9.0) / 21
+
+        XCTAssertEqual(earnings.earned, actual.amount, accuracy: 0.001)
+        XCTAssertEqual(earnings.projected, actual.amount, accuracy: 0.001)
+        XCTAssertEqual(earnings.progress, expectedProgress, accuracy: 0.001)
+        XCTAssertLessThan(earnings.progress, 1)
+    }
+
     func testPeriodEarningsAndBreakdownUseCalendarCorrections() {
         var settings = SalarySettings.defaultValue
         settings.salaryType = .monthly

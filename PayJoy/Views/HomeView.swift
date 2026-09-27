@@ -319,21 +319,31 @@ struct HomeView: View {
                 }
             } else {
                 ZStack(alignment: .topLeading) {
-                    if L10n.currentLanguage == .zhHans, AppTheme.current != .midnight {
-                        AssetImage(name: "home_header_lettering_spaced_v2")
-                            .frame(width: 204, height: 147)
-                            .offset(x: -2, y: 0)
-                            .accessibilityLabel(Text(L10n.t("开薪！打工赚钱的每一秒，都是热爱生活的证据！")))
+                    if L10n.currentLanguage == .zhHans {
+                        Group {
+                            if AppTheme.current == .midnight {
+                                AssetImage(name: "home_header_lettering_spaced_v2")
+                                    .colorInvert()
+                                    .opacity(0.96)
+                            } else {
+                                AssetImage(name: "home_header_lettering_spaced_v2")
+                            }
+                        }
+                        .frame(width: 204, height: 147)
+                        .offset(x: -2, y: 0)
+                        .accessibilityLabel(Text(L10n.t("开薪！打工赚钱的每一秒，都是热爱生活的证据！")))
                     } else {
                         VStack(alignment: .leading, spacing: 8) {
+                            Text(L10n.appDisplayName)
+                                .font(.system(size: 27, weight: .black, design: .rounded))
+                                .foregroundStyle(AppTheme.coin)
                             Text(L10n.t("今天也给自己一点好心情。"))
-                                .font(.system(size: 36, weight: .black, design: .rounded))
+                                .font(.title3.weight(.black))
                                 .foregroundStyle(AppTheme.ink)
-                                .frame(width: 205, alignment: .leading)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.55)
+                                .minimumScaleFactor(0.72)
                             Text(L10n.t("打工赚钱的每一秒，都是热爱生活的证据！"))
-                                .font(.title3.weight(.heavy))
+                                .font(.callout.weight(.heavy))
                                 .foregroundStyle(AppTheme.ink)
                                 .lineSpacing(3)
                                 .frame(width: 250, alignment: .leading)
@@ -341,7 +351,7 @@ struct HomeView: View {
                                 .minimumScaleFactor(0.76)
                         }
                         .frame(width: 250, height: 147, alignment: .topLeading)
-                        .offset(x: 0, y: 12)
+                        .offset(x: 0, y: 2)
                         .accessibilityElement(children: .combine)
                     }
 
@@ -795,7 +805,7 @@ struct WeeklyEchoSheet: View {
                     WeeklyEchoPoster(
                         weekDateKeys: appState.currentWeekDateKeys,
                         receipts: appState.currentWeekClosingReceipts,
-                        companionAssetName: appState.selectedCompanion.avatarAssetName
+                        avatarAssetName: appState.profile.avatarAssetName
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .overlay {
@@ -835,7 +845,7 @@ struct WeeklyEchoSheet: View {
         let poster = WeeklyEchoPoster(
             weekDateKeys: appState.currentWeekDateKeys,
             receipts: appState.currentWeekClosingReceipts,
-            companionAssetName: appState.selectedCompanion.avatarAssetName
+            avatarAssetName: appState.profile.avatarAssetName
         )
         .frame(width: 360, height: 500)
         .environment(\.dynamicTypeSize, .large)
@@ -870,7 +880,7 @@ private struct WeeklyEchoPoster: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let weekDateKeys: [String]
     let receipts: [ClosingCapsule]
-    let companionAssetName: String
+    let avatarAssetName: String
 
     var body: some View {
         VStack(spacing: 16) {
@@ -880,7 +890,7 @@ private struct WeeklyEchoPoster: View {
                 .font(.subheadline.weight(.bold))
                 .foregroundStyle(AppTheme.textGray)
 
-            AssetImage(name: companionAssetName)
+            AssetImage(name: avatarAssetName)
                 .frame(width: 108, height: 108)
                 .background(AppTheme.coin.opacity(0.24))
                 .clipShape(Circle())
@@ -1005,32 +1015,35 @@ private struct ClosingReceiptHomeCard: View {
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .stroke(AppTheme.outline, lineWidth: 1.6)
                     }
+                    .shadow(color: AppTheme.shadow.opacity(0.12), radius: 6, x: 0, y: 3)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(receipt == nil ? L10n.t("今天辛苦了") : L10n.t("今天已收下"))
                         .font(.caption.weight(.black))
                         .foregroundStyle(AppTheme.textGray)
                     Text(receipt == nil ? L10n.t("收下今天") : L10n.t("查看收工回执"))
-                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .font(.system(size: 21, weight: .black, design: .rounded))
                         .foregroundStyle(AppTheme.ink)
                     Text(receipt == nil ? L10n.t("点一下今天的状态，给这一天一个句号。") : L10n.t("回执和分享入口今天都在这里。"))
                         .font(.caption.weight(.bold))
                         .foregroundStyle(AppTheme.textGray)
-                        .lineLimit(2)
-                        .frame(maxWidth: 224, alignment: .leading)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                        .frame(maxWidth: 210, alignment: .leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(17)
-                .padding(.trailing, 98)
+                .padding(.horizontal, 14)
+                .padding(.trailing, 84)
 
-                AssetImage(name: appState.selectedCompanion.avatarAssetName)
-                    .frame(width: 104, height: 104)
-                    .offset(x: -4, y: 8)
-                    .comicIdleBob(enabled: !prefersReducedMotion, amplitude: 3, rotation: 1.5, duration: 2.5)
+                AssetImage(name: appState.profile.avatarAssetName)
+                    .frame(width: 76, height: 76)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(AppTheme.outline.opacity(0.82), lineWidth: 1.3))
+                    .offset(x: -4, y: 2)
+                    .comicIdleBob(enabled: !prefersReducedMotion, amplitude: 2, rotation: 1, duration: 2.5)
                     .accessibilityHidden(true)
             }
-            .frame(minHeight: 126)
-            .shadow(color: AppTheme.shadow.opacity(0.18), radius: 0, x: 4, y: 4)
+            .frame(height: 96)
         }
         .buttonStyle(PayJoyPressStyle(scale: 0.98, reduceMotion: prefersReducedMotion))
         .accessibilityLabel(receipt == nil ? L10n.t("收下今天") : L10n.t("查看收工回执"))
@@ -1100,6 +1113,7 @@ struct ClosingReceiptFlowView: View {
                             RoundedRectangle(cornerRadius: 26, style: .continuous)
                                 .stroke(AppTheme.outline, lineWidth: 1.7)
                         }
+                        .shadow(color: AppTheme.shadow.opacity(0.14), radius: 7, x: 0, y: 4)
 
                     VStack(alignment: .leading, spacing: 7) {
                         Text(L10n.t("今日已经到账"))
@@ -1121,13 +1135,12 @@ struct ClosingReceiptFlowView: View {
                     .padding(20)
                     .padding(.trailing, 104)
 
-                    AssetImage(name: appState.selectedCompanion.avatarAssetName)
+                    AssetImage(name: appState.profile.avatarAssetName)
                         .frame(width: 118, height: 118)
                         .offset(x: -8, y: -3)
                         .accessibilityHidden(true)
                 }
                 .frame(height: 166)
-                .shadow(color: AppTheme.shadow.opacity(0.18), radius: 0, x: 4, y: 4)
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text(L10n.t("选一个今天的状态"))
@@ -1372,7 +1385,7 @@ private struct ClosingReceiptDetailView: View {
 
     private var capsuleCard: some View {
         VStack(spacing: 18) {
-            AssetImage(name: companion.avatarAssetName)
+            AssetImage(name: appState.profile.avatarAssetName)
                 .frame(width: 122, height: 122)
                 .background(AppTheme.coin.opacity(0.26))
                 .clipShape(Circle())
@@ -1429,10 +1442,6 @@ private struct ClosingReceiptDetailView: View {
         .shadow(color: AppTheme.shadow.opacity(0.2), radius: 0, x: 5, y: 5)
     }
 
-    private var companion: CompanionProfile {
-        CompanionProfile.catalog.first { $0.id == capsule.companionID } ?? .defaultValue
-    }
-
     private var shareText: String {
         let amountLine = showsAmount
             ? capsule.earnedAmount.compactMoneyText(currencySymbol: receiptCurrencySymbol)
@@ -1448,7 +1457,7 @@ private struct ClosingReceiptDetailView: View {
     private func exportSharePoster() {
         let poster = ClosingReceiptSharePoster(
             capsule: capsule,
-            companionAssetName: companion.avatarAssetName,
+            avatarAssetName: appState.profile.avatarAssetName,
             showsAmount: showsAmount,
             currencySymbol: receiptCurrencySymbol
         )
@@ -1514,7 +1523,7 @@ private struct ClosingReceiptDetailView: View {
 
 private struct ClosingReceiptSharePoster: View {
     let capsule: ClosingCapsule
-    let companionAssetName: String
+    let avatarAssetName: String
     let showsAmount: Bool
     let currencySymbol: String
 
@@ -1529,7 +1538,7 @@ private struct ClosingReceiptSharePoster: View {
                     .foregroundStyle(AppTheme.textGray)
             }
 
-            AssetImage(name: companionAssetName)
+            AssetImage(name: avatarAssetName)
                 .frame(width: 130, height: 130)
                 .background(AppTheme.coin.opacity(0.24))
                 .clipShape(Circle())

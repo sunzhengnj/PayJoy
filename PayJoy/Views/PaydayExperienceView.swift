@@ -486,8 +486,7 @@ struct ActualSalaryHistoryView: View {
                         monthDetailText(
                             canEnter: canEnter,
                             record: record,
-                            recordMatchesCurrency: recordMatchesCurrency,
-                            estimate: estimate
+                            recordMatchesCurrency: recordMatchesCurrency
                         )
                     )
                         .font(.caption2.weight(.black))
@@ -546,25 +545,12 @@ struct ActualSalaryHistoryView: View {
     private func monthDetailText(
         canEnter: Bool,
         record: ActualSalaryRecord?,
-        recordMatchesCurrency: Bool,
-        estimate: SalaryMonthSummary
+        recordMatchesCurrency: Bool
     ) -> String {
         guard canEnter else { return L10n.t("未到发薪时间") }
-        guard let record else { return L10n.t("预计薪资") }
+        guard record != nil else { return L10n.t("预计薪资") }
         guard recordMatchesCurrency else { return L10n.t("点按更新币种") }
-
-        let difference = record.amount - estimate.projectedAmount
-        if abs(difference) < 0.005 {
-            return L10n.t("与预计一致")
-        }
-        let amount = PrivacyText.money(
-            abs(difference),
-            hidden: appState.preferences.hideSensitiveAmounts,
-            currencySymbol: appState.settings.currencySymbol
-        )
-        return difference > 0
-            ? L10n.format("比预计多 %@", amount)
-            : L10n.format("比预计少 %@", amount)
+        return L10n.t("已记录")
     }
 }
 
@@ -649,16 +635,6 @@ struct ActualSalaryEntrySheet: View {
                                 .foregroundStyle(AppTheme.textGray)
                         }
 
-                        if let differenceText {
-                            Text(differenceText)
-                                .font(.caption.weight(.black))
-                                .foregroundStyle(AppTheme.ink)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 7)
-                                .background(AppTheme.coin.opacity(0.72))
-                                .clipShape(Capsule())
-                        }
-
                         Text(L10n.t("填写这个月最终到账总额，保存后会自动更新月度、年度统计和工资报告。"))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(AppTheme.textGray)
@@ -729,22 +705,6 @@ struct ActualSalaryEntrySheet: View {
 
     private var estimate: SalaryMonthSummary {
         appState.estimatedSalaryMonthSummary(for: month)
-    }
-
-    private var differenceText: String? {
-        guard let amount = parsedAmount else { return nil }
-        let difference = amount - estimate.projectedAmount
-        if abs(difference) < 0.005 {
-            return L10n.t("与预计一致")
-        }
-        let value = PrivacyText.money(
-            abs(difference),
-            hidden: appState.preferences.hideSensitiveAmounts,
-            currencySymbol: appState.settings.currencySymbol
-        )
-        return difference > 0
-            ? L10n.format("比预计多 %@", value)
-            : L10n.format("比预计少 %@", value)
     }
 
     private var hasCurrencyMismatch: Bool {

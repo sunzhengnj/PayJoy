@@ -282,6 +282,46 @@ enum AppTab: String, CaseIterable, Identifiable {
     }
 }
 
+struct TabChromeOccupancy: Equatable {
+    var contentBottomInset: CGFloat
+    var barBottomOffset: CGFloat
+
+    static let hidden = TabChromeOccupancy(contentBottomInset: 0, barBottomOffset: 0)
+
+    /// Convert physical-bottom occupancy into padding for a container that already
+    /// respects the bottom safe area. Subtracting that inset avoids double-counting
+    /// the home indicator; values are never negative.
+    func paddingInSafeAreaRespectingContainer(bottomSafeArea: CGFloat) -> TabChromeOccupancy {
+        let safeArea = max(0, bottomSafeArea)
+        return TabChromeOccupancy(
+            contentBottomInset: max(0, contentBottomInset - safeArea),
+            barBottomOffset: max(0, barBottomOffset - safeArea)
+        )
+    }
+}
+
+enum TabChromeLayout {
+    static let defaultBarHeight: CGFloat = 66
+    static let minimumLift: CGFloat = 8
+
+    /// Occupancy from the physical bottom of an edge-to-edge container.
+    /// `bottomSafeArea` must come from a reader that still sees the home-indicator
+    /// edge — not from a `GeometryReader` that has ignored `.bottom` (that reports 0).
+    static func occupancy(
+        barVisible: Bool,
+        bottomSafeArea: CGFloat,
+        barHeight: CGFloat = defaultBarHeight
+    ) -> TabChromeOccupancy {
+        guard barVisible else { return .hidden }
+        let safeArea = max(0, bottomSafeArea)
+        let barBottomOffset = max(minimumLift, safeArea)
+        return TabChromeOccupancy(
+            contentBottomInset: barHeight + barBottomOffset,
+            barBottomOffset: barBottomOffset
+        )
+    }
+}
+
 struct ComicTabBar: View {
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.payJoyReduceMotion) private var appReduceMotion
@@ -327,7 +367,7 @@ struct ComicTabBar: View {
             }
             .padding(7)
         }
-        .frame(height: 66)
+        .frame(height: TabChromeLayout.defaultBarHeight)
         .padding(.horizontal, 18)
         .sensoryFeedback(.selection, trigger: selectedTab)
     }
