@@ -4,6 +4,40 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-02 — privacy mode Lock Screen earnings EN guide
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Privacy mode Lock Screen earnings (amounts hidden by default) → `/en/guides/privacy-mode-lock-screen-earnings.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` (new guide-card first; meta mentions privacy mode Lock Screen earnings)
+- Updated `docs/sitemap.xml` (new EN URL + `en/guides/` lastmod 2026-10-02)
+- Social draft: `marketing/posts/2026-10-02-instagram-privacy-mode-lock-screen.md` (Instagram carousel; EN-only)
+- Marked prior ships (freelancer 2026-09-25, overtime 2026-09-28) done in QUEUE
+- No App Store Connect edits
+- No CN twin this batch
+- No social auto-post
+
+**Brand check:** new public copy uses ClockJoy only (PayJoy = repo path / GitHub Pages URL only).
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/privacy-mode-lock-screen-earnings.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+
+**Failures / follow-ups**
+
+- CN twin for privacy mode Lock Screen earnings: deferred (capacity).
+- ASC live metadata: not touched.
+
+**Next queue items:** wish / goal progress companion; monthly / yearly workday summary; share workday progress card without showing pay.
+
+---
+
 ## 2026-09-21 — best Lock Screen countdown for work EN guide
 
 **Status:** shipped
