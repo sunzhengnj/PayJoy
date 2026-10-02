@@ -33,6 +33,7 @@ Primary channels: **X/Twitter (`@ycbhsz`)**, **Instagram**, **Reddit**, **Thread
 
 ## Done / drafted
 
+- [drafted 2026-10-02] Instagram carousel — Privacy mode: Lock Screen progress without flashing pay → `2026-10-02-instagram-privacy-mode-lock-screen.md` (`ready`)
 - [drafted 2026-09-28] Instagram carousel — Overtime day tracker: notice when the day ran long → `2026-09-28-instagram-overtime-day-tracker.md` (`ready`)
 - [drafted 2026-09-25] Instagram carousel — Freelancer day earnings: see today's progress → `2026-09-25-instagram-freelancer-day-earnings.md` (`ready`)
 - [drafted 2026-09-21] Instagram carousel — 3 Lock Screen setups for a calmer workday → `2026-09-21-instagram-lock-screen-setups.md` (`ready`)

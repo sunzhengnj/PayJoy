@@ -4,6 +4,7 @@ Append one line (or a short block) when a draft is posted, explicitly skipped, o
 
 | Date | Platform | Draft file | Status | Notes |
 |------|----------|------------|--------|-------|
+| 2026-10-02 | Instagram | 2026-10-02-instagram-privacy-mode-lock-screen.md | drafted / ready | Carousel: privacy mode Lock Screen earnings (amounts hidden by default); EN-only; soft CTA + App Store + new privacy guide; creative scrapbook image concepts (no bare screenshot / no SaaS card); Estimates ≠ paycheck / timesheet / tax / attendance; JA/KO UI OK. |
 | 2026-09-28 | Instagram | 2026-09-28-instagram-overtime-day-tracker.md | drafted / ready | Carousel: overtime day tracker for motivation; EN-only; soft CTA + App Store + new overtime guide; creative scrapbook image concepts (no bare screenshot / no SaaS card); Estimates ≠ paycheck / payroll OT / timesheet / tax / attendance; JA/KO UI OK. |
 | 2026-09-25 | Instagram | 2026-09-25-instagram-freelancer-day-earnings.md | drafted / ready | Carousel: freelancer day earnings progress; EN-only; soft CTA + App Store + new freelancer day-earnings guide; creative image concepts (no bare screenshot); Estimates ≠ paycheck / timesheet / tax / attendance; JA/KO UI OK. |
 | 2026-09-21 | Instagram | 2026-09-21-instagram-lock-screen-setups.md | drafted / ready | Carousel: 3 Lock Screen setups; EN-only; soft CTA + App Store + new Lock Screen countdown guide; creative image concepts (no bare screenshot); Estimates ≠ paycheck; JA/KO UI OK. |
