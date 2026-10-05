@@ -201,3 +201,8 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 - CN twins for the three new EN guides: deferred (capacity).
 
 **Next queue items:** clock-out Live Activity; salary progress vs timesheet; best Lock Screen countdown for work.
+
+## 2026-10-05 — CN backfill for all EN guides
+- Added Chinese twins under `docs/guides/` for every EN guide that lacked one (wish, privacy mode, overtime, freelancer, best Lock Screen countdown, salary vs timesheet, clock-out Live Activity, hourly widget, Dynamic Island, workday progress bar).
+- Updated CN guides index + sitemap; wired EN↔CN `hreflang` and footer links.
+- Pipeline: Mon/Fri must ship EN+CN together going forward.
