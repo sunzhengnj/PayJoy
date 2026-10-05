@@ -6,13 +6,12 @@ Status legend: `[next]` = pick these first · `[done YYYY-MM-DD]` = shipped · `
 
 ## Next up
 
-1. `[next]` wish / goal progress companion — manual wish tracking beside the workday (not finance goals)
-2. `[next]` monthly / yearly workday summary — motivation rollup vs pay stub
-3. `[next]` share workday progress card without showing pay — privacy share defaults (deep dive)
+1. `[next]` monthly / yearly workday summary — motivation rollup vs pay stub
+2. `[next]` share workday progress card without showing pay — privacy share defaults (deep dive)
+3. `[next]` work timer vs countdown app — which job each product solves
 
 ## Backlog
 
-4. `[ ]` work timer vs countdown app — which job each product solves
 5. `[ ]` Dynamic Island earnings glance — what updates, what iOS controls
 6. `[ ]` shift end reminder without timesheet — soft nudge vs attendance punch
 7. `[ ]` clock-out companion for office workers — playful progress, not HR tools
@@ -27,6 +26,7 @@ Status legend: `[next]` = pick these first · `[done YYYY-MM-DD]` = shipped · `
 
 ## Shipped
 
+- `[done 2026-10-05]` wish / goal progress companion → `docs/en/guides/wish-goal-progress-workday.html`
 - `[done 2026-10-02]` privacy mode Lock Screen earnings → `docs/en/guides/privacy-mode-lock-screen-earnings.html`
 - `[done 2026-09-28]` overtime day tracker for motivation → `docs/en/guides/overtime-day-tracker-for-motivation.html`
 - `[done 2026-09-25]` freelancer day earnings estimate → `docs/en/guides/freelancer-day-earnings-estimate.html`

@@ -4,6 +4,40 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-05 — wish / goal progress for workdays EN guide
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Wish / goal progress companion → `/en/guides/wish-goal-progress-workday.html`
+
+**Also**
+
+- Fact-checked against app source (`WishExperience`, `personalGoalProgress`): wish via text/link/photo/screenshot; optional target amount → progress from estimated earnings since creation + est. workdays remaining; manual progress; active/paused/completed/abandoned; wish shelf.
+- Updated `docs/en/guides/index.html` (new guide-card first; meta mentions wish progress)
+- Updated `docs/sitemap.xml` (new EN URL + `en/guides/` lastmod 2026-10-05)
+- Social draft: `marketing/posts/2026-10-05-x-wish-progress-workday.md` (X thread @ycbhsz; EN-only)
+- No App Store Connect edits
+- No CN twin this batch
+- No social auto-post
+
+**Brand check:** new public copy uses ClockJoy only (PayJoy = repo path / GitHub Pages URL only).
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/wish-goal-progress-workday.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+
+**Failures / follow-ups**
+
+- CN twin for wish progress: deferred (capacity).
+- ASC live metadata: not touched.
+
+**Next queue items:** monthly / yearly workday summary; share workday progress card without showing pay; work timer vs countdown app.
+
+---
+
 ## 2026-10-02 — privacy mode Lock Screen earnings EN guide
 
 **Status:** shipped
