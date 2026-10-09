@@ -4,6 +4,39 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-09 — monthly / yearly workday summary EN+CN guides
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Monthly / yearly workday summary (motivation rollup vs pay stub) → `/en/guides/monthly-yearly-workday-summary.html` + CN twin `/guides/monthly-yearly-workday-summary.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` and `docs/guides/index.html` (new guide-card first; meta mentions monthly/yearly summary)
+- Updated `docs/sitemap.xml` (both locale URLs + indexes lastmod 2026-10-09)
+- Mutual `hreflang` + 中文版 / English version links
+- Social draft: `marketing/posts/2026-10-09-instagram-monthly-yearly-summary.md` (Instagram carousel; EN-only)
+- No App Store Connect edits
+- No Xiaohongshu auto-post
+
+**Brand check:** new public copy uses ClockJoy (EN) / 开薪 (CN) only (PayJoy = repo path / GitHub Pages URL only). Product truth: Estimates ≠ paycheck / 估算≠工资条.
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/monthly-yearly-workday-summary.html
+- https://sunzhengnj.github.io/PayJoy/guides/monthly-yearly-workday-summary.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+- https://sunzhengnj.github.io/PayJoy/guides/
+
+**Failures / follow-ups**
+
+- ASC live metadata: not touched.
+
+**Next queue items:** share workday progress card without showing pay; work timer vs countdown app; Dynamic Island earnings glance.
+
+---
 ## 2026-10-05 — wish / goal progress for workdays EN guide
 
 **Status:** shipped

@@ -33,6 +33,7 @@ Primary channels: **X/Twitter (`@ycbhsz`)**, **Instagram**, **Reddit**, **Thread
 
 ## Done / drafted
 
+- [drafted 2026-10-09] Instagram carousel — Monthly/yearly workday summary vs pay stub → `2026-10-09-instagram-monthly-yearly-summary.md` (`ready`)
 - [drafted 2026-10-05] X thread `@ycbhsz` — Give your workday a wish: small goal progress, not a bank → `2026-10-05-x-wish-progress-workday.md` (`ready`)
 - [drafted 2026-10-02] Instagram carousel — Privacy mode: Lock Screen progress without flashing pay → `2026-10-02-instagram-privacy-mode-lock-screen.md` (`ready`)
 - [drafted 2026-09-28] Instagram carousel — Overtime day tracker: notice when the day ran long → `2026-09-28-instagram-overtime-day-tracker.md` (`ready`)
