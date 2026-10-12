@@ -4,6 +4,40 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-12 — privacy share card hide-pay EN+CN guides
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Share workday progress card without showing pay (privacy share defaults) → `/en/guides/privacy-share-card-hide-pay.html` + CN twin `/guides/privacy-share-card-hide-pay.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` and `docs/guides/index.html` (new guide-card first; meta mentions privacy share cards)
+- Updated `docs/sitemap.xml` (both locale URLs + indexes lastmod 2026-10-12)
+- Mutual `hreflang` + 中文版 / English version links
+- Cross-links to privacy-mode Lock Screen guide (desk glance) vs this share-card angle (export/post)
+- Social draft: `marketing/posts/2026-10-12-instagram-privacy-share-card.md` (Instagram carousel; EN-only)
+- No App Store Connect edits
+- No Xiaohongshu auto-post
+
+**Brand check:** new public copy uses ClockJoy (EN) / 开薪 (CN) only (PayJoy = repo path / GitHub Pages URL only). Product truth: Estimates ≠ paycheck / 估算≠工资条.
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/privacy-share-card-hide-pay.html
+- https://sunzhengnj.github.io/PayJoy/guides/privacy-share-card-hide-pay.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+- https://sunzhengnj.github.io/PayJoy/guides/
+
+**Failures / follow-ups**
+
+- ASC live metadata: not touched.
+
+**Next queue items:** work timer vs countdown app; Dynamic Island earnings glance; shift end reminder without timesheet.
+
+---
 ## 2026-10-09 — monthly / yearly workday summary EN+CN guides
 
 **Status:** shipped
