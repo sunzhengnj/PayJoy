@@ -10,29 +10,29 @@ Primary channels: **X/Twitter (`@ycbhsz`)**, **Instagram**, **Reddit**, **Thread
 
 ## [next]
 
-1. **[next]** Reddit `r/jobs` — "Anyone else track 'hours left today' instead of a to-do list?" empathy post; light ClockJoy link in comments if asked.
-2. **[next]** Reddit `r/sideproject` — Indie iOS: shipping Lock Screen + Dynamic Island workday countdown (build story, not hard sell).
-3. **[next]** X thread `@ycbhsz` — Estimates vs payroll: why a countdown widget is not a timesheet (disclaimer-forward education).
-4. **[next]** Reddit `r/iphone` — Dynamic Island Live Activity for shift end: what works on iOS today (guide tone).
+1. **[next]** Reddit `r/sideproject` — Indie iOS: shipping Lock Screen + Dynamic Island workday countdown (build story, not hard sell).
+2. **[next]** X thread `@ycbhsz` — Estimates vs payroll: why a countdown widget is not a timesheet (disclaimer-forward education).
+3. **[next]** Reddit `r/iphone` — Dynamic Island Live Activity for shift end: what works on iOS today (guide tone).
+4. **[next]** Reddit `r/ProductivityApps` — Minimal widgets for focus: countdown > noisy dashboards.
 
 ## Backlog
 
 5. Reddit `r/antiwork` — **carefully**: focus on boundaries / knowing when the day ends; no employer-bashing spam; value-only, skip if vibe is wrong (`skipped` OK).
-6. Reddit `r/ProductivityApps` — Minimal widgets for focus: countdown > noisy dashboards.
-7. X thread `@ycbhsz` — Friday wind-down ritual: glance Lock Screen → close laptop when countdown hits zero.
-8. Threads — Friday clock-out: short, human, one EN screenshot if available.
-9. LinkedIn — "A countdown is not a timesheet" education post for managers and ICs; ClockJoy as optional example.
-10. Instagram Reel/feed — Dynamic Island Live Activity for clock-out (EN UI only; caption + hashtags).
-11. Product Hunt — Launch listing copy (hold until a hunt is scheduled; EN only).
-12. X `@ycbhsz` — Workday progress bar: one number on Lock Screen beats a crowded widget stack.
-13. Reddit `r/productivity` — Glanceable progress vs another task manager; invite setups, soft ClockJoy mention.
-14. Threads — Lock Screen tip in one breath: end-of-shift time, not a to-do list.
-15. LinkedIn — Estimated earnings on a widget: personal motivation only, not payroll proof.
-16. Instagram story/feed — After-work relief visual (`docs/assets/afterwork.jpg`) + "the countdown hit zero" caption.
-17. X `@ycbhsz` — Optional estimated pay on Lock Screen: keep it fictional in screenshots; disclaimer in the post.
+6. X thread `@ycbhsz` — Friday wind-down ritual: glance Lock Screen → close laptop when countdown hits zero.
+7. Threads — Friday clock-out: short, human, one EN screenshot if available.
+8. LinkedIn — "A countdown is not a timesheet" education post for managers and ICs; ClockJoy as optional example.
+9. Instagram Reel/feed — Dynamic Island Live Activity for clock-out (EN UI only; caption + hashtags).
+10. Product Hunt — Launch listing copy (hold until a hunt is scheduled; EN only).
+11. X `@ycbhsz` — Workday progress bar: one number on Lock Screen beats a crowded widget stack.
+12. Reddit `r/productivity` — Glanceable progress vs another task manager; invite setups, soft ClockJoy mention.
+13. Threads — Lock Screen tip in one breath: end-of-shift time, not a to-do list.
+14. LinkedIn — Estimated earnings on a widget: personal motivation only, not payroll proof.
+15. Instagram story/feed — After-work relief visual (`docs/assets/afterwork.jpg`) + "the countdown hit zero" caption.
+16. X `@ycbhsz` — Optional estimated pay on Lock Screen: keep it fictional in screenshots; disclaimer in the post.
 
 ## Done / drafted
 
+- [drafted 2026-10-16] Reddit `r/jobs` — hours left today vs to-do list → `2026-10-16-reddit-jobs-hours-left-today.md` (`ready`)
 - [drafted 2026-10-12] Instagram carousel — Privacy share card: progress without flashing pay → `2026-10-12-instagram-privacy-share-card.md` (`ready`)
 - [drafted 2026-10-09] Instagram carousel — Monthly/yearly workday summary vs pay stub → `2026-10-09-instagram-monthly-yearly-summary.md` (`ready`)
 - [drafted 2026-10-05] X thread `@ycbhsz` — Give your workday a wish: small goal progress, not a bank → `2026-10-05-x-wish-progress-workday.md` (`ready`)
