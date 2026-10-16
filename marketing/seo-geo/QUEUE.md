@@ -6,24 +6,24 @@ Status legend: `[next]` = pick these first · `[done YYYY-MM-DD]` = shipped · `
 
 ## Next up
 
-1. `[next]` work timer vs countdown app — which job each product solves
-2. `[next]` Dynamic Island earnings glance — what updates, what iOS controls
-3. `[next]` shift end reminder without timesheet — soft nudge vs attendance punch
+1. `[next]` Dynamic Island earnings glance — what updates, what iOS controls
+2. `[next]` shift end reminder without timesheet — soft nudge vs attendance punch
+3. `[next]` clock-out companion for office workers — playful progress, not HR tools
 
 ## Backlog
 
-4. `[ ]` clock-out companion for office workers — playful progress, not HR tools
-5. `[ ]` iPhone Live Activity for hourly jobs — retail / hospitality motivation use
-6. `[ ]` early clock-out day tracker — personal log, not attendance
-7. `[ ]` estimated paycheck progress mid-month — estimate disclaimer heavy
-8. `[ ]` Lock Screen vs Home Screen widgets for work — placement tradeoffs
-9. `[ ]` ClockJoy vs spreadsheet salary tracker — when each is enough
-10. `[ ]` focus during long shifts with visible countdown — behavioral framing
-11. `[ ]` widget refresh limits on iOS — set expectations for “live” feel
-12. `[ ]` themes and companions for workday mood — playful UI without SaaS stiffness
+4. `[ ]` iPhone Live Activity for hourly jobs — retail / hospitality motivation use
+5. `[ ]` early clock-out day tracker — personal log, not attendance
+6. `[ ]` estimated paycheck progress mid-month — estimate disclaimer heavy
+7. `[ ]` Lock Screen vs Home Screen widgets for work — placement tradeoffs
+8. `[ ]` ClockJoy vs spreadsheet salary tracker — when each is enough
+9. `[ ]` focus during long shifts with visible countdown — behavioral framing
+10. `[ ]` widget refresh limits on iOS — set expectations for “live” feel
+11. `[ ]` themes and companions for workday mood — playful UI without SaaS stiffness
 
 ## Shipped
 
+- `[done 2026-10-16]` work timer vs countdown app — which job each product solves → `docs/en/guides/work-timer-vs-countdown.html` (+ CN twin)
 - `[done 2026-10-12]` share workday progress card without showing pay — privacy share defaults → `docs/en/guides/privacy-share-card-hide-pay.html` (+ CN twin)
 - `[done 2026-10-09]` monthly / yearly workday summary — motivation rollup vs pay stub → `docs/en/guides/monthly-yearly-workday-summary.html` (+ CN twin)
 - `[done 2026-10-05]` wish / goal progress companion → `docs/en/guides/wish-goal-progress-workday.html`

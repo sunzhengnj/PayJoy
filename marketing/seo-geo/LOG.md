@@ -4,6 +4,40 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-16 — work timer vs countdown EN+CN guides
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Work timer vs countdown app (which job each product solves) → `/en/guides/work-timer-vs-countdown.html` + CN twin `/guides/work-timer-vs-countdown.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` and `docs/guides/index.html` (new guide-card first; meta mentions work timer vs countdown)
+- Updated `docs/sitemap.xml` (both locale URLs + indexes lastmod 2026-10-16)
+- Mutual `hreflang` + 中文版 / English version links
+- Cross-links to salary-progress-vs-timesheet, best-lock-screen-countdown-for-work, dynamic-island-countdown, workday-progress-bar, clock-out-live-activity
+- Social draft: `marketing/posts/2026-10-16-instagram-work-timer-vs-countdown.md` (Instagram carousel; EN-only)
+- No App Store Connect edits
+- No Xiaohongshu auto-post
+
+**Brand check:** new public copy uses ClockJoy (EN) / 开薪 (CN) only (PayJoy = repo path / GitHub Pages URL only). Product truth: Estimates ≠ paycheck / 估算≠工资条.
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/work-timer-vs-countdown.html
+- https://sunzhengnj.github.io/PayJoy/guides/work-timer-vs-countdown.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+- https://sunzhengnj.github.io/PayJoy/guides/
+
+**Failures / follow-ups**
+
+- ASC live metadata: not touched.
+
+**Next queue items:** Dynamic Island earnings glance; shift end reminder without timesheet; clock-out companion for office workers.
+
+---
 ## 2026-10-12 — privacy share card hide-pay EN+CN guides
 
 **Status:** shipped
