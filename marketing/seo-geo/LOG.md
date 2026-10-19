@@ -4,6 +4,40 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-19 — Dynamic Island earnings glance EN+CN guides
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Dynamic Island earnings glance (what updates, what iOS controls) → `/en/guides/dynamic-island-earnings-glance.html` + CN twin `/guides/dynamic-island-earnings-glance.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` and `docs/guides/index.html` (new guide-card first; meta mentions Dynamic Island earnings glance)
+- Updated `docs/sitemap.xml` (both locale URLs + indexes lastmod 2026-10-19)
+- Mutual `hreflang` + 中文版 / English version links
+- Cross-links to dynamic-island-countdown, clock-out-live-activity, privacy-mode-lock-screen-earnings, hourly-pay-widget, workday-progress-bar, salary-progress-vs-timesheet
+- Social draft: `marketing/posts/2026-10-19-instagram-dynamic-island-earnings.md` (Instagram carousel; EN-only)
+- No App Store Connect edits
+- No Xiaohongshu auto-post
+
+**Brand check:** new public copy uses ClockJoy (EN) / 开薪 (CN) only (PayJoy = repo path / GitHub Pages URL only). Product truth: Estimates ≠ paycheck / 估算≠工资条.
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/dynamic-island-earnings-glance.html
+- https://sunzhengnj.github.io/PayJoy/guides/dynamic-island-earnings-glance.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+- https://sunzhengnj.github.io/PayJoy/guides/
+
+**Failures / follow-ups**
+
+- ASC live metadata: not touched.
+
+**Next queue items:** shift end reminder without timesheet; clock-out companion for office workers; iPhone Live Activity for hourly jobs.
+
+---
 ## 2026-10-16 — work timer vs countdown EN+CN guides
 
 **Status:** shipped
