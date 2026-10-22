@@ -1,0 +1,7 @@
+{"elapsed": 1.9, "idle_percent": 0.1, "host_spawn_ms": 64.4, "controlled_processes": 42, "bootstatus_exit": null}
+{"elapsed": 3.0, "idle_percent": 0.1, "host_spawn_ms": 94.6, "controlled_processes": 44, "bootstatus_exit": null}
+{"elapsed": 4.0, "idle_percent": 0.0, "host_spawn_ms": 12.8, "controlled_processes": 56, "bootstatus_exit": null}
+{"elapsed": 5.0, "idle_percent": 0.0, "host_spawn_ms": 12.5, "controlled_processes": 64, "bootstatus_exit": null}
+{"elapsed": 6.0, "idle_percent": 0.0, "host_spawn_ms": 13.0, "controlled_processes": 70, "bootstatus_exit": 0}
+{"shutdown_exit": 0}
+{"result": "host_load_protection", "elapsed": 9.6}

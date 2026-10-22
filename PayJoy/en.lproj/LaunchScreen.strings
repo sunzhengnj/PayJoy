@@ -1,0 +1,2 @@
+/* Launch wordmark follows the system language before SwiftUI is ready. */
+"brand-title.text" = "ClockJoy";

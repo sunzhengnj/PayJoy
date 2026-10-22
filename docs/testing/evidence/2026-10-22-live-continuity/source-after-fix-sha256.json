@@ -1,0 +1,9 @@
+{
+  "PayJoy/AppState.swift": "c8ab4ba215be11e3d4662ac097cb82e3f9b660e5c79c74a09b760753763eced7",
+  "PayJoy/Views/AppRootView.swift": "ee60e858d7f065587467dec7fe85670f1f0be90070ac0c66fac36d5a3fe3a5fe",
+  "PayJoy/Views/FocusView.swift": "01e2d58ee7b1739c05a7e52ea88ed2bd66d5d2fa32a72b592ceebdf41b4616e0",
+  "PayJoy/Components/AppComponents.swift": "2560c468fd3d8c649d0360ba6657e05c3cb1f10d0cb2ac7650d88b587672641c",
+  "PayJoyTests/FocusSessionTests.swift": "4c4ebce165009df6504cca30db0daa0ebb060717111822893690f332fcc929d6",
+  "marketing/app-store/featured-candidate/capture.sh": "d61196270b8e9db24d69b1ed64d0114346660b610ce23f6784ded485e7274efe",
+  "marketing/app-store/featured-candidate/test_capture_safety.sh": "772fdca8ed88672772facb49bc4c49e802b5b51f95004021b6ece0db176083ee"
+}

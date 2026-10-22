@@ -1,0 +1,326 @@
+{
+  "date": "2026-10-22 Asia/Shanghai",
+  "platform": "macOS arm64; not iOS runtime",
+  "package": "/Volumes/CodexOffload/Builds/PayJoyCoreAudit-3vc6zrqo",
+  "command": "nice -n 20 swift test --package-path /Volumes/CodexOffload/Builds/PayJoyCoreAudit-3vc6zrqo --jobs 1",
+  "result": {
+    "executed": 49,
+    "failures": 0,
+    "exit_code": 0
+  },
+  "regression": {
+    "new_tests": 3,
+    "red_executed": 12,
+    "red_assertion_failures": 6,
+    "red_exit_code": 1,
+    "failed_methods": [
+      "testCustomFocusMinutesAcceptFullWidthDigits",
+      "testCustomFocusMinutesAllowSurroundingWhitespace"
+    ],
+    "baseline": "Existing Int parsing and 1...240 check mechanically extracted into FocusSession.customMinutes; normalization not yet implemented."
+  },
+  "production_declaration_blocks": [
+    {
+      "source": "PayJoy/Components/AppComponents.swift",
+      "start": "struct AdaptiveLayoutContext {",
+      "end": "private struct AdaptiveLayoutContextKey:",
+      "block_sha256": "be2db3fa54463727bf5ec101c41361b64e8b17fd4fb5e53e0102dd709d7dc4ce"
+    },
+    {
+      "source": "PayJoy/Components/AppComponents.swift",
+      "start": "struct TabChromeOccupancy:",
+      "end": "struct ComicTabBar:",
+      "block_sha256": "382fff4a6e3d338f3bf8d0cb28ea9101a7fdc571d691b0c1915c9bbf933672c6"
+    },
+    {
+      "source": "PayJoy/Components/AppComponents.swift",
+      "start": "struct AdaptiveScrollPosition {",
+      "end": "struct ComicCard<",
+      "block_sha256": "366b39545cba6b2dfc4e002172c52d3c685c825e9794f26a3d4525264b860c2c"
+    },
+    {
+      "source": "PayJoy/Views/FocusView.swift",
+      "start": "enum DeskClockMode:",
+      "end": "struct DeskClockView:",
+      "block_sha256": "0777ddfa87daa2226a9ff78356390933bee090426dea1a3cd375a5d907664c1b"
+    }
+  ],
+  "test_methods_compared_exactly_with_current_repository": [
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testSalaryModesCalculateDailyIncome",
+      "sha256": "5247876709c03ea5ce2176dba9835e7001c8d6d6c3461db493eefa8987c8b50f"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testBeforeWorkWorkingAndAfterWorkStates",
+      "sha256": "6d8bf84c384172ef4ac6db1aab1f72f947b2ecddaf89d977bd3be3dd749f3815"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testOffDutyCountdownAppearsOnlyAfterACompletedWorkday",
+      "sha256": "ec3645bebf9bd405e16c2a6b4a555ae7b0957d17c0e73a88f6dc2dca4e41c6fd"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testNextScheduledWorkStartUsesWorkdaysAndManualDayChanges",
+      "sha256": "c84020166644ebc947e33b4ab0ec657c17eff474f132352009dcfca78ea4f6df"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testLunchDeductionPausesEarningsAndProgress",
+      "sha256": "0ee73854f387f279eb121b1fd0ae8a20b684d0cb4ce44dea73f106c052127781"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testWeekendIsRestDay",
+      "sha256": "c54ce82439491de0a795ff665e516daf42f1b41602806eeaa9baa4a366e121f5"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testCalendarCorrectionControlsTodaySnapshot",
+      "sha256": "b286c268dc9c4e4640a46a5a19de8c4c228b00cc0175cf14f2c4371bd77cb77d"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testCustomWorkdaysCanIncludeSunday",
+      "sha256": "0e4a325fef92012ef770981e56e5470dc1c7c935b0bfc81e22c4f7fa99905316"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testOvertimeDateDoesNotCountRestDayAsPaidWork",
+      "sha256": "9f3e24283f77017a1291b894c78478201a47271e52b6ab752b03355551af6029"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testOvertimeSummaryCountsMonthlyRecords",
+      "sha256": "641fbe62f89686c10c409dc074fb62fbdc231ac017725f5e216bbff39e11f2a6"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testOvertimeSummaryIncludesActiveRecordUntilNow",
+      "sha256": "8ad5114eccd09eb33aba5afc574b254601c34996951157babfad795ec331694d"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testBoundaryTimesDoNotExceedDaySalary",
+      "sha256": "4a1f5032833890d795d611469633544a57b71ae89e0b5634691b422e451ca5e8"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testPeriodBreakdownCountsWorkdays",
+      "sha256": "b6cf39b4c044d122fff26eeede067ead7280a02a80deb36ad7d6802cf5bc6a98"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testPeriodBreakdownOnRestDayDoesNotCountToday",
+      "sha256": "52d9b97bf8ce190d3c4c93289181df935f313964f88621ab1c22007999e82cac"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testMonthlySalaryCompletesWhenMonthHasNoRemainingWorkdays",
+      "sha256": "5f4fb2ccb6ece5ea2f716118a6885e1e2cb7d41e0afb6aab4f6a7dda068fdddf"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testMonthlySalaryUsesActualMonthWorkdayProgress",
+      "sha256": "0c108d50dcb33b6181d79e3e2b04ae725db5f15fd9f4ca25bf7ff84f7fdfbf15"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testSalaryCalendarCompletesTodayAfterEarlyLeave",
+      "sha256": "6d223a299b4c78e59479df8f4407a9d402c15cf037d5d2c5c2cea2a80f55ded1"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testCoreVisibleStringsAreLocalizedForEnglishJapaneseAndKorean",
+      "sha256": "e29f87509865c11f6d35239d4529244f21dc4d2e06878f36cab18cc24aa46d07"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testLiteralInterfaceStringsAreLocalizedForSupportedLanguages",
+      "sha256": "0efbcd85958b7b406d818737240192ef4ad82ffbc43e7cb7df77d8597e26c954"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testTraditionalMarketToneFollowsInterfaceLanguage",
+      "sha256": "ece37113eb7d52954b01a000822f3370c3fdf177951f2d6d70b116b59e814965"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testUserFacingSwiftStringsDoNotExposeProLabels",
+      "sha256": "e729e8a543c67fddbd4b1522967ea38632434a31290d37030c51ef5efc2cc922"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testEditableSalaryNumbersRespectRegionalDecimalSeparators",
+      "sha256": "a7b0367b0467d38015cbd1c8993394358a86322946f987b71ff0a272a36e9e51"
+    },
+    {
+      "file": "SalaryCalculatorTests.swift",
+      "name": "testPersistedSalarySettingsNormalizeInvalidValues",
+      "sha256": "54e1ddfec0f6f1c5b5a2955c25e0387f89f42252ab02b0530ca9337c55052f1f"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testExpandingSecondaryCompactAnchorKeepsItWhenFoldedAgainWithoutDragging",
+      "sha256": "a74e220ea4214f31b59d37e6a37de22b7e6c7585a262be97128ef35964a01f18"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testExpandingPrimaryCompactAnchorReplacesPreviousSecondaryPreference",
+      "sha256": "e482dc7f069930c0070acc1e74ed7290b73675ebcff49bdb7230d97c713c504b"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testHomeCollapsesToLastUsedSharedActionAnchor",
+      "sha256": "6473030c10761be8cd2abdf53ccfdcc0e611529c1508051956f8df34adda192d"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testExpandedOnlyHomeActionFallsBackToExistingCompactContent",
+      "sha256": "10114217212743d5fca64f39c20e18d3b87b51a63bb0cfb390a7bb0178b12674"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testDynamicWishAnchorReturnsToOtherPaneAndSurvivesAnotherFold",
+      "sha256": "aefded218d91138cdcb76198cc2b693b036df02d5cf6fdf4eda557142ce803ef"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testHiddenBarClearsContentInsetAndOffset",
+      "sha256": "3b12f2b826126852ee21e6e427983aae9a2adf8f896d4575eb5fd5f1cfde5780"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testVisibleBarUsesBarHeightAndSafeArea",
+      "sha256": "bfe2f61f938e6dfa05065d29da54d45e831c939928211f1c48a953a660802473"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testSafeAreaRespectingPaddingDoesNotDoubleCountOrClip",
+      "sha256": "61df931b116c311800cbe9f46ece2f0cd9275efd32bccdfc2dbd17a7841edc4d"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testTwoColumnDecisionUsesGeometrySizeWithoutCountingSafeAreaTwice",
+      "sha256": "bb5a6f28d0496df55a7560561e8f915f3e5251b9de763dd522003bb0688ece4c"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testDeskClockRequiresAnActualHorizontalFoldWithReachableControls",
+      "sha256": "76f29d54bf033d11b5a164c099d3309b91a16cedaa8f738773595d33766c72bb"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testTopControlsClearOnlyOcclusionsInTheirOwnPane",
+      "sha256": "78f7fd7cda7fc34aa06cf9141243c49f578505c794c925ba07bf2d0c5a905856"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testDeskClockDoesNotEnterWhenHeaderLeavesTooLittleRoomForTime",
+      "sha256": "b25696df88bf358ee017549dd50013a43b7c4ee773711bdbf498ef3136497b43"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testDeskClockEntryAccountsForCameraClearanceBeforeTime",
+      "sha256": "6fe179f80ad0eb4c50ffa71f1f7270507f6d3cf549a32b7839a2e49d1d940688"
+    },
+    {
+      "file": "TabChromeLayoutTests.swift",
+      "name": "testDeskClockStatePriorityAndRestingFallback",
+      "sha256": "9fe01b0313d2b8778f307c77c57a4dcb1bac259898f63116b82b141639cdd428"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testCustomFocusMinutesAcceptFullWidthDigits",
+      "sha256": "569c6de29fa3b9e6f8b9344b67081e4644af4e322db9baf1ce8e528f610af505"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testCustomFocusMinutesAllowSurroundingWhitespace",
+      "sha256": "49f42580f72b214c22e2cd42ec7356fc07424f60bffc53f19e4e65c264cb77e3"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testCustomFocusMinutesRejectInvalidOrOutOfRangeInput",
+      "sha256": "963c63817787264da24b0b8b4f5c546d8cd16d6162572bf6419662387691a230"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testPauseAndResumePreserveFocusedTime",
+      "sha256": "f2c71ae83aa871e84a5fd33ac60c57e2be4aadbd26e888ead3b80bb17d3dec92"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testCompletionCreatesOnlyOneRecord",
+      "sha256": "533cab9ea974ebace0696b6829b53d14aab431bc088a66c850164468436ebe78"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testPausedSessionSurvivesStorageRoundTrip",
+      "sha256": "7c060a2a2e1b8a61eae86393e41ecdbf81b8bc0a696539cc30cb0d1cecf50421"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testRestoredPausedSessionResumesAndSettlesOnce",
+      "sha256": "052e6d1c4dd2532cff1e90662e7a871d9ec124ca528bef4b74a5337fe73362d4"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testFocusUntilOffWorkKeepsOriginalEndAfterPause",
+      "sha256": "9561f03253eafcb5ee8f033bcc2ba24b758f25faa4a9d209086a90451741de86"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testFocusUntilOffWorkPausedAtEndKeepsOnlyFocusedTime",
+      "sha256": "f1043e726b6fe87e047cd23c62f31ed2005bad3eb234c64d15650419438103f9"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testFocusUntilOffWorkPausedThenCompletedSettlesOnce",
+      "sha256": "89a96f5077185dc5cf53715760d365323eac5f12dbedbc365dcc9cb30df63140"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testFixedFocusCrossingMidnightKeepsPausedTimeOutOfResult",
+      "sha256": "49a8855367420776494e14c646f0a1ee99c87977a85dddd27f1d59a2179274d6"
+    },
+    {
+      "file": "FocusSessionTests.swift",
+      "name": "testEndingAfterSystemClockMovesBackwardDoesNotReverseRecordDates",
+      "sha256": "092f71accfa2441c7a979cc035fac314930fdc9ceaf14f8ebb030e2daa2d5d0a"
+    }
+  ],
+  "current_source_sha256": {
+    "PayJoy/Components/AppComponents.swift": "87f7270fe23a40d55b7600a7a8deb3725c0460164dd5d391d40e5314cf9aa7f2",
+    "PayJoy/Views/FocusView.swift": "0e61b943bdc3f38321c5c15a3c405f140064703754a1477fcd827e2003b580c5",
+    "PayJoyTests/TabChromeLayoutTests.swift": "b50b1278ea1733fdb12bb1aab353f96f4c7ef4dc2bbdfa9a05827b80d048415f",
+    "PayJoy/Theme/L10n.swift": "0edb46a9e2aab50ed86b51a79ec16561541791532d9127d399f075396cbd5508",
+    "PayJoy/Models/FocusSession.swift": "11fb57c095af44ec0cdfe18740a0b2905c9817deb9056d374234f09901d32f49",
+    "PayJoy/Services/SalaryCalculator.swift": "1901981c0da246e933eb32fad633b20acd1a15fc41efd19bcedfc69b83fd7472",
+    "PayJoy/Theme/AppTheme.swift": "24983b971163bc2e895261cfa1b4fa0a060bf5425b8bec634ed878846f7828e4",
+    "PayJoy/Models/WishExperience.swift": "109d8f58538ee3aba7f07409b2028a084128852c89f5b2e20ff05fc2a1a21eab",
+    "PayJoy/Models/SalaryModels.swift": "78d73d13c90d63340ba7fdd43494baa3f6fb004b42dcf598a69092b4712f0f9f",
+    "PayJoy/Services/SettingsStore.swift": "a8cf8762bf540a340e7f8077c73da1db77d2f8d47a15bf96d325aae963f41811",
+    "PayJoy/AppState.swift": "29917c82b7b7e8fd1e0b391bd6a53d4841086abeb4992a1526caa06fc4c57586",
+    "PayJoyTests/FocusSessionTests.swift": "b6ca835e3e477413c34e2619fd27c87b7119daedee7c57bee79531df4a5e41f1"
+  },
+  "log_sha256": {
+    "red.log": "26e1287fb9ff683c72fd3069adc897831b10f832e6663a80d2d5d1e42c05a65d",
+    "green.log": "0a196435e97a66db96d31469709ded976fd61a410b3eca53dd00cc567185d68a",
+    "ios-build.log": "c4301401db2227fe94b9de64be2856bfc5d7d03bdd612b9980c004782a292557"
+  },
+  "ios_build": {
+    "exit_code": 0,
+    "result": "TEST BUILD SUCCEEDED",
+    "configuration": "Debug, generic iOS Simulator, CODE_SIGNING_ALLOWED=NO, -jobs 1",
+    "runtime_tests_executed": false
+  },
+  "limits": [
+    "No simulator booted or app launched.",
+    "12 focus/input, 23 salary/workday/localization/input, 14 layout/scroll tests execute on macOS; AppState-dependent iOS tests are excluded.",
+    "Keyboard/input-method behavior, raw draft/focus continuity across folds and localized hint layout require device tests.",
+    "Current iOS build-for-testing succeeded, but full iOS XCTest and iOS 17 runtime regression were not executed."
+  ]
+}

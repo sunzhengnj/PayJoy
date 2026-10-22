@@ -7,7 +7,9 @@ struct SalaryCalendarView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var monthAnchor = Date()
     @State private var selectedDate = Date()
+    @State private var didInitializeDate = false
     @State private var editingDay: SalaryCalendarDay?
+    @State private var scrollPosition = AdaptiveScrollPosition()
 
     let showsBackButton: Bool
 
@@ -16,17 +18,62 @@ struct SalaryCalendarView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                header
-                monthSwitcher
-                monthSummaryCard
-                calendarCard
-                selectedDayCard
-                monthFooterCard
+        GeometryReader { space in
+            let layout = AdaptiveLayoutContext(proxy: space)
+            let isExpanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+            Group {
+                if isExpanded {
+                    AdaptiveTwoColumn {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                header.id("calendar-header")
+                                monthSwitcher.id("calendar-month")
+                                calendarCard.id("calendar-grid")
+                            }
+                            .scrollTargetLayout()
+                            .padding(.bottom, 28)
+                        }
+                        .scrollPosition(id: $scrollPosition.primary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = false
+                        })
+                    } secondary: {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                selectedDayCard.id("calendar-selected-day")
+                                monthSummaryCard.id("calendar-summary")
+                                monthFooterCard.id("calendar-footer")
+                            }
+                            .scrollTargetLayout()
+                            .padding(.top, 12)
+                            .padding(.bottom, 28)
+                        }
+                        .scrollPosition(id: $scrollPosition.secondary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = true
+                        })
+                    }
+                    .padding(.horizontal, AppTheme.pagePadding)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 14) {
+                            calendarOverview
+                            selectedDayCard.id("calendar-selected-day")
+                            monthFooterCard.id("calendar-footer")
+                        }
+                        .scrollTargetLayout()
+                        .padding(.horizontal, AppTheme.pagePadding)
+                        .padding(.bottom, showsBackButton ? 28 : 86)
+                    }
+                    .scrollPosition(id: $scrollPosition.compact)
+                    .adaptiveSinglePane(in: layout)
+                }
             }
-            .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.bottom, showsBackButton ? 28 : 86)
+            .onChange(of: isExpanded) { _, expanded in
+                scrollPosition.transition(toExpanded: expanded, isSecondary: { position in
+                    ["calendar-selected-day", "calendar-summary", "calendar-footer"].contains(position)
+                })
+            }
         }
         .background(AppTheme.paper.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
@@ -50,8 +97,10 @@ struct SalaryCalendarView: View {
             if showsBackButton {
                 appState.isTabBarHidden = true
             }
+            guard !didInitializeDate else { return }
             monthAnchor = monthStart(for: appState.now)
             selectedDate = Calendar.current.startOfDay(for: appState.now)
+            didInitializeDate = true
         }
         .onDisappear {
             if showsBackButton {
@@ -63,6 +112,14 @@ struct SalaryCalendarView: View {
             transaction.animation = nil
             transaction.disablesAnimations = true
         }
+    }
+
+    @ViewBuilder
+    private var calendarOverview: some View {
+        header.id("calendar-header")
+        monthSwitcher.id("calendar-month")
+        monthSummaryCard.id("calendar-summary")
+        calendarCard.id("calendar-grid")
     }
 
     private var monthSummary: SalaryMonthSummary {
@@ -662,6 +719,7 @@ private struct SalaryDayEditorSheet: View {
                 }
             }
         }
+        .adaptiveSinglePane()
     }
 
     private var editorColumns: [GridItem] {

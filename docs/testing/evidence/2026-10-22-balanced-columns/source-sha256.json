@@ -1,0 +1,23 @@
+{
+  "time": "2026-10-22T14:37:23.681975+00:00",
+  "version": "1.6 (11)",
+  "xcode": "27.1 (27A9275)",
+  "device": "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+  "os": "iOS 27.1 (24A94425)",
+  "sha256": {
+    "PayJoy/Views/SalaryCalendarView.swift": "c0b105f0e14927cdbf38d91dcf83029ef9fc036fd7303f6d4144c87582ba88e8",
+    "PayJoy/Views/ProfileView.swift": "270615636461f5be5889618a326e5be1a79af1c32a25199cf474f46bee5d5b7b",
+    "PayJoy/Views/SalarySettingsView.swift": "fbafa7eb738ab56bee88a07b0442fe043fced7be8c0f9529101f6ddbacf26c76",
+    "PayJoy/Views/ProSalaryReportView.swift": "f291e1012ba8c680b356caccd4f21af053f29d967383ceb9d4cfe70767272b47",
+    "PayJoy/Components/AppComponents.swift": "2560c468fd3d8c649d0360ba6657e05c3cb1f10d0cb2ac7650d88b587672641c",
+    "PayJoy/Views/FocusView.swift": "01e2d58ee7b1739c05a7e52ea88ed2bd66d5d2fa32a72b592ceebdf41b4616e0",
+    "PayJoy/AppState.swift": "c8ab4ba215be11e3d4662ac097cb82e3f9b660e5c79c74a09b760753763eced7",
+    "PayJoy/Views/AppRootView.swift": "ee60e858d7f065587467dec7fe85670f1f0be90070ac0c66fac36d5a3fe3a5fe"
+  },
+  "ordinaryIPhone": {
+    "device": "0A9D47BA-14F0-49B4-B0A7-CDE5A28DD72A",
+    "os": "iOS 26.5",
+    "pixels": "1170x2532",
+    "mode": "existing Debug screenshot fixtures; compact layout only"
+  }
+}

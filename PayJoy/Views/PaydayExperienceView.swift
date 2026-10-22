@@ -159,18 +159,20 @@ struct PaydayCelebrationView: View {
         .fullScreenCover(isPresented: $showsProPaywall) {
             ProPaywallSheet()
         }
-        .onAppear {
+        .task {
             beginEntrance()
             guard presentsMembershipPromptOnAppear else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                showsMembershipPrompt = true
-            }
+            do { try await Task.sleep(for: .milliseconds(350)) }
+            catch { return }
+            guard !Task.isCancelled else { return }
+            showsMembershipPrompt = true
         }
         .transaction { transaction in
             guard prefersReducedMotion else { return }
             transaction.animation = nil
             transaction.disablesAnimations = true
         }
+        .adaptiveSinglePane()
     }
 
     private var hero: some View {
@@ -319,6 +321,7 @@ struct ActualSalaryHistoryView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @State private var selectedYear = Calendar.current.component(.year, from: Date())
+    @State private var didInitializeYear = false
     @State private var entryMonth: ActualSalaryMonthSelection?
     @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
@@ -352,8 +355,10 @@ struct ActualSalaryHistoryView: View {
         .navigationTitle(L10n.t("实际薪资"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            selectedYear = Calendar.current.component(.year, from: appState.now)
             appState.isTabBarHidden = true
+            guard !didInitializeYear else { return }
+            selectedYear = Calendar.current.component(.year, from: appState.now)
+            didInitializeYear = true
         }
         .onDisappear {
             appState.isTabBarHidden = false
@@ -370,6 +375,7 @@ struct ActualSalaryHistoryView: View {
         .fullScreenCover(isPresented: $showsProPaywall) {
             ProPaywallSheet()
         }
+        .adaptiveSinglePane()
     }
 
     private var yearSelector: some View {
@@ -692,6 +698,7 @@ struct ActualSalaryEntrySheet: View {
         } message: {
             Text(L10n.t("删除后，该月会恢复使用预计薪资。"))
         }
+        .adaptiveSinglePane()
     }
 
     private var parsedAmount: Double? {
@@ -842,7 +849,7 @@ private struct PaydaySharePoster: View {
                 Spacer(minLength: 8 * unit)
 
                 HStack {
-                    Text(L10n.t("由 ClockJoy 开薪生成"))
+                    Text(L10n.t("由 ClockJoy 生成"))
                     Spacer()
                     Text(AppTheme.current.title)
                 }

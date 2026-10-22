@@ -1,0 +1,57 @@
+{
+  "payjoy.engagement.state.v1": {
+    "dailyState": {
+      "dateKey": "2026-10-22",
+      "mood": "steady"
+    },
+    "capsules": [
+      {
+        "currencyCode": "CNY",
+        "revealsSalary": false,
+        "dateKey": "2026-10-22",
+        "companionID": "kai",
+        "id": "DE9816EC-F151-4B71-8644-D5E784D1464C",
+        "messageIndex": 0,
+        "workProgress": 1,
+        "tone": "gentle",
+        "earnedAmount": 454.54545454545456,
+        "createdAt": 814370757.078399,
+        "mood": "steady"
+      }
+    ],
+    "tone": "gentle",
+    "selectedCompanionID": "kai"
+  },
+  "payjoy.wish.experiences.v1": null,
+  "payjoy.salary.settings": {
+    "workStart": {
+      "minute": 0,
+      "hour": 9
+    },
+    "lunchEnd": {
+      "minute": 0,
+      "hour": 13
+    },
+    "monthlyPaidDays": 21.75,
+    "workdays": [
+      6,
+      2,
+      3,
+      4,
+      5
+    ],
+    "workEnd": {
+      "minute": 5,
+      "hour": 22
+    },
+    "currencySymbol": "¥",
+    "lunchStart": {
+      "minute": 0,
+      "hour": 12
+    },
+    "salaryType": "monthly",
+    "currencyCode": "CNY",
+    "deductLunch": false,
+    "salaryAmount": 10000
+  }
+}

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct StatsView: View {
+    @Environment(\.payJoyAmbientMotionEnabled) private var ambientMotionEnabled
     @Environment(AppState.self) private var appState
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -13,26 +14,68 @@ struct StatsView: View {
     @State private var showsActualSalaryHistory = false
     @State private var showsActualSalaryMembershipPrompt = false
     @State private var showsActualSalaryPaywall = false
+    @State private var showsAchievements = false
+    @State private var scrollPosition = AdaptiveScrollPosition()
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                statsHeader
-                summaryCard
-                salaryReportCard
-                salaryAchievementCard
-                weeklyPayReportCard
-                salaryCalendarCard
-                detailsCard
-                overtimeCard
-                exchangeCard
-                targetCard
+        GeometryReader { space in
+            let layout = AdaptiveLayoutContext(proxy: space)
+            let isExpanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+            Group {
+                if isExpanded {
+                    AdaptiveTwoColumn {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                overviewCards
+                            }
+                            .scrollTargetLayout()
+                            .padding(.bottom, 30)
+                        }
+                        .scrollPosition(id: $scrollPosition.primary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = false
+                        })
+                    } secondary: {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                detailCards
+                            }
+                            .scrollTargetLayout()
+                            .padding(.top, 12)
+                            .padding(.bottom, 30)
+                        }
+                        .scrollPosition(id: $scrollPosition.secondary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = true
+                        })
+                    }
+                    .padding(.horizontal, AppTheme.pagePadding)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 14) {
+                            overviewCards
+                            detailCards
+                        }
+                        .scrollTargetLayout()
+                        .padding(.horizontal, AppTheme.pagePadding)
+                        .padding(.bottom, 86)
+                    }
+                    .scrollPosition(id: $scrollPosition.compact)
+                    .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
+                    .adaptiveSinglePane(in: layout)
+                }
             }
-            .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.bottom, 86)
+            .onChange(of: isExpanded) { _, expanded in
+                scrollPosition.transition(toExpanded: expanded, isSecondary: { position in
+                    ["stats-calendar", "stats-details", "stats-overtime", "stats-exchange", "stats-target"].contains(position)
+                })
+            }
         }
+        .environment(\.payJoyAmbientMotionEnabled, ambientMotionEnabled
+                     && !showsAchievements && !isOvertimeSheetPresented && !showsProSalaryReport && !showsSalaryReportMembershipPrompt
+                     && !showsSalaryReportPaywall && !showsActualSalaryHistory
+                     && !showsActualSalaryMembershipPrompt && !showsActualSalaryPaywall)
         .background(AppTheme.paper.ignoresSafeArea())
-        .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $showsProSalaryReport) {
             ProSalaryReportView(period: selectedPeriod)
@@ -51,6 +94,26 @@ struct StatsView: View {
         }
         .fullScreenCover(isPresented: $showsActualSalaryPaywall) {
             ProPaywallSheet()
+        }
+        .sheet(isPresented: $showsAchievements) {
+            NavigationStack {
+                ScrollView {
+                    SalaryAchievementCard(badges: appState.salaryBadges)
+                        .padding(AppTheme.pagePadding)
+                }
+                .background(AppTheme.paper)
+                .navigationTitle(L10n.t("开薪成就"))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(L10n.t("关闭")) { showsAchievements = false }
+                            .foregroundStyle(AppTheme.ink)
+                    }
+                }
+            }
+            .adaptiveSinglePane()
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $isOvertimeSheetPresented) {
             OvertimeRecordsSheet(
@@ -76,8 +139,59 @@ struct StatsView: View {
         }
     }
 
+    @ViewBuilder
+    private var overviewCards: some View {
+        statsHeader.id("stats-header")
+        summaryCard.id("stats-summary")
+        focusStatsCard.id("stats-focus")
+        salaryReportCard.id("stats-salary-report")
+        salaryAchievementCard.id("stats-achievements")
+        weeklyPayReportCard.id("stats-weekly")
+    }
+
+    @ViewBuilder
+    private var detailCards: some View {
+        salaryCalendarCard.id("stats-calendar")
+        detailsCard.id("stats-details")
+        overtimeCard.id("stats-overtime")
+        exchangeCard.id("stats-exchange")
+        targetCard.id("stats-target")
+    }
+
     private var period: PeriodEarnings {
         appState.periodEarnings(for: selectedPeriod)
+    }
+
+    private var focusStatsCard: some View {
+        ComicCard(background: AppTheme.cream) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.t("专注记录"))
+                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .foregroundStyle(AppTheme.ink)
+                HStack(spacing: 12) {
+                    focusMetric(title: L10n.t("今天"), duration: appState.todayFocusDuration, completed: appState.todayCompletedFocusCount)
+                    focusMetric(title: L10n.t("近七天"), duration: appState.recentFocusDuration, completed: appState.recentCompletedFocusCount)
+                }
+            }
+        }
+    }
+
+    private func focusMetric(title: String, duration: TimeInterval, completed: Int) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(AppTheme.textGray)
+            Text(duration > 0 && duration < 60
+                 ? L10n.format("%d 秒", Int(ceil(duration)))
+                 : L10n.format("%d 分钟", Int(duration / 60)))
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.ink)
+            Text(L10n.format("完成 %d 段", completed))
+                .font(.caption)
+                .foregroundStyle(AppTheme.textGray)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 
     private var isLowerScreenshot: Bool {
@@ -450,7 +564,8 @@ struct StatsView: View {
 
     private var salaryAchievementCard: some View {
         SalaryAchievementCompactEntry(
-            badges: appState.salaryBadges
+            badges: appState.salaryBadges,
+            showAll: { showsAchievements = true }
         )
     }
 
@@ -906,6 +1021,7 @@ private struct OvertimeRecordsSheet: View {
                 .presentationBackground(AppTheme.paper)
             }
         }
+        .adaptiveSinglePane()
     }
 
     private var monthSwitcher: some View {
@@ -1272,7 +1388,7 @@ private struct OvertimeRecordRow: View {
 private struct SalaryAchievementCompactEntry: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let badges: [SalaryBadge]
-    @State private var showsAll = false
+    let showAll: () -> Void
 
     private var collectedCount: Int {
         badges.filter(\.isUnlocked).count
@@ -1287,9 +1403,7 @@ private struct SalaryAchievementCompactEntry: View {
     }
 
     var body: some View {
-        Button {
-            showsAll = true
-        } label: {
+        Button(action: showAll) {
             let layout = dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
                 : AnyLayout(HStackLayout(alignment: .center, spacing: 13))
@@ -1321,25 +1435,6 @@ private struct SalaryAchievementCompactEntry: View {
             }
         }
         .buttonStyle(PayJoyPressStyle())
-        .sheet(isPresented: $showsAll) {
-            NavigationStack {
-                ScrollView {
-                    SalaryAchievementCard(badges: badges)
-                        .padding(AppTheme.pagePadding)
-                }
-                .background(AppTheme.paper)
-                .navigationTitle(L10n.t("开薪成就"))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(L10n.t("关闭")) { showsAll = false }
-                            .foregroundStyle(AppTheme.ink)
-                    }
-                }
-            }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-        }
         .accessibilityLabel(L10n.format("已收下 %@ 份小成就", "\(collectedCount)"))
         .accessibilityHint(L10n.t("查看全部成就"))
     }
@@ -1578,6 +1673,7 @@ private struct SalaryBadgeDetailSheet: View {
                 }
             }
         }
+        .adaptiveSinglePane()
     }
 }
 

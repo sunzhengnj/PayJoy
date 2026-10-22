@@ -5,10 +5,80 @@ private struct PayJoyReduceMotionKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct PayJoyAmbientMotionKey: EnvironmentKey {
+    static let defaultValue = true
+}
+
 extension EnvironmentValues {
+    var payJoyAmbientMotionEnabled: Bool {
+        get { self[PayJoyAmbientMotionKey.self] }
+        set { self[PayJoyAmbientMotionKey.self] = newValue }
+    }
+
     var payJoyReduceMotion: Bool {
         get { self[PayJoyReduceMotionKey.self] }
         set { self[PayJoyReduceMotionKey.self] = newValue }
+    }
+}
+
+struct AdaptiveTwoColumn<Primary: View, Secondary: View>: View {
+    let primary: Primary
+    let secondary: Secondary
+
+    init(@ViewBuilder primary: () -> Primary, @ViewBuilder secondary: () -> Secondary) {
+        self.primary = primary()
+        self.secondary = secondary()
+    }
+
+    var body: some View {
+#if PAYJOY_DUO_SDK
+        if #available(iOS 27.1, *) {
+            ArrangementView {
+                primary.padding(.trailing, 12)
+            } secondary: {
+                secondary.padding(.leading, 12)
+            }
+            .arrangementViewStyle(.split.axes(.horizontal))
+        } else {
+            fallback
+        }
+#else
+        fallback
+#endif
+    }
+
+    private var fallback: some View {
+        HStack(alignment: .top, spacing: 24) {
+            primary.frame(maxWidth: .infinity)
+            secondary.frame(maxWidth: .infinity)
+        }
+    }
+}
+
+struct AdaptiveScrollPosition {
+    var primary: String?
+    var secondary: String?
+    var compact: String?
+    var lastWidePaneWasSecondary = false
+
+    mutating func transition(
+        toExpanded expanded: Bool,
+        isSecondary: (String) -> Bool,
+        expandedOnlyAnchors: Set<String> = []
+    ) {
+        if expanded {
+            guard let compact else { return }
+            lastWidePaneWasSecondary = isSecondary(compact)
+            if lastWidePaneWasSecondary {
+                secondary = compact
+            } else {
+                primary = compact
+            }
+        } else {
+            let preferred = lastWidePaneWasSecondary ? secondary : primary
+            compact = [preferred, primary, secondary].compactMap { $0 }
+                .first { !expandedOnlyAnchors.contains($0) }
+        }
     }
 }
 
@@ -32,6 +102,9 @@ struct ComicCard<Content: View>: View {
 }
 
 struct ComicProgressBar: View {
+    @Environment(\.payJoyReduceMotion) private var reduceMotion
+    @Environment(\.payJoyAmbientMotionEnabled) private var ambientMotionEnabled
+    @Environment(\.scenePhase) private var scenePhase
     let progress: Double
 
     var body: some View {
@@ -42,7 +115,7 @@ struct ComicProgressBar: View {
                 Capsule()
                     .fill(AppTheme.coin)
                     .frame(width: max(12, proxy.size.width * CGFloat(min(1, max(0, progress)))))
-                    .animation(.spring(response: 0.46, dampingFraction: 0.84), value: progress)
+                    .animation(reduceMotion || !ambientMotionEnabled || scenePhase != .active ? nil : .easeOut(duration: 0.3), value: progress)
             }
             .overlay {
                 Capsule().stroke(AppTheme.outline, lineWidth: 1.4)
@@ -53,31 +126,42 @@ struct ComicProgressBar: View {
 }
 
 struct ComicIdleBob: ViewModifier {
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.payJoyAmbientMotionEnabled) private var ambientMotionEnabled
     var enabled: Bool
     var amplitude: CGFloat = 3.5
     var rotation: Double = 1.2
     var duration: Double = 2.5
     @State private var lifted = false
 
+    private var isActive: Bool { enabled && ambientMotionEnabled && scenePhase == .active }
+
     func body(content: Content) -> some View {
         content
-            .offset(y: enabled && lifted ? -amplitude : amplitude * 0.12)
-            .rotationEffect(.degrees(enabled && lifted ? rotation : -rotation * 0.28))
+            .offset(y: lifted ? -amplitude : 0)
+            .rotationEffect(.degrees(lifted ? rotation : 0))
             .onAppear(perform: startIfNeeded)
-            .onChange(of: enabled) { _, isEnabled in
+            .onDisappear(perform: stop)
+            .onChange(of: isActive) { _, isEnabled in
                 if isEnabled {
                     startIfNeeded()
                 } else {
-                    lifted = false
+                    stop()
                 }
             }
     }
 
     private func startIfNeeded() {
-        guard enabled, !lifted else { return }
+        guard isActive, !lifted else { return }
         withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
             lifted = true
         }
+    }
+
+    private func stop() {
+        var transaction = Transaction(animation: nil)
+        transaction.disablesAnimations = true
+        withTransaction(transaction) { lifted = false }
     }
 }
 
@@ -93,7 +177,7 @@ struct ComicTwinkleField: View {
     ]
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: enabled ? 1 / 12 : 120)) { timeline in
+        TimelineView(.animation(minimumInterval: 1 / 12, paused: !enabled)) { timeline in
             GeometryReader { proxy in
                 ForEach(sparks.indices, id: \.self) { index in
                     let spark = sparks[index]
@@ -115,6 +199,25 @@ struct ComicTwinkleField: View {
 }
 
 extension View {
+    /// Keep the scroll container and its state in place while the available pane changes.
+    func adaptiveSinglePane(in layout: AdaptiveLayoutContext) -> some View {
+        let bounds = layout.singleColumnBounds
+        // Let system scroll edges reach the screen, but never extend across a fold or camera clearance.
+        let topOverflow = bounds.minY <= 0 ? layout.safeAreaInsets.top : 0
+        let bottomOverflow = bounds.maxY >= layout.size.height ? layout.safeAreaInsets.bottom : 0
+        return frame(width: bounds.width, height: bounds.height)
+            .clipShape(Rectangle()
+                .size(width: bounds.width, height: bounds.height + topOverflow + bottomOverflow)
+                .offset(y: -topOverflow))
+            .position(x: bounds.midX, y: bounds.midY)
+    }
+
+    func adaptiveSinglePane() -> some View {
+        GeometryReader { proxy in
+            adaptiveSinglePane(in: AdaptiveLayoutContext(proxy: proxy))
+        }
+    }
+
     func comicIdleBob(
         enabled: Bool,
         amplitude: CGFloat = 3.5,
@@ -257,6 +360,7 @@ struct ComicBubbleShape: Shape {
 
 enum AppTab: String, CaseIterable, Identifiable {
     case home
+    case focus
     case stats
     case wish
     case profile
@@ -266,6 +370,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .home: L10n.t("首页")
+        case .focus: L10n.t("专注")
         case .stats: L10n.t("统计")
         case .wish: L10n.t("愿望")
         case .profile: L10n.t("我的")
@@ -275,9 +380,206 @@ enum AppTab: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .home: "house.fill"
+        case .focus: "timer"
         case .stats: "chart.bar.fill"
         case .wish: "sparkles.rectangle.stack.fill"
         case .profile: "person.fill"
+        }
+    }
+}
+
+/// The available scene geometry, rather than a device name or interface orientation,
+/// determines whether content can be shown beside or across the fold.
+struct AdaptiveLayoutContext {
+    var size: CGSize
+    var safeAreaInsets: EdgeInsets
+    var divisionRegions: [CGRect]
+    var occlusionRegions: [CGRect]
+
+    static let compact = AdaptiveLayoutContext(
+        size: .zero,
+        safeAreaInsets: EdgeInsets(),
+        divisionRegions: [],
+        occlusionRegions: []
+    )
+
+    init(size: CGSize, safeAreaInsets: EdgeInsets, divisionRegions: [CGRect], occlusionRegions: [CGRect]) {
+        self.size = size
+        self.safeAreaInsets = safeAreaInsets
+        self.divisionRegions = divisionRegions
+        self.occlusionRegions = occlusionRegions
+    }
+
+    init(proxy: GeometryProxy) {
+        size = proxy.size
+        safeAreaInsets = proxy.safeAreaInsets
+#if DEBUG
+        if ProcessInfo.processInfo.environment["PAYJOY_DUO_TEST_POSE"] == "tabletop" {
+            divisionRegions = [CGRect(x: 0, y: size.height * 0.52, width: size.width, height: 18)]
+            occlusionRegions = []
+            return
+        }
+#endif
+#if PAYJOY_DUO_SDK
+        if #available(iOS 27.1, *) {
+            divisionRegions = proxy.reservedRegions(kind: .division).map(\.frame)
+            occlusionRegions = proxy.reservedRegions(kind: .occlusion).map(\.frame)
+        } else {
+            divisionRegions = []
+            occlusionRegions = []
+        }
+#else
+        divisionRegions = []
+        occlusionRegions = []
+#endif
+    }
+
+    var usableWidth: CGFloat {
+        max(0, size.width)
+    }
+
+    var singleColumnWidth: CGFloat {
+        verticalDivision.map { max(0, $0.minX - 12) } ?? usableWidth
+    }
+
+    var singleColumnBounds: CGRect {
+        var bounds = CGRect(x: 0, y: 0, width: singleColumnWidth, height: size.height)
+        if let division = horizontalDivision {
+            let upperHeight = max(0, division.minY - 12)
+            let lowerStart = min(size.height, division.maxY + 12)
+            let lowerHeight = max(0, size.height - lowerStart)
+            bounds = upperHeight >= lowerHeight
+                ? CGRect(x: 0, y: 0, width: usableWidth, height: upperHeight)
+                : CGRect(x: 0, y: lowerStart, width: usableWidth, height: lowerHeight)
+        }
+        // Page titles and result text can occupy the centre as well as either edge.
+        let clearance = topContentClearance(in: bounds)
+        return CGRect(x: bounds.minX, y: bounds.minY + min(clearance, bounds.height),
+                      width: bounds.width, height: max(0, bounds.height - clearance))
+    }
+
+    func topContentClearance(in bounds: CGRect) -> CGFloat {
+        let header = CGRect(x: bounds.minX, y: bounds.minY, width: bounds.width, height: min(60, bounds.height))
+        return occlusionRegions.filter { $0.intersects(header) }
+            .map { max(0, $0.maxY - bounds.minY) + 8 }.max() ?? 0
+    }
+
+    var hasRoomForTwoColumns: Bool {
+        guard horizontalDivision == nil else { return false }
+        let minimumPaneWidth: CGFloat = 320 + AppTheme.pagePadding + 12
+        if let division = verticalDivision {
+            let leadingWidth = division.minX
+            let trailingWidth = size.width - division.maxX
+            return leadingWidth >= minimumPaneWidth && trailingWidth >= minimumPaneWidth
+        }
+        // A horizontal-only ArrangementView collapses its secondary view in a tall window.
+        guard size.width >= size.height else { return false }
+        return usableWidth >= 2 * 320 + 24 + 2 * AppTheme.pagePadding
+    }
+
+    var horizontalDivision: CGRect? {
+        divisionRegions.first { $0.width > $0.height && $0.width >= size.width * 0.7 }
+    }
+
+    var verticalDivision: CGRect? {
+        divisionRegions.first { $0.height > $0.width && $0.height >= size.height * 0.7 }
+    }
+
+    func topControlClearance(in bounds: CGRect) -> CGFloat {
+        let edgeWidth = min(160, bounds.width / 2)
+        let headerHeight = min(60, bounds.height)
+        let leadingControls = CGRect(x: bounds.minX, y: bounds.minY, width: edgeWidth, height: headerHeight)
+        let trailingControls = CGRect(x: bounds.maxX - edgeWidth, y: bounds.minY, width: edgeWidth, height: headerHeight)
+        return occlusionRegions
+            .filter { $0.intersects(leadingControls) || $0.intersects(trailingControls) }
+            .map { max(0, $0.maxY - bounds.minY) + 8 }
+            .max() ?? 0
+    }
+
+    var canShowDeskClock: Bool {
+        guard let division = horizontalDivision else { return false }
+        let clockBounds = CGRect(x: 0, y: 0, width: size.width, height: division.minY)
+        return deskClockTimeFontSize(in: clockBounds) >= 44 && size.height - division.maxY >= 88
+    }
+
+    func deskClockTimeFontSize(in bounds: CGRect) -> CGFloat {
+        // Reserve the 44pt header, 20pt label, 4pt gap and 8pt bottom padding.
+        let timeHeight = max(0, bounds.height - topControlClearance(in: bounds) - 44 - 20 - 4 - 8)
+        return max(1, min(132, max(0, bounds.width - 32) * 0.18, timeHeight / 1.25))
+    }
+}
+
+private struct AdaptiveLayoutContextKey: EnvironmentKey {
+    static let defaultValue = AdaptiveLayoutContext.compact
+}
+
+private struct DuoDeviceAvailableKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var adaptiveLayoutContext: AdaptiveLayoutContext {
+        get { self[AdaptiveLayoutContextKey.self] }
+        set { self[AdaptiveLayoutContextKey.self] = newValue }
+    }
+
+    var duoDeviceAvailable: Bool {
+        get { self[DuoDeviceAvailableKey.self] }
+        set { self[DuoDeviceAvailableKey.self] = newValue }
+    }
+
+    var payJoyWindowScene: UIWindowScene? {
+        get { self[PayJoyWindowSceneKey.self] }
+        set { self[PayJoyWindowSceneKey.self] = newValue }
+    }
+}
+
+private struct PayJoyWindowSceneKey: EnvironmentKey {
+    static let defaultValue: UIWindowScene? = nil
+}
+
+struct WindowSceneReader: UIViewRepresentable {
+    let onSceneChange: (UIWindowScene?) -> Void
+    let onHingeAvailabilityChange: (Bool) -> Void
+    let onHingeFullyOpen: () -> Void
+
+    func makeUIView(context: Context) -> SceneView {
+        let view = SceneView()
+        view.onSceneChange = onSceneChange
+        view.onHingeAvailabilityChange = onHingeAvailabilityChange
+        view.onHingeFullyOpen = onHingeFullyOpen
+#if PAYJOY_DUO_SDK
+        if #available(iOS 27.1, *) {
+            view.addInteraction(UIHingeInteraction { [weak view] _, update in
+                let hasHinge = update.hinge != nil
+                let isFullyOpen = update.hinge?.status == .fullyOpen
+                DispatchQueue.main.async { [weak view] in
+                    view?.onHingeAvailabilityChange?(hasHinge)
+                    if isFullyOpen { view?.onHingeFullyOpen?() }
+                }
+            })
+        }
+#endif
+        return view
+    }
+
+    func updateUIView(_ view: SceneView, context: Context) {
+        view.onSceneChange = onSceneChange
+        view.onHingeAvailabilityChange = onHingeAvailabilityChange
+        view.onHingeFullyOpen = onHingeFullyOpen
+    }
+
+    final class SceneView: UIView {
+        var onSceneChange: ((UIWindowScene?) -> Void)?
+        var onHingeAvailabilityChange: ((Bool) -> Void)?
+        var onHingeFullyOpen: (() -> Void)?
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            let scene = window?.windowScene
+            DispatchQueue.main.async { [weak self] in
+                self?.onSceneChange?(scene)
+            }
         }
     }
 }
@@ -431,7 +733,7 @@ struct LiveActivityControlCard: View {
         if let statusMessage {
             return statusMessage
         }
-        return isAvailable ? L10n.t("状态可在系统实时活动中展示", statusTitle) : L10n.t("当前系统未开放实时活动。")
+        return isAvailable ? L10n.t("%@，可在系统实时活动中展示。", statusTitle) : L10n.t("当前系统未开放实时活动。")
     }
 }
 

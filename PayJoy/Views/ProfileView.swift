@@ -2,36 +2,73 @@ import SwiftUI
 import UIKit
 import AuthenticationServices
 import StoreKit
+import MessageUI
 
 struct ProfileView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @State private var activeSheet: ProfileSheet?
-    @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
     @State private var showsAccountManagement = false
-    @State private var showsWidgetGuide = false
     @State private var showsClosingReceipts = false
+    @State private var scrollPosition = AdaptiveScrollPosition()
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 14) {
-                Text(L10n.t("我的"))
-                    .font(.system(size: 30, weight: .black, design: .rounded))
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 12)
-                profileHeader
-                accountCard
-                liveActivityCard
-                proCard
-                settingsList
+        GeometryReader { space in
+            let layout = AdaptiveLayoutContext(proxy: space)
+            let isExpanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+            Group {
+                if isExpanded {
+                    AdaptiveTwoColumn {
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 14) {
+                                overviewCards
+                            }
+                            .scrollTargetLayout()
+                            .padding(.bottom, 28)
+                        }
+                        .scrollPosition(id: $scrollPosition.primary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = false
+                        })
+                    } secondary: {
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 14) {
+                                settingsList
+                            }
+                            .scrollTargetLayout()
+                            .padding(.top, 12)
+                            .padding(.bottom, 28)
+                        }
+                        .scrollPosition(id: $scrollPosition.secondary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = true
+                        })
+                    }
+                    .padding(.horizontal, AppTheme.pagePadding)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 14) {
+                            overviewCards
+                            settingsList
+                        }
+                        .scrollTargetLayout()
+                        .padding(.horizontal, AppTheme.pagePadding)
+                        .padding(.bottom, 18)
+                        .frame(maxWidth: 620)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .scrollPosition(id: $scrollPosition.compact)
+                    .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
+                    .adaptiveSinglePane(in: layout)
+                }
             }
-            .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.bottom, 18)
+            .onChange(of: isExpanded) { _, expanded in
+                scrollPosition.transition(toExpanded: expanded, isSecondary: { $0.hasPrefix("profile-settings-") })
+            }
         }
         .background(AppTheme.paper.ignoresSafeArea())
-        .defaultScrollAnchor(isLowerScreenshot ? .bottom : .top)
         .navigationBarHidden(true)
         .sheet(item: $activeSheet) { sheet in
             ProfileDetailSheet(sheet: sheet)
@@ -45,12 +82,6 @@ struct ProfileView: View {
                 .presentationDragIndicator(.visible)
                 .presentationBackground(AppTheme.paper)
         }
-        .sheet(isPresented: $showsWidgetGuide) {
-            WidgetGuideSheet()
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(AppTheme.paper)
-        }
         .sheet(isPresented: $showsClosingReceipts) {
             NavigationStack {
                 ClosingReceiptHistoryView()
@@ -58,9 +89,6 @@ struct ProfileView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
             .presentationBackground(AppTheme.paper)
-        }
-        .membershipFeatureAlert(isPresented: $showsMembershipPrompt) {
-            showsProPaywall = true
         }
         .fullScreenCover(isPresented: $showsProPaywall) {
             ProPaywallSheet()
@@ -70,6 +98,19 @@ struct ProfileView: View {
             transaction.animation = nil
             transaction.disablesAnimations = true
         }
+    }
+
+    @ViewBuilder
+    private var overviewCards: some View {
+        Text(L10n.t("我的"))
+            .font(.system(size: 30, weight: .black, design: .rounded))
+            .frame(maxWidth: .infinity)
+            .padding(.top, 12)
+            .id("profile-title")
+        profileHeader.id("profile-header")
+        accountCard.id("profile-account")
+        liveActivityCard.id("profile-live-activity")
+        proCard.id("profile-pro")
     }
 
     private var profileHeader: some View {
@@ -129,23 +170,22 @@ struct ProfileView: View {
 
     private var proCard: some View {
         Button {
-            if appState.hasEffectivePro {
-                showsProPaywall = true
-            } else {
-                showsMembershipPrompt = true
-            }
+            showsProPaywall = true
         } label: {
             ComicCard(background: AppTheme.proCardBackground) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(proCardTitle)
-                            .font(.title3.weight(.black))
-                        Text(L10n.t("工资报告、同步、密码、午休和主题集中管理。"))
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 15, weight: .black))
+                            Text(L10n.t("开薪会员"))
+                                .font(.title3.weight(.black))
+                        }
+                        Text(L10n.t("一次买断，永久拥有"))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(AppTheme.textGray)
-                            .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(L10n.t("查看详情"))
+                        Text(appState.hasEffectivePro ? L10n.t("查看权益") : L10n.t("前往开通"))
                             .font(.caption.weight(.black))
                             .foregroundStyle(AppTheme.ink)
                             .padding(.horizontal, 12)
@@ -265,7 +305,7 @@ struct ProfileView: View {
     }
 
     private var settingsList: some View {
-        VStack(spacing: 14) {
+        Group {
             SettingsGroup(title: L10n.t("工作与收入")) {
                 NavigationLink {
                     SalarySettingsView(mode: .salary)
@@ -290,29 +330,22 @@ struct ProfileView: View {
 
                 profileButton(.reminders, showsDivider: false)
             }
+            .id("profile-settings-work")
 
             SettingsGroup(title: L10n.t("外观与使用")) {
                 profileButton(.displayEffects)
                 profileButton(.theme)
                 profileButton(.language)
-                widgetGuideButton
             }
+            .id("profile-settings-appearance")
 
             SettingsGroup(title: L10n.t("隐私与支持")) {
                 profileButton(.privacy)
                 profileButton(.data)
                 profileButton(.help, showsDivider: false)
             }
+            .id("profile-settings-privacy")
         }
-    }
-
-    private var widgetGuideButton: some View {
-        Button {
-            showsWidgetGuide = true
-        } label: {
-            SettingsRow(title: L10n.t("小组件指引"), detail: L10n.t("添加到桌面"), showsDivider: false)
-        }
-        .buttonStyle(SettingsRowButtonStyle())
     }
 
     private var liveActivityCard: some View {
@@ -365,12 +398,11 @@ struct ProfileView: View {
     }
 
     private var profileRemindersStatusText: String {
-        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled, appState.preferences.goalRemindersEnabled].filter { $0 }.count
+        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled].filter { $0 }.count
         switch enabledCount {
         case 0: return L10n.t("未开启")
         case 1: return L10n.t("已开启 1 项")
-        case 2: return L10n.t("已开启 2 项")
-        default: return L10n.t("已开启 3 项")
+        default: return L10n.t("已开启 2 项")
         }
     }
 
@@ -378,9 +410,6 @@ struct ProfileView: View {
         AppState.isScreenshotMode && ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_SCREEN"] == "profile-lower"
     }
 
-    private var proCardTitle: String {
-        L10n.t("更多功能")
-    }
 }
 
 enum ProfileSheet: String, Identifiable {
@@ -449,9 +478,9 @@ enum ProfileSheet: String, Identifiable {
         case .privacy:
             L10n.t("开启密码保护后，每次打开开薪都需要输入 4 位密码；进入多任务切换器时也会自动隐藏页面内容。")
         case .reminders:
-            L10n.t("提醒功能会用于上班开薪、下班结算、午休暂停和目标达成提示。默认关闭，只有你主动开启后才会请求通知权限。")
+            L10n.t("提醒功能会用于上班开薪、下班结算和午休暂停提示。默认关闭，只有你主动开启后才会请求通知权限。")
         case .theme:
-            L10n.t("主题控制 App、小组件、锁屏和灵动岛的视觉风格；App 图标可以单独选择，不和主题绑定。")
+            L10n.t("主题控制 App、锁屏和灵动岛的视觉风格；App 图标可以单独选择，不和主题绑定。")
         case .language:
             L10n.t("默认跟随手机语言，也可以在这里固定为繁体中文、日文、英语或韩文。")
         case .data:
@@ -547,6 +576,7 @@ struct ProfileDetailSheet: View {
                 Text(L10n.t("这会用这台设备上的数据替换 iCloud 中已有的开薪数据。确认后将开启自动同步。"))
             }
         }
+        .adaptiveSinglePane()
     }
 
     private var detailBody: some View {
@@ -628,12 +658,11 @@ struct ProfileDetailSheet: View {
     }
 
     private var remindersStatusText: String {
-        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled, appState.preferences.goalRemindersEnabled].filter { $0 }.count
+        let enabledCount = [appState.preferences.remindersEnabled, appState.preferences.lunchRemindersEnabled].filter { $0 }.count
         switch enabledCount {
         case 0: return L10n.t("未开启")
         case 1: return L10n.t("已开启 1 项")
-        case 2: return L10n.t("已开启 2 项")
-        default: return L10n.t("已开启 3 项")
+        default: return L10n.t("已开启 2 项")
         }
     }
 
@@ -661,16 +690,6 @@ struct ProfileDetailSheet: View {
                         showsMembershipPrompt = true
                     }
                 }
-            )
-
-            Divider().overlay(AppTheme.divider)
-
-            reminderToggleRow(
-                title: L10n.t("目标达成提醒"),
-                subtitle: goalReminderHelpText,
-                isEnabled: appState.preferences.goalRemindersEnabled,
-                isAvailable: appState.personalGoal != nil,
-                action: appState.setGoalRemindersEnabled
             )
 
             if appState.reminderPermissionState == .denied {
@@ -751,23 +770,6 @@ struct ProfileDetailSheet: View {
             return L10n.t("系统通知权限已关闭，需要到设置里重新打开。")
         default:
             return L10n.t("打开后会在午休开始和午休结束时提醒。")
-        }
-    }
-
-    private var goalReminderHelpText: String {
-        guard appState.personalGoal != nil else {
-            return L10n.t("请先设置一个开薪目标。")
-        }
-        if appState.preferences.goalRemindersEnabled {
-            return L10n.t("会在预计达成日的下班时间提醒你。")
-        }
-        switch appState.reminderPermissionState {
-        case .notDetermined:
-            return L10n.t("开启时会自动请求系统通知权限。")
-        case .denied:
-            return L10n.t("系统通知权限已关闭，需要到设置里重新打开。")
-        default:
-            return L10n.t("开启后会在预计目标达成时提醒。")
         }
     }
 
@@ -927,36 +929,40 @@ struct ProfileDetailSheet: View {
 }
 
 private struct HelpFeedbackSheet: View {
+    @State private var feedback = ""
+    @State private var showsMailComposer = false
+    @State private var showsMailError = false
+    @FocusState private var isFeedbackFocused: Bool
+
+    private var trimmedFeedback: String {
+        feedback.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                ComicCard(background: AppTheme.highlightCardBackground) {
-                    HStack(alignment: .top, spacing: 12) {
-                        Text("?")
-                            .font(.system(size: 22, weight: .black, design: .rounded))
-                            .foregroundStyle(AppTheme.ink)
-                            .frame(width: 42, height: 42)
-                            .background(AppTheme.coin)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
+            VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 23, weight: .bold))
+                        .foregroundStyle(AppTheme.ink)
+                        .frame(width: 48, height: 48)
+                        .background(AppTheme.coin, in: RoundedRectangle(cornerRadius: 15))
 
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(L10n.t("规则、支持与法律信息"))
-                                .font(.headline.weight(.black))
-                            Text(L10n.t("计算规则：月薪按月薪 / 21.75 估算日薪，年薪按年薪 / 12 / 21.75，时薪按每日工作时长计算。默认周一到周五计薪。"))
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(AppTheme.textGray)
-                                .lineSpacing(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
+                    Text(L10n.t("有问题或想法？"))
+                        .font(.system(size: 25, weight: .black, design: .rounded))
+                        .foregroundStyle(AppTheme.ink)
+                    Text(L10n.t("你的意见对我们很重要。收到邮件后，我会第一时间回复。"))
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
-                ComicCard(padding: 0) {
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionTitle(L10n.t("常用入口"))
                     VStack(spacing: 0) {
                         Button(action: requestAppStoreReview) {
                             helpRow(
-                                index: "01",
+                                symbol: "star.fill",
                                 title: L10n.t("去 App Store 给开薪评分"),
                                 subtitle: L10n.t("轻点即可打开系统评分"),
                                 emphasized: true
@@ -964,47 +970,120 @@ private struct HelpFeedbackSheet: View {
                         }
                         .buttonStyle(.plain)
 
-                        Divider().overlay(AppTheme.divider).padding(.leading, 58)
+                        Divider().overlay(AppTheme.divider).padding(.leading, 60)
 
                         Link(destination: PayJoyLegalLinks.support) {
-                            helpRow(index: "02", title: L10n.t("支持与反馈"), subtitle: nil)
+                            helpRow(symbol: "questionmark.circle", title: L10n.t("支持与反馈"))
+                        }
+                        Divider().overlay(AppTheme.divider).padding(.leading, 60)
+                        Link(destination: PayJoyLegalLinks.privacy) {
+                            helpRow(symbol: "hand.raised", title: L10n.t("隐私政策"))
+                        }
+                        Divider().overlay(AppTheme.divider).padding(.leading, 60)
+                        Link(destination: PayJoyLegalLinks.terms) {
+                            helpRow(symbol: "doc.text", title: L10n.t("服务条款"))
+                        }
+                        Divider().overlay(AppTheme.divider).padding(.leading, 60)
+                        Link(destination: PayJoyLegalLinks.deleteAccount) {
+                            helpRow(symbol: "person.crop.circle.badge.minus", title: L10n.t("账号删除说明"))
                         }
                     }
+                    .background(AppTheme.softSurface, in: RoundedRectangle(cornerRadius: 18))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(AppTheme.divider, lineWidth: 1))
                 }
 
-                ComicCard(padding: 0) {
-                    VStack(spacing: 0) {
-                        Link(destination: PayJoyLegalLinks.privacy) {
-                            helpRow(index: "03", title: L10n.t("隐私政策"), subtitle: nil)
-                        }
-                        Divider().overlay(AppTheme.divider).padding(.leading, 58)
-                        Link(destination: PayJoyLegalLinks.terms) {
-                            helpRow(index: "04", title: L10n.t("服务条款"), subtitle: nil)
-                        }
-                        Divider().overlay(AppTheme.divider).padding(.leading, 58)
-                        Link(destination: PayJoyLegalLinks.deleteAccount) {
-                            helpRow(index: "05", title: L10n.t("账号删除说明"), subtitle: nil)
-                        }
-                    }
+                feedbackCard
+
+                VStack(alignment: .leading, spacing: 6) {
+                    sectionTitle(L10n.t("计算说明"))
+                    Text(L10n.t("计算规则：月薪按月薪 / 21.75 估算日薪，年薪按年薪 / 12 / 21.75，时薪按每日工作时长计算。默认周一到周五计薪。"))
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.textGray)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .padding(AppTheme.pagePadding)
             .padding(.bottom, 36)
         }
+        .scrollDismissesKeyboard(.interactively)
+        .sheet(isPresented: $showsMailComposer) {
+            FeedbackMailComposer(body: trimmedFeedback) { result, error in
+                if result == .sent && error == nil { feedback = "" }
+                if result == .failed || error != nil { showsMailError = true }
+            }
+        }
+        .alert(L10n.t("无法打开邮件应用"), isPresented: $showsMailError) {
+            Button(L10n.t("完成"), role: .cancel) {}
+        } message: {
+            Text(L10n.t("请在设备上设置邮件应用后重试。"))
+        }
     }
 
-    private func helpRow(index: String, title: String, subtitle: String?, emphasized: Bool = false) -> some View {
-        HStack(spacing: 12) {
-            Text(index)
-                .font(.system(size: 11, weight: .black, design: .rounded))
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.caption.weight(.heavy))
+            .foregroundStyle(AppTheme.textGray)
+            .padding(.leading, 2)
+    }
+
+    private var feedbackCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "envelope.badge")
+                    .font(.title3.weight(.bold))
+                Text(L10n.t("给我们留言"))
+                    .font(.headline.weight(.black))
+            }
+            .foregroundStyle(AppTheme.ink)
+
+            TextEditor(text: $feedback)
+                .focused($isFeedbackFocused)
+                .frame(minHeight: 100)
+                .scrollContentBackground(.hidden)
+                .padding(8)
+                .background(AppTheme.softSurface, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.divider, lineWidth: 1))
+                .overlay(alignment: .topLeading) {
+                    if feedback.isEmpty {
+                        Text(L10n.t("写下你的建议或遇到的问题…"))
+                            .font(.body)
+                            .foregroundStyle(AppTheme.muted)
+                            .padding(.top, 16)
+                            .padding(.leading, 13)
+                            .allowsHitTesting(false)
+                    }
+                }
+                .accessibilityLabel(L10n.t("写下你的建议或遇到的问题…"))
+
+            Button(action: sendFeedback) {
+                HStack(spacing: 8) {
+                    Text(L10n.t("发送反馈"))
+                    Image(systemName: "arrow.up.right")
+                }
+                .font(.subheadline.weight(.black))
                 .foregroundStyle(AppTheme.ink)
-                .frame(width: 34, height: 34)
+                .frame(maxWidth: .infinity, minHeight: 48)
+                .background(trimmedFeedback.isEmpty ? AppTheme.divider : AppTheme.coin, in: RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+            .disabled(trimmedFeedback.isEmpty)
+
+            Text(L10n.t("将打开邮件编辑页，请确认发送。"))
+                .font(.caption)
+                .foregroundStyle(AppTheme.textGray)
+        }
+        .padding(16)
+        .background(AppTheme.highlightCardBackground, in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private func helpRow(symbol: String, title: String, subtitle: String? = nil, emphasized: Bool = false) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(AppTheme.ink)
+                .frame(width: 36, height: 36)
                 .background(emphasized ? AppTheme.coin : AppTheme.softSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(emphasized ? AppTheme.outline : AppTheme.divider, lineWidth: 1)
-                }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -1018,14 +1097,37 @@ private struct HelpFeedbackSheet: View {
 
             Spacer(minLength: 8)
 
-            Text("›")
-                .font(.title3.weight(.black))
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
                 .foregroundStyle(AppTheme.textGray)
         }
         .foregroundStyle(AppTheme.ink)
         .padding(.horizontal, 14)
-        .padding(.vertical, subtitle == nil ? 13 : 12)
+        .padding(.vertical, 10)
         .contentShape(Rectangle())
+    }
+
+    private func sendFeedback() {
+        guard !trimmedFeedback.isEmpty else { return }
+        isFeedbackFocused = false
+        if MFMailComposeViewController.canSendMail() {
+            showsMailComposer = true
+        } else {
+            var components = URLComponents()
+            components.scheme = "mailto"
+            components.path = "5232@88.com"
+            components.queryItems = [
+                URLQueryItem(name: "subject", value: "\(L10n.appDisplayName) · \(L10n.t("帮助与反馈"))"),
+                URLQueryItem(name: "body", value: trimmedFeedback)
+            ]
+            guard let url = components.url else {
+                showsMailError = true
+                return
+            }
+            UIApplication.shared.open(url) { success in
+                if !success { showsMailError = true }
+            }
+        }
     }
 
     private func requestAppStoreReview() {
@@ -1035,6 +1137,43 @@ private struct HelpFeedbackSheet: View {
             return
         }
         SKStoreReviewController.requestReview(in: windowScene)
+    }
+}
+
+private struct FeedbackMailComposer: UIViewControllerRepresentable {
+    let body: String
+    let onFinish: (MFMailComposeResult, Error?) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> MFMailComposeViewController {
+        let composer = MFMailComposeViewController()
+        composer.mailComposeDelegate = context.coordinator
+        composer.setToRecipients(["5232@88.com"])
+        composer.setSubject("\(L10n.appDisplayName) · \(L10n.t("帮助与反馈"))")
+        composer.setMessageBody(body, isHTML: false)
+        return composer
+    }
+
+    func updateUIViewController(_ controller: MFMailComposeViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onFinish: onFinish, dismiss: dismiss)
+    }
+
+    final class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
+        let onFinish: (MFMailComposeResult, Error?) -> Void
+        let dismiss: DismissAction
+
+        init(onFinish: @escaping (MFMailComposeResult, Error?) -> Void, dismiss: DismissAction) {
+            self.onFinish = onFinish
+            self.dismiss = dismiss
+        }
+
+        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+            onFinish(result, error)
+            dismiss()
+        }
     }
 }
 
@@ -1123,6 +1262,7 @@ private struct AccountManagementSheet: View {
             }
             .interactiveDismissDisabled(isDeletingAccount)
         }
+        .adaptiveSinglePane()
     }
 
     private var header: some View {
@@ -1261,88 +1401,6 @@ private struct AccountInfoLine: View {
     }
 }
 
-private struct WidgetGuideSheet: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 16) {
-                    ComicCard(background: AppTheme.current == .midnight ? AppTheme.cream.opacity(0.86) : Color(hex: 0xFFF7DD), padding: 14) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            AssetImage(name: "widget_guide_preview_v1")
-                                .frame(height: 166)
-                                .frame(maxWidth: .infinity)
-                                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                        .stroke(AppTheme.outline, lineWidth: 1.2)
-                                }
-
-                            Text(L10n.t("把开薪小组件加到桌面"))
-                                .font(.title3.weight(.black))
-                            Text(L10n.t("不用打开 App，也能看到今日已赚、每秒回血和进度。"))
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(AppTheme.textGray)
-                                .lineSpacing(3)
-                        }
-                    }
-
-                    ComicCard {
-                        VStack(alignment: .leading, spacing: 12) {
-                            WidgetGuideStep(number: "1", title: L10n.t("长按桌面空白处"), detail: L10n.t("等图标开始晃动后，点左上角的 +。"))
-                            WidgetGuideStep(number: "2", title: L10n.t("搜索「开薪」"), detail: L10n.t("选择你喜欢的小组件尺寸。"))
-                            WidgetGuideStep(number: "3", title: L10n.t("添加到桌面"), detail: L10n.t("拖到顺手的位置，今天赚多少一眼就知道。"))
-                        }
-                    }
-                }
-                .padding(AppTheme.pagePadding)
-                .padding(.bottom, 32)
-            }
-            .background(AppTheme.paper.ignoresSafeArea())
-            .navigationTitle(L10n.t("小组件指引"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(L10n.t("完成")) {
-                        dismiss()
-                    }
-                    .fontWeight(.heavy)
-                    .foregroundStyle(AppTheme.ink)
-                }
-            }
-        }
-    }
-}
-
-private struct WidgetGuideStep: View {
-    let number: String
-    let title: String
-    let detail: String
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Text(number)
-                .font(.headline.weight(.black))
-                .foregroundStyle(AppTheme.ink)
-                .frame(width: 34, height: 34)
-                .background(AppTheme.coin)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(AppTheme.outline, lineWidth: 1.2))
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.subheadline.weight(.black))
-                Text(detail)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.textGray)
-                    .lineSpacing(2)
-            }
-            Spacer(minLength: 0)
-        }
-    }
-}
-
 private struct ProfileEditSheet: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
@@ -1362,11 +1420,14 @@ private struct ProfileEditSheet: View {
                             .font(.caption.weight(.bold))
                             .foregroundStyle(AppTheme.textGray)
 
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 12) {
-                            ForEach(UserProfile.avatarOptions, id: \.self) { avatar in
-                                avatarButton(avatar)
+                        ScrollView(.vertical) {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: 10)], spacing: 12) {
+                                ForEach(UserProfile.avatarOptions, id: \.self) { avatar in
+                                    avatarButton(avatar)
+                                }
                             }
                         }
+                        .frame(height: 230)
                     }
                 }
 
@@ -1384,18 +1445,22 @@ private struct ProfileEditSheet: View {
                             .textFieldStyle(.roundedBorder)
                     }
                 }
-
-                PrimaryButton(title: L10n.t("保存资料")) {
-                    appState.profile = UserProfile(
-                        nickname: nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UserProfile.defaultValue.nickname : nickname,
-                        motto: motto.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UserProfile.defaultValue.motto : motto,
-                        avatarAssetName: selectedAvatar
-                    )
-                    dismiss()
-                }
             }
             .padding(AppTheme.pagePadding)
-            .padding(.bottom, 36)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            PrimaryButton(title: L10n.t("保存资料")) {
+                appState.profile = UserProfile(
+                    nickname: nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UserProfile.defaultValue.nickname : nickname,
+                    motto: motto.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? UserProfile.defaultValue.motto : motto,
+                    avatarAssetName: selectedAvatar
+                )
+                dismiss()
+            }
+            .padding(.horizontal, AppTheme.pagePadding)
+            .padding(.top, 10)
+            .padding(.bottom, 8)
+            .background(AppTheme.paper)
         }
         .onAppear {
             guard !didLoad else { return }
@@ -2233,98 +2298,140 @@ struct ProPaywallSheet: View {
     }
 
     var body: some View {
-        ZStack {
-            ProPaywallBackground()
-
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 16) {
-                    ProPassportArtwork {
-                        dismiss()
+        GeometryReader { proxy in
+            let layout = AdaptiveLayoutContext(proxy: proxy)
+            let paneWidth = layout.verticalDivision.map { max(0, $0.minX - 12) }
+            ZStack {
+                ProPaywallBackground()
+                if layout.canShowDeskClock, let division = layout.horizontalDivision {
+                    VStack(spacing: 0) {
+                        paywallContent(paneWidth: paneWidth)
+                            .padding(.top, layout.topContentClearance(in: CGRect(x: 0, y: 0, width: proxy.size.width, height: division.minY)))
+                            .frame(height: max(0, division.minY))
+                            .clipped()
+                        Color.clear.frame(height: max(0, division.height))
+                        ScrollView(showsIndicators: false) {
+                            paywallActions(extendsBackground: false, paneWidth: paneWidth)
+                                .frame(maxWidth: 620)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .frame(height: max(0, proxy.size.height - division.maxY))
                     }
+                } else {
+                    paywallContent(paneWidth: paneWidth)
+                        .safeAreaInset(edge: .bottom, alignment: paneWidth == nil ? .center : .leading) {
+                            paywallActions(extendsBackground: layout.horizontalDivision == nil, paneWidth: paneWidth)
+                        }
+                        .adaptiveSinglePane(in: layout)
                 }
-                .padding(.horizontal, AppTheme.pagePadding)
-                .padding(.top, 6)
-                .padding(.bottom, 12)
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 8) {
-                primaryActionButton
-
-                if let message = appState.proPurchaseMessage {
-                    purchaseNotice(message)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
-
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 12) {
-                        restorePurchaseButton
-
-                        Rectangle()
-                            .fill(Color.white.opacity(0.24))
-                            .frame(width: 1, height: 14)
-
-                        oneTimePurchaseLabel
-                        Spacer(minLength: 0)
-                    }
-
-                    VStack(spacing: 2) {
-                        restorePurchaseButton
-                        oneTimePurchaseLabel
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-
-                if appState.proPurchaseMessage == nil {
-                    Text(paywallFootnote)
-                        .font(.caption2.weight(.black))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineLimit(3)
-                        .multilineTextAlignment(.center)
-                }
-
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 8) {
-                        finalPriceLabel
-                        Text("·")
-                        legalLinks
-                    }
-
-                    VStack(spacing: 3) {
-                        finalPriceLabel
-                        legalLinks
-                    }
-                }
-                .font(.caption2.weight(.black))
-                .foregroundStyle(.white.opacity(0.54))
-            }
-            .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.top, 8)
-            .padding(.bottom, 8)
-            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .background {
-                LinearGradient(
-                    colors: [
-                        Color(hex: 0x0B2430).opacity(0.96),
-                        Color(hex: 0x07151D).opacity(0.98)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.16))
-                        .frame(height: 1)
-                }
-                .ignoresSafeArea()
-            }
-            .animation(prefersReducedMotion ? nil : .easeInOut(duration: 0.2), value: appState.proPurchaseMessage)
-        }
+        .preferredColorScheme(.dark)
         .task {
             appState.recordPaywallViewed()
             await appState.loadProProduct()
         }
         .sensoryFeedback(.success, trigger: appState.hasEffectivePro)
+    }
+
+    private func paywallContent(paneWidth: CGFloat?) -> some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                if L10n.currentLanguage.resolved == .zhHans {
+                    ProPassportArtwork {
+                        dismiss()
+                    }
+                } else {
+                    ProPaywallHeader(subtitle: context.subtitle) {
+                        dismiss()
+                    }
+                    ProPassCoverCard(isUnlocked: appState.hasEffectivePro, description: context.coverDescription)
+                    ProLocalizedBenefits()
+                }
+            }
+            .padding(.horizontal, AppTheme.pagePadding)
+            .padding(.top, 6)
+            .padding(.bottom, 12)
+            .frame(maxWidth: 620)
+            .frame(maxWidth: .infinity)
+        }
+        .frame(width: paneWidth)
+        .frame(maxWidth: .infinity, alignment: paneWidth == nil ? .center : .leading)
+    }
+
+    private func paywallActions(extendsBackground: Bool, paneWidth: CGFloat?) -> some View {
+        VStack(spacing: 8) {
+            primaryActionButton
+
+            if let message = appState.proPurchaseMessage {
+                purchaseNotice(message)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    restorePurchaseButton
+
+                    Rectangle()
+                        .fill(Color.white.opacity(0.24))
+                        .frame(width: 1, height: 14)
+
+                    oneTimePurchaseLabel
+                    Spacer(minLength: 0)
+                }
+
+                VStack(spacing: 2) {
+                    restorePurchaseButton
+                    oneTimePurchaseLabel
+                }
+                .frame(maxWidth: .infinity)
+            }
+
+            if appState.proPurchaseMessage == nil {
+                Text(paywallFootnote)
+                    .font(.caption2.weight(.black))
+                    .foregroundStyle(.white.opacity(0.72))
+                    .lineLimit(3)
+                    .multilineTextAlignment(.center)
+            }
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    finalPriceLabel
+                    Text("·")
+                    legalLinks
+                }
+
+                VStack(spacing: 3) {
+                    finalPriceLabel
+                    legalLinks
+                }
+            }
+            .font(.caption2.weight(.black))
+            .foregroundStyle(.white.opacity(0.54))
+        }
+        .padding(.horizontal, AppTheme.pagePadding)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .frame(width: paneWidth)
+        .background {
+            LinearGradient(
+                colors: [
+                    Color(hex: 0x0B2430),
+                    Color(hex: 0x07151D)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .overlay(alignment: .top) {
+                Rectangle()
+                    .fill(Color.white.opacity(0.16))
+                    .frame(height: 1)
+            }
+            .ignoresSafeArea(edges: extendsBackground ? .all : [])
+        }
+        .animation(prefersReducedMotion ? nil : .easeInOut(duration: 0.2), value: appState.proPurchaseMessage)
     }
 
     private var prefersReducedMotion: Bool {
@@ -2483,21 +2590,16 @@ private struct ProPassportArtwork: View {
         ZStack(alignment: .topTrailing) {
             AssetImage(name: "pro_passport_artwork_v3", contentMode: .fit)
                 .frame(maxWidth: .infinity)
-                .accessibilityHidden(true)
+                .accessibilityLabel(L10n.t("开薪权益：无限愿望、工资报告、实际薪资、完整回执历史、更多回执语气、iCloud 同步、密码保护、午休设置与提醒、老板键、全部主题与图标。"))
 
             Button(action: onClose) {
-                Text("×")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.96))
-                    .frame(width: 52, height: 52)
-                    .background(Color(hex: 0x0A4A4D).opacity(0.2))
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.28), lineWidth: 1))
+                Color.clear
+                    .frame(width: 44, height: 44)
+                    .contentShape(Circle())
             }
             .buttonStyle(.plain)
-            .contentShape(Circle())
-            .padding(.top, 7)
-            .padding(.trailing, 7)
+            .padding(.top, 5)
+            .padding(.trailing, 6)
             .accessibilityLabel(L10n.t("关闭会员页面"))
         }
     }
@@ -2538,20 +2640,20 @@ private struct ProPaywallHeader: View {
         Group {
             if dynamicTypeSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .top) {
+                    HStack(alignment: .top, spacing: 8) {
                         proTitle
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         closeButton
                     }
                     subtitleText
                 }
             } else {
-                HStack(alignment: .center) {
+                HStack(alignment: .center, spacing: 8) {
                     VStack(alignment: .leading, spacing: 3) {
                         proTitle
                         subtitleText
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     closeButton
                 }
             }
@@ -2561,7 +2663,7 @@ private struct ProPaywallHeader: View {
 
     private var proTitle: some View {
         HStack(spacing: 8) {
-            Text("薪")
+            Image(systemName: "crown.fill")
                 .font(.system(size: 13, weight: .black, design: .rounded))
                 .foregroundStyle(Color(hex: 0x073D3B))
                 .frame(width: 30, height: 30)
@@ -2570,6 +2672,9 @@ private struct ProPaywallHeader: View {
             Text(L10n.t("开薪会员"))
                 .font(.system(size: 27, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -2600,62 +2705,66 @@ private struct ProPassCoverCard: View {
     let description: String
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            AssetImage(name: "pro_passport_cover_v1", contentMode: .fill)
-                .frame(maxWidth: .infinity)
-                .frame(height: 278)
-                .clipped()
+        GeometryReader { geometry in
+            ZStack(alignment: .topLeading) {
+                AssetImage(name: "pro_passport_cover_v1", contentMode: .fill)
+                    .frame(width: geometry.size.width, height: 278)
+                    .clipped()
+                    .accessibilityHidden(true)
 
-            LinearGradient(
-                colors: [Color(hex: 0x052D2C).opacity(0.96), Color.clear],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
+                LinearGradient(
+                    colors: [Color(hex: 0x052D2C).opacity(0.96), Color(hex: 0x052D2C).opacity(0.6), Color.clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
 
-            VStack(alignment: .leading, spacing: 7) {
-                Text("PAYJOY · LIFE PASS")
-                    .font(.caption2.weight(.black))
-                    .tracking(1.2)
-                    .foregroundStyle(AppTheme.coin.opacity(0.88))
-                Text(passTitle)
-                    .font(.system(size: 31, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.76)
-                Text(L10n.t("给努力一张长期通行证"))
-                    .font(.subheadline.weight(.black))
-                    .foregroundStyle(AppTheme.coin)
-                Text(description)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.8))
-                    .lineSpacing(2)
-                    .lineLimit(3)
-                    .frame(maxWidth: 205, alignment: .leading)
-                Spacer(minLength: 0)
-                Text(L10n.t("一次买断，永久拥有"))
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(Color(hex: 0x073D3B))
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 7)
-                    .background(AppTheme.coin)
-                    .clipShape(Capsule())
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("\(L10n.appDisplayName) · LIFE PASS")
+                        .font(.caption2.weight(.black))
+                        .tracking(1.2)
+                        .foregroundStyle(AppTheme.coin.opacity(0.88))
+                    Text(passTitle)
+                        .font(.system(size: 31, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.76)
+                    Text(L10n.t("给努力一张长期通行证"))
+                        .font(.subheadline.weight(.black))
+                        .foregroundStyle(AppTheme.coin)
+                    Text(description)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .lineSpacing(2)
+                        .lineLimit(3)
+                        .frame(maxWidth: 205, alignment: .leading)
+                    Spacer(minLength: 0)
+                    Text(L10n.t("一次买断，永久拥有"))
+                        .font(.caption.weight(.black))
+                        .foregroundStyle(Color(hex: 0x073D3B))
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 7)
+                        .background(AppTheme.coin)
+                        .clipShape(Capsule())
+                }
+                .padding(18)
+                .frame(maxHeight: .infinity, alignment: .topLeading)
+
+                AssetImage(name: AppTheme.proPaywallWorkerAsset)
+                    .frame(width: 138, height: 104)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, 8)
+                    .padding(.bottom, 2)
+                    .accessibilityHidden(true)
             }
-            .padding(18)
-            .frame(maxHeight: .infinity, alignment: .topLeading)
-
-            AssetImage(name: AppTheme.proPaywallWorkerAsset)
-                .frame(width: 138, height: 104)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                .padding(.trailing, 8)
-                .padding(.bottom, 2)
+            .frame(width: geometry.size.width, height: 278)
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(AppTheme.coin.opacity(0.7), lineWidth: 1.2)
+            }
+            .shadow(color: Color.black.opacity(0.3), radius: 18, x: 0, y: 10)
         }
         .frame(height: 278)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(AppTheme.coin.opacity(0.7), lineWidth: 1.2)
-        }
-        .shadow(color: Color.black.opacity(0.3), radius: 18, x: 0, y: 10)
         .dynamicTypeSize(...DynamicTypeSize.large)
         .accessibilityElement(children: .combine)
     }
@@ -2665,6 +2774,57 @@ private struct ProPassCoverCard: View {
             return L10n.t("会员已开通")
         }
         return L10n.t("人生加薪护照")
+    }
+}
+
+private struct ProLocalizedBenefits: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private let benefits: [(icon: String, title: String)] = [
+        ("infinity", "无限愿望"),
+        ("chart.bar.fill", "工资报告"),
+        ("banknote.fill", "实际薪资记录"),
+        ("clock.arrow.circlepath", "完整回执历史"),
+        ("text.bubble.fill", "更多回执语气"),
+        ("icloud.fill", "iCloud 同步"),
+        ("lock.shield.fill", "密码保护"),
+        ("cup.and.saucer.fill", "午休设置与提醒"),
+        ("eye.slash.fill", "老板键"),
+        ("paintpalette.fill", "全部主题 / 图标")
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.t("开薪权益"))
+                .font(.title2.weight(.black))
+                .foregroundStyle(.white)
+            Text(L10n.t("解锁更完整的开薪体验"))
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.white.opacity(0.74))
+
+            LazyVGrid(columns: dynamicTypeSize.isAccessibilitySize ? [GridItem(.flexible())] : [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                ForEach(Array(benefits.enumerated()), id: \.offset) { _, benefit in
+                    HStack(alignment: .center, spacing: 10) {
+                        Image(systemName: benefit.icon)
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundStyle(Color(hex: 0x073D3B))
+                            .frame(width: 36, height: 36)
+                            .background(AppTheme.coin)
+                            .clipShape(Circle())
+                            .accessibilityHidden(true)
+                        Text(L10n.t(benefit.title))
+                            .font(.caption.weight(.black))
+                            .foregroundStyle(Color(hex: 0x173E3A))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .background(Color(hex: 0xFFF5DD))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+            }
+        }
     }
 }
 

@@ -136,6 +136,30 @@ final class SalaryCalculator {
         return remaining > 0 ? remaining : nil
     }
 
+    func nextScheduledWorkStart(
+        after date: Date,
+        settings: SalarySettings,
+        records: [SalaryDayRecord] = []
+    ) -> Date? {
+        let recordsByDate = latestRecordsByDate(records)
+        var day = calendar.startOfDay(for: date)
+        for _ in 0..<366 {
+            let record = recordsByDate[dateKey(for: day)]
+            let effectiveSettings = record?.settingsSnapshot ?? settings
+            let kind = record?.kind ?? defaultSalaryDayKind(for: day, settings: effectiveSettings)
+            if kind == .normal {
+                let start = dateAt(
+                    minutesFromStartOfDay: effectiveSettings.workStart.minutesFromStartOfDay,
+                    matching: day
+                )
+                if start > date { return start }
+            }
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { return nil }
+            day = nextDay
+        }
+        return nil
+    }
+
     func periodEarnings(
         for period: StatsPeriod,
         date: Date,

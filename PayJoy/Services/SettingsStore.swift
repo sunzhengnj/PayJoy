@@ -27,6 +27,7 @@ struct SettingsStore {
     private let salaryWishesKey = "payjoy.salary.wishes"
     private let wishExperiencesKey = "payjoy.wish.experiences.v1"
     private let engagementStateKey = "payjoy.engagement.state.v1"
+    private let focusDataKey = "payjoy.focus.data.v1"
     private let appleAccountKey = "payjoy.apple.account"
     private let cloudSyncInitializedAccountKey = "payjoy.cloud.sync.initialized.account"
     private let bossKeyExitGuideKey = "payjoy.boss.key.didShowExitGuide"
@@ -193,6 +194,19 @@ struct SettingsStore {
         guard let data = try? JSONEncoder().encode(records) else { return }
         defaults.set(data, forKey: actualSalaryRecordsKey)
         sharedDefaults?.set(data, forKey: actualSalaryRecordsKey)
+    }
+
+    func loadFocusData() -> FocusData {
+        guard let data = defaults.data(forKey: focusDataKey),
+              let focusData = try? JSONDecoder().decode(FocusData.self, from: data) else {
+            return FocusData()
+        }
+        return focusData
+    }
+
+    func saveFocusData(_ focusData: FocusData) {
+        guard let data = try? JSONEncoder().encode(focusData) else { return }
+        defaults.set(data, forKey: focusDataKey)
     }
 
     func lastPaydayCelebrationDate() -> String? {
@@ -365,7 +379,7 @@ struct SettingsStore {
     }
 
     func clearAllLocalData() {
-        [salaryKey, profileKey, preferencesKey, selectedThemeKey, overtimeDaysKey, overtimeRecordsKey, earlyLeaveDaysKey, salaryDayRecordsKey, actualSalaryRecordsKey, lastPaydayCelebrationDateKey, personalGoalKey, salaryWishesKey, wishExperiencesKey, engagementStateKey, appleAccountKey, cloudSyncInitializedAccountKey, bossKeyExitGuideKey].forEach { key in
+        [salaryKey, profileKey, preferencesKey, selectedThemeKey, overtimeDaysKey, overtimeRecordsKey, earlyLeaveDaysKey, salaryDayRecordsKey, actualSalaryRecordsKey, lastPaydayCelebrationDateKey, personalGoalKey, salaryWishesKey, wishExperiencesKey, engagementStateKey, focusDataKey, "payjoy.focus.keepScreenAwake", appleAccountKey, cloudSyncInitializedAccountKey, bossKeyExitGuideKey].forEach { key in
             defaults.removeObject(forKey: key)
             sharedDefaults?.removeObject(forKey: key)
         }

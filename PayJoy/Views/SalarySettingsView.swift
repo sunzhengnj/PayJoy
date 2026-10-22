@@ -37,40 +37,14 @@ struct SalarySettingsView: View {
     @State private var showsProPaywall = false
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                titleBlock
-                if mode == .salary || mode == .all {
-                    salaryTypePicker
-                    amountCard
-                    paydayCard
-                }
-                if mode == .workTime || mode == .all {
-                    workTimeCard
-                    workdayCard
-                    lunchCard
-                }
-                if let validationMessage {
-                    validationNotice(validationMessage)
-                }
-                previewCard
+        GeometryReader { proxy in
+            let layout = AdaptiveLayoutContext(proxy: proxy)
+            ZStack {
+                AppTheme.paper.ignoresSafeArea()
+                settingsContent(in: layout)
             }
-            .padding(AppTheme.pagePadding)
-            .padding(.bottom, 82)
+            .navigationBarBackButtonHidden(layout.verticalDivision != nil)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            saveButton
-                .padding(.horizontal, AppTheme.pagePadding)
-                .padding(.top, 10)
-                .padding(.bottom, 8)
-                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                .background(AppTheme.paper)
-                .overlay(alignment: .top) {
-                    Divider()
-                        .overlay(AppTheme.divider.opacity(0.7))
-                }
-        }
-        .background(AppTheme.paper.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(AppTheme.current == .midnight ? .dark : .light, for: .navigationBar)
         .payJoyKeyboardDismissToolbar()
@@ -96,8 +70,92 @@ struct SalarySettingsView: View {
         }
     }
 
-    private var titleBlock: some View {
+    private func settingsContent(in layout: AdaptiveLayoutContext) -> some View {
+        let expanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+        let division = expanded ? layout.verticalDivision : nil
+        let bounds = expanded ? CGRect(origin: .zero, size: layout.size) : layout.singleColumnBounds
+        let gap = (division?.width ?? 0) + 24
+        let leadingWidth = expanded ? (division.map { $0.minX - 2 * AppTheme.pagePadding - 12 }
+            ?? (bounds.width - 2 * AppTheme.pagePadding - gap) / 2) : nil
+        let trailingWidth = expanded ? (division.map { layout.size.width - $0.maxX - 2 * AppTheme.pagePadding - 12 }
+            ?? leadingWidth) : nil
+        let columns = expanded
+            ? AnyLayout(HStackLayout(alignment: .top, spacing: gap + (division == nil ? 0 : 2 * AppTheme.pagePadding)))
+            : AnyLayout(VStackLayout(alignment: .leading, spacing: 14))
+
+        // Keep the same fields and scroll container while rearranging the form.
+        return ScrollView(showsIndicators: false) {
+            columns {
+                VStack(alignment: .leading, spacing: 14) {
+                    titleBlock(showsBackButton: layout.verticalDivision != nil)
+                    if mode == .workTime {
+                        workTimeCard
+                        workdayCard
+                    } else {
+                        salaryTypePicker
+                        amountCard
+                        if mode == .all { paydayCard }
+                    }
+                }
+                .padding(.top, division.map {
+                    layout.topContentClearance(in: CGRect(x: 0, y: 0, width: $0.minX, height: layout.size.height))
+                } ?? 0)
+                .frame(width: leadingWidth)
+
+                VStack(alignment: .leading, spacing: 14) {
+                    if mode == .salary { paydayCard }
+                    if mode == .all {
+                        workTimeCard
+                        workdayCard
+                    }
+                    if mode != .salary { lunchCard }
+                    if let validationMessage { validationNotice(validationMessage) }
+                    previewCard
+                }
+                .padding(.top, division.map {
+                    layout.topContentClearance(in: CGRect(x: $0.maxX, y: 0, width: layout.size.width - $0.maxX, height: layout.size.height))
+                } ?? 0)
+                .frame(width: trailingWidth)
+            }
+            .padding(AppTheme.pagePadding)
+            .padding(.bottom, 24)
+            .frame(maxWidth: expanded ? .infinity : 620)
+            .frame(maxWidth: .infinity)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            settingsFooter(paneWidth: trailingWidth.map { $0 + 2 * AppTheme.pagePadding })
+                .frame(maxWidth: .infinity, alignment: expanded ? .trailing : .center)
+        }
+        .frame(width: bounds.width, height: bounds.height)
+        .clipped()
+        .position(x: bounds.midX, y: bounds.midY)
+    }
+
+    private func settingsFooter(paneWidth: CGFloat?) -> some View {
+        saveButton
+            .padding(.horizontal, AppTheme.pagePadding)
+            .padding(.top, 10)
+            .padding(.bottom, 8)
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            .frame(width: paneWidth)
+            .frame(maxWidth: paneWidth ?? 620)
+            .background(AppTheme.paper)
+            .overlay(alignment: .top) {
+                Divider()
+                    .overlay(AppTheme.divider.opacity(0.7))
+            }
+    }
+
+    private func titleBlock(showsBackButton: Bool) -> some View {
         HStack(alignment: .center, spacing: 12) {
+            if showsBackButton {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundStyle(AppTheme.ink)
+                        .frame(width: 44, height: 44)
+                }
+                .accessibilityLabel(L10n.t("返回"))
+            }
             VStack(alignment: .leading, spacing: 4) {
                 Text(mode.title)
                     .font(.system(size: 28, weight: .black, design: .rounded))
@@ -112,7 +170,7 @@ struct SalarySettingsView: View {
 
             Spacer()
 
-            if !dynamicTypeSize.isAccessibilitySize {
+            if !dynamicTypeSize.isAccessibilitySize && !showsBackButton {
                 AssetImage(name: AppTheme.cornerWorkerAsset)
                     .frame(width: 78, height: 52)
                     .scaleEffect(AppTheme.cardArtworkScale, anchor: .trailing)
@@ -155,7 +213,7 @@ struct SalarySettingsView: View {
             if amountText.isEmpty || draft.salaryAmount <= 0 {
                 let amount = defaultAmount(for: type)
                 draft.salaryAmount = amount
-                amountText = amount.formatted(.number.precision(.fractionLength(0...2)))
+                amountText = LocalizedDecimalInput.display(amount)
             }
         } label: {
             VStack(alignment: .leading, spacing: 8) {
@@ -215,7 +273,7 @@ struct SalarySettingsView: View {
                         let isSelected = draft.salaryAmount == amount
                         Button {
                             draft.salaryAmount = amount
-                            amountText = amount.formatted(.number.precision(.fractionLength(0...2)))
+                            amountText = LocalizedDecimalInput.display(amount)
                         } label: {
                             Text(amount.compactMoneyText(currencySymbol: draft.currencySymbol))
                                 .font(.caption.weight(.heavy))
@@ -730,7 +788,7 @@ struct SalarySettingsView: View {
     private func loadDraft() {
         guard !didLoad else { return }
         draft = appState.sanitizeSettingsForCurrentPlan(appState.settings)
-        amountText = draft.salaryAmount.formatted(.number.precision(.fractionLength(0...2)))
+        amountText = LocalizedDecimalInput.display(draft.salaryAmount)
         monthlyPaidDaysText = formatMonthlyPaidDays(draft.monthlyPaidDays)
 #if DEBUG
         if AppState.isScreenshotMode,
@@ -761,49 +819,22 @@ struct SalarySettingsView: View {
     }
 
     private func sanitizeAmount(_ input: String) -> String {
-        var hasDecimalPoint = false
-        return input.filter { character in
-            if character == "." {
-                if hasDecimalPoint { return false }
-                hasDecimalPoint = true
-                return true
-            }
-            return character.isNumber
-        }
+        LocalizedDecimalInput.sanitize(input)
     }
 
     private func parsedSalaryAmount(from input: String) -> Double? {
-        guard let value = Double(input), value.isFinite, value > 0 else { return nil }
+        guard let value = LocalizedDecimalInput.parse(input), value.isFinite, value > 0 else { return nil }
         return value
     }
 
     private func sanitizeMonthlyPaidDays(_ input: String) -> String {
-        var hasDecimalPoint = false
-        var fractionalCount = 0
-        var sanitized = ""
-
-        for character in input {
-            if character == "." {
-                guard !hasDecimalPoint else { continue }
-                hasDecimalPoint = true
-                sanitized.append(character)
-                continue
-            }
-
-            guard character.isNumber else { continue }
-            if hasDecimalPoint {
-                guard fractionalCount < 2 else { continue }
-                fractionalCount += 1
-            }
-            sanitized.append(character)
-        }
-
-        return sanitized
+        LocalizedDecimalInput.sanitize(input, maxFractionDigits: 2)
     }
 
     private func updateMonthlyPaidDays(from text: String) {
-        guard let value = Double(text), value <= 31 else {
-            if let value = Double(text), value > 31 {
+        let parsed = LocalizedDecimalInput.parse(text)
+        guard let value = parsed, value <= 31 else {
+            if let parsed, parsed > 31 {
                 draft.monthlyPaidDays = 31
                 monthlyPaidDaysText = formatMonthlyPaidDays(31)
             } else {
@@ -821,7 +852,7 @@ struct SalarySettingsView: View {
     }
 
     private func formatMonthlyPaidDays(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(0...2)))
+        LocalizedDecimalInput.display(value)
     }
 
     private func defaultAmount(for type: SalaryType) -> Double {

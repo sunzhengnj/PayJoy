@@ -1,0 +1,12 @@
+{"elapsed": 2.6, "idle_percent": 0.17, "host_spawn_ms": 7.2, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 7.9, "idle_percent": 0.0, "host_spawn_ms": 11.1, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 10.5, "idle_percent": 0.0, "host_spawn_ms": 11.5, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 13.4, "idle_percent": 0.0, "host_spawn_ms": 11.4, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 16.5, "idle_percent": 0.0, "host_spawn_ms": 108.1, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 19.2, "idle_percent": 0.0, "host_spawn_ms": 14.9, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 22.3, "idle_percent": 0.0, "host_spawn_ms": 10.9, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 24.8, "idle_percent": 0.0, "host_spawn_ms": 10.8, "background_processes": 0, "bootstatus_exit": null}
+{"elapsed": 27.6, "idle_percent": 0.0, "host_spawn_ms": 8.4, "background_processes": 0, "bootstatus_exit": null}
+{"exception": "Command '['top', '-l', '1', '-n', '0']' timed out after 4 seconds"}
+{"shutdown_exit": 0}
+{"result": "error"}

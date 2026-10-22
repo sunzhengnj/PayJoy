@@ -2,14 +2,14 @@
 
 > **ASC live description still may contain PayJoy — apply this paste when agent has App Store Connect access.**
 
-Updated: 2026-09-14
+Updated: 2026-10-18. Candidate copy for the next version; verify against the final build and screenshots before pasting into App Store Connect.
 
 `ClockJoy` is the confirmed public name for the U.S. release. Keep the existing bundle ID, App Group, CloudKit container, StoreKit product IDs, repository paths, and internal Swift type names unchanged.
 
 ## App information
 
 - Name (27/30): `ClockJoy: Workday Countdown`
-- Subtitle (30/30): `Earnings, widgets & work timer`
+- Subtitle (21/30): `Earnings & work timer`
 - Primary category: `Productivity`
 - Secondary category: `Lifestyle`
 - Primary language: `English (U.S.)`
@@ -20,11 +20,19 @@ Updated: 2026-09-14
 
 `salary,wage,hourly,paycheck,income,overtime,lock,screen,shift,live,activity,clock,out,goal,job,focus`
 
-Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `widgets`, `work`, or `timer` to the keyword field because those terms already appear in the name or subtitle. `lock,screen` and `live,activity` cover Lock Screen and Live Activities as two-token searches. Do not use the internal repo name, competitor names, or unrelated financial terms in the keyword field.
+Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `work`, or `timer` to the keyword field because those terms already appear in the name or subtitle. `lock,screen` and `live,activity` cover Lock Screen and Live Activities as two-token searches. Do not use the internal repo name, competitor names, or unrelated financial terms in the keyword field.
 
 ## Promotional text
 
-`Make the workday feel lighter. Watch today’s estimated earnings grow, count down to clock-out, and keep your progress close with widgets and Live Activities.`
+`Take the workday one focus session at a time. Choose 25 minutes or, near the end of your shift, focus until clock-out. See your actual focused time at the end.`
+
+## What's New in 1.6 (candidate)
+
+Choose a 25-minute, 45-minute, or custom focus session—or focus until clock-out near the end of your shift. Pause and resume, then see how long you actually focused.
+
+On iPhone Duo, open the app to see today's progress beside your next action, or set it half-folded on a desk for a large countdown.
+
+Refined layouts and transitions across Today, Stats, and Wishes.
 
 ## Description
 
@@ -38,8 +46,13 @@ SEE TODAY MOVE FORWARD
 • Review monthly and yearly summaries
 • Record overtime days and early clock-outs
 
+FOCUS ON THE NEXT STRETCH
+• Choose 25 or 45 minutes, or set your own duration
+• Near clock-out, start a session that ends with your workday
+• See one clear timer, pause and resume, then review your actual focused time
+• Focus time never adds earnings or updates goals automatically
+
 KEEP IT CLOSE
-• Add Home Screen widgets
 • Follow the countdown from the Lock Screen and Dynamic Island
 • Sync your preferences privately with iCloud when enabled
 
@@ -56,8 +69,8 @@ Use a dedicated English (U.S.) set. Keep real salary amounts hidden in every sha
 
 1. `A lighter way through the workday.`
    Show the companion and today’s main progress state.
-2. `See today’s earnings grow.`
-   Show the live estimated-earnings card with a clearly fictional amount.
+2. `Focus on this stretch, until clock-out.`
+   Show the focus setup and a single, legible running timer.
 3. `Countdown from your Lock Screen.`
    Show the Lock Screen and Dynamic Island Live Activity.
 4. `Turn every shift into a small win.`
@@ -79,7 +92,8 @@ Do not change multiple metadata fields at the same time during measurement.
 ## Submission checks
 
 - Confirm the U.S. App Store name is ClockJoy (not the internal repo name).
-- Confirm the installed English app and widget names are both `ClockJoy`.
+- Replace the remaining public-description mentions of PayJoy with ClockJoy and verify the in-app purchase display name no longer says “PayJoy PRO”; keep the existing product ID unchanged.
+- Confirm the installed English app name is `ClockJoy`.
 - Confirm the English screenshots contain no Chinese UI or copy.
 - Confirm Support URL, Privacy Policy URL, and Terms show `ClockJoy` when opened in English.
 - Complete a formal USPTO exact, similar-spelling, and similar-sound trademark review before external release.

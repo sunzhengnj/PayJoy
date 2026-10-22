@@ -19,6 +19,8 @@ struct PayJoyActivityAttributes: ActivityAttributes {
         var goalProgress: Double?
         var goalRemainingText: String?
         var goalCompletionText: String?
+        var focusEndDate: Date?
+        var focusPausedRemaining: TimeInterval?
     }
 
     var title: String

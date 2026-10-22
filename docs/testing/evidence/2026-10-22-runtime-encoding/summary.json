@@ -1,0 +1,31 @@
+{
+  "hypothesis": "Removing lzfse decoding might reduce the observed diskimagesiod startup load",
+  "conversion": {
+    "exit_code": 0,
+    "format": "UDRO read-only",
+    "bytes": 18002695752,
+    "elapsed": "5m28.653s",
+    "logical_crc32_before_and_after": "984ADCAF",
+    "apfs_partition_crc32": "8851A0DC"
+  },
+  "verification": {
+    "integrity": "All image partition CRCs passed",
+    "simctl_runtime_add_identifier": "39A04ED7-26EF-4051-85FE-044FB4D3DE8B",
+    "signature": "Missing Signature",
+    "runtime_state": "Unusable; subsequently automatically removed by runtime service",
+    "booted": false
+  },
+  "outcome": "Encoding performance hypothesis not tested: converted image lacks Apple image signature and was rejected. No signature bypass attempted.",
+  "rollback": {
+    "runtime": "iOS 27.1 24A94425, original byte-identical signed compressed image",
+    "identifier": "2F27E9A4-1309-4303-A4AF-9452FA479668",
+    "state": "Ready / Verified",
+    "reason_for_new_identifier": "scan-and-mount rediscovered old asset whose seal still fails -67054 and suppressed the valid image as Cryptex Mount Preferred. Removed only that registration while keeping the Apple asset; re-registered a clone of the valid original image.",
+    "device_data": "No device created, erased, or deleted"
+  },
+  "limits": [
+    "No app UI evidence produced",
+    "Root cause of startup load remains unresolved",
+    "Original Apple asset retained; no unrelated runtimes changed"
+  ]
+}

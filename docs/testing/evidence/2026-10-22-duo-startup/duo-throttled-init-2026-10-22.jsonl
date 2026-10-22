@@ -1,0 +1,20 @@
+{"elapsed": 2.5, "idle_percent": 23.8, "host_spawn_ms": 3.5, "controlled_processes": 45, "bootstatus_exit": null}
+{"elapsed": 3.5, "idle_percent": 52.6, "host_spawn_ms": 3.7, "controlled_processes": 45, "bootstatus_exit": null}
+{"elapsed": 4.5, "idle_percent": 46.3, "host_spawn_ms": 4.6, "controlled_processes": 45, "bootstatus_exit": null}
+{"elapsed": 5.5, "idle_percent": 36.6, "host_spawn_ms": 3.4, "controlled_processes": 45, "bootstatus_exit": null}
+{"elapsed": 6.6, "idle_percent": 43.4, "host_spawn_ms": 66.4, "controlled_processes": 46, "bootstatus_exit": null}
+{"elapsed": 7.6, "idle_percent": 42.9, "host_spawn_ms": 3.0, "controlled_processes": 46, "bootstatus_exit": null}
+{"elapsed": 8.6, "idle_percent": 44.2, "host_spawn_ms": 4.0, "controlled_processes": 47, "bootstatus_exit": null}
+{"elapsed": 9.6, "idle_percent": 48.8, "host_spawn_ms": 7.0, "controlled_processes": 48, "bootstatus_exit": null}
+{"elapsed": 10.7, "idle_percent": 48.1, "host_spawn_ms": 87.6, "controlled_processes": 56, "bootstatus_exit": null}
+{"elapsed": 11.8, "idle_percent": 44.0, "host_spawn_ms": 7.1, "controlled_processes": 57, "bootstatus_exit": null}
+{"elapsed": 12.8, "idle_percent": 52.3, "host_spawn_ms": 7.0, "controlled_processes": 58, "bootstatus_exit": null}
+{"elapsed": 13.8, "idle_percent": 52.2, "host_spawn_ms": 4.2, "controlled_processes": 58, "bootstatus_exit": null}
+{"elapsed": 14.8, "idle_percent": 48.0, "host_spawn_ms": 6.4, "controlled_processes": 61, "bootstatus_exit": null}
+{"elapsed": 15.9, "idle_percent": 46.7, "host_spawn_ms": 56.9, "controlled_processes": 64, "bootstatus_exit": null}
+{"elapsed": 16.9, "idle_percent": 39.1, "host_spawn_ms": 6.9, "controlled_processes": 65, "bootstatus_exit": null}
+{"elapsed": 17.9, "idle_percent": 41.6, "host_spawn_ms": 4.4, "controlled_processes": 66, "bootstatus_exit": null}
+{"elapsed": 18.9, "idle_percent": 46.9, "host_spawn_ms": 7.3, "controlled_processes": 68, "bootstatus_exit": null}
+{"elapsed": 20.0, "idle_percent": 41.8, "host_spawn_ms": 23.9, "controlled_processes": 68, "bootstatus_exit": 0}
+{"shutdown_exit": 0}
+{"result": "migration_failed", "elapsed": 23.5}

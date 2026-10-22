@@ -118,6 +118,23 @@ struct WidgetColors {
     }
 }
 
+struct WidgetProgress: View {
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule().fill(WidgetColors.cream)
+                Capsule()
+                    .fill(WidgetColors.coin)
+                    .frame(width: max(12, proxy.size.width * CGFloat(min(1, max(0, progress)))))
+            }
+            .overlay(Capsule().stroke(WidgetColors.outline.opacity(0.82), lineWidth: 1.4))
+        }
+        .frame(height: 11)
+    }
+}
+
 struct WidgetPNGImage: View {
     let name: String
     var contentMode: ContentMode = .fit

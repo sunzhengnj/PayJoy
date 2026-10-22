@@ -1,0 +1,15 @@
+{
+  "time": "2026-10-22T15:33:43.078428+00:00",
+  "version": "2.0.0 (11)",
+  "testVersion": "1.6 (11), before metadata-only version bump",
+  "tests": "137 passed, 0 failed",
+  "sha256": {
+    "PayJoy/Views/FocusView.swift": "44103a6eb7b5ee4df324cd9ce0656b30970d2a3abff5f74b308dfa19dd5362b1",
+    "PayJoy/Theme/L10n.swift": "9db43c49d648d6792a9c8c4c89689f89e8da57c10aa22af3ffd50b81522d5b69",
+    "PayJoy/PayJoyApp.swift": "df21ce7a0a9e05e3a6c1136a8b24de861e1418c6da17c59b11ef8a922340ec29",
+    "PayJoy/Views/ProSalaryReportView.swift": "1759174b5eec1421291ffccd4159391e7f2cf9a9d887d2deaa598686d0a37b8b",
+    "PayJoy/Views/PaydayExperienceView.swift": "af921950532b166ac2a225ff7770db66be3d3bc0d9fd919f01669799028ddbab",
+    "PayJoyTests/FocusSessionTests.swift": "34d27756da8909eeccd1881a49b8130ab08fe53699115d82aff42c2a8cb699b4",
+    "PayJoy.xcodeproj/project.pbxproj": "1edadb2879a4105e54aa28fbb13461cbd18d9fdd9505add7a044d3b2326d309a"
+  }
+}

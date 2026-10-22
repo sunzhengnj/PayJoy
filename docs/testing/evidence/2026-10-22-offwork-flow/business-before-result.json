@@ -1,0 +1,42 @@
+{
+  "payjoy.engagement.state.v1": {
+    "selectedCompanionID": "kai",
+    "dailyState": {
+      "dateKey": "2026-10-22"
+    },
+    "capsules": [],
+    "tone": "gentle"
+  },
+  "payjoy.wish.experiences.v1": null,
+  "payjoy.salary.settings": {
+    "workStart": {
+      "minute": 0,
+      "hour": 9
+    },
+    "lunchEnd": {
+      "minute": 0,
+      "hour": 13
+    },
+    "monthlyPaidDays": 21.75,
+    "workdays": [
+      6,
+      2,
+      3,
+      4,
+      5
+    ],
+    "workEnd": {
+      "minute": 5,
+      "hour": 22
+    },
+    "currencySymbol": "¥",
+    "lunchStart": {
+      "minute": 0,
+      "hour": 12
+    },
+    "salaryType": "monthly",
+    "currencyCode": "CNY",
+    "deductLunch": false,
+    "salaryAmount": 10000
+  }
+}

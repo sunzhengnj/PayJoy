@@ -1,0 +1,27 @@
+{
+  "source_images": [
+    "PayJoy/Assets.xcassets/AppIcon.appiconset/app_icon_draft_1024.png",
+    "PayJoy/Assets.xcassets/home_header_lettering_v1.imageset/home_header_lettering_v1.png",
+    "brand-mascot-cutout.png",
+    "search-right-iphone-source.png"
+  ],
+  "assets": [
+    {
+      "file": "header-zh-Hans-3840x1646.png",
+      "size": [
+        3840,
+        1646
+      ],
+      "mode": "RGB"
+    },
+    {
+      "file": "search-results-zh-Hans-3840x2560.png",
+      "size": [
+        3840,
+        2560
+      ],
+      "mode": "RGB"
+    }
+  ],
+  "note": "Header: extracted brand mascot and original wordmark on classic yellow, no icon square or app screenshot. Search results: original user-provided iPhone screenshot on right and classic yellow brand treatment on left."
+}

@@ -6,7 +6,8 @@ struct PayJoyWidgetEntry: TimelineEntry {
     let snapshot: EarningsSnapshot
     let settings: SalarySettings
     let preferences: AppPreferences
-    let offDutySecondsUntilWorkStart: TimeInterval?
+    let isConfigured: Bool
+    let nextWorkStart: Date?
     let personalGoal: WishExperience?
     let personalGoalProgress: PersonalGoalProgress?
 }
@@ -17,7 +18,7 @@ struct PayJoyWidgetProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PayJoyWidgetEntry) -> Void) {
-        completion(context.isPreview ? previewEntry : entry(for: Date()))
+        completion(previewEntry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<PayJoyWidgetEntry>) -> Void) {
@@ -32,8 +33,10 @@ struct PayJoyWidgetProvider: TimelineProvider {
         let store = SettingsStore(defaults: UserDefaults(suiteName: AppConstants.appGroupIdentifier) ?? .standard)
         let settings = store.load()
         let preferences = store.loadPreferences()
+        let isConfigured = preferences.hasCompletedInitialSetup
         let salaryDayRecords = store.loadSalaryDayRecords()
         let earlyLeaveDateKeys = store.loadEarlyLeaveDays()
+        let overtimeDateKeys = store.loadOvertimeDays()
         let calculator = SalaryCalculator()
         let todayRecord = salaryDayRecords
             .filter { $0.dateKey == calculator.dateKey(for: date) }
@@ -41,16 +44,27 @@ struct PayJoyWidgetProvider: TimelineProvider {
         let snapshot = calculator.snapshot(
             for: date,
             settings: settings,
-            overtimeDateKeys: store.loadOvertimeDays(),
+            overtimeDateKeys: overtimeDateKeys,
             earlyLeaveDateKeys: earlyLeaveDateKeys,
             record: todayRecord
         )
-        let offDutySecondsUntilWorkStart = calculator.offDutySecondsUntilWorkStart(
-            for: date,
-            settings: settings,
-            earlyLeaveDateKeys: earlyLeaveDateKeys,
-            records: salaryDayRecords
-        )
+        let nextWorkStart = (0...14).compactMap { dayOffset -> Date? in
+            guard let day = Calendar.current.date(byAdding: .day, value: dayOffset, to: Calendar.current.startOfDay(for: date)) else { return nil }
+            let record = salaryDayRecords
+                .filter { $0.dateKey == calculator.dateKey(for: day) }
+                .max { $0.updatedAt < $1.updatedAt }
+            let workStart = (record?.settingsSnapshot ?? settings).workStart
+            guard let start = Calendar.current.date(bySettingHour: workStart.hour, minute: workStart.minute, second: 0, of: day),
+                  start > date else { return nil }
+            let beforeStart = calculator.snapshot(
+                for: start.addingTimeInterval(-1),
+                settings: settings,
+                overtimeDateKeys: overtimeDateKeys,
+                earlyLeaveDateKeys: earlyLeaveDateKeys,
+                record: record
+            )
+            return beforeStart.status == .beforeWork ? start : nil
+        }.first
         let wishes = store.loadWishExperiences()
         let goal = wishes.first(where: \.isFocused) ?? wishes.first(where: \.isActive)
         let goalProgress = goal.map {
@@ -67,7 +81,8 @@ struct PayJoyWidgetProvider: TimelineProvider {
             snapshot: snapshot,
             settings: settings,
             preferences: preferences,
-            offDutySecondsUntilWorkStart: offDutySecondsUntilWorkStart,
+            isConfigured: isConfigured,
+            nextWorkStart: nextWorkStart,
             personalGoal: goal,
             personalGoalProgress: goalProgress
         )
@@ -87,7 +102,8 @@ struct PayJoyWidgetProvider: TimelineProvider {
             ),
             settings: .defaultValue,
             preferences: .defaultValue,
-            offDutySecondsUntilWorkStart: nil,
+            isConfigured: true,
+            nextWorkStart: Date(timeIntervalSinceNow: 86_400),
             personalGoal: WishExperience(
                 title: "夏日旅行",
                 archetype: .journey,
@@ -115,7 +131,7 @@ struct PayJoyEarningsWidget: Widget {
             PayJoyWidgetView(entry: entry)
         }
         .configurationDisplayName(L10n.t("开薪实时收入"))
-        .description(L10n.t("不用打开 App，也能看到今天赚了多少。"))
+        .description(L10n.t("不用打开 App，也能看到今日已赚、进度和倒计时。"))
         .supportedFamilies([
             .systemSmall,
             .systemMedium,
@@ -141,14 +157,16 @@ struct PayJoyWidgetView: View {
 
     var body: some View {
         Group {
-            if isAccessoryFamily {
+            if !entry.isConfigured {
+                setupWidget
+            } else if isAccessoryFamily {
                 accessoryWidget
                     .widgetAccentable()
             } else {
                 ZStack {
                     WidgetColors.paper
-                    if let offDutySecondsUntilWorkStart = entry.offDutySecondsUntilWorkStart {
-                        offDutyWidget(secondsUntilWorkStart: offDutySecondsUntilWorkStart)
+                    if entry.snapshot.status == .beforeWork || entry.snapshot.status == .restDay || entry.snapshot.status == .afterWork {
+                        offDutyWidget
                     } else {
                         switch family {
                         case .systemSmall:
@@ -180,6 +198,26 @@ struct PayJoyWidgetView: View {
             true
         default:
             false
+        }
+    }
+
+    private var setupWidget: some View {
+        Group {
+            if isAccessoryFamily {
+                Text(L10n.t("打开 App，先设置工资和上下班时间。"))
+                    .font(.caption)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(2)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(L10n.appDisplayName)
+                        .font(.headline)
+                    Text(L10n.t("打开 App，先设置工资和上下班时间。"))
+                        .font(.subheadline)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .padding(12)
+            }
         }
     }
 
@@ -231,7 +269,7 @@ struct PayJoyWidgetView: View {
     }
 
     private var accessoryProgress: Double {
-        if entry.offDutySecondsUntilWorkStart != nil { return 1 }
+        if entry.snapshot.status == .beforeWork { return 0 }
         switch entry.snapshot.status {
         case .afterWork, .restDay:
             return entry.snapshot.status == .afterWork ? 1 : 0
@@ -241,7 +279,7 @@ struct PayJoyWidgetView: View {
     }
 
     private var accessoryTitle: String {
-        if entry.offDutySecondsUntilWorkStart != nil {
+        if entry.snapshot.status == .beforeWork || entry.snapshot.status == .restDay {
             return L10n.t("下次上班")
         }
         switch entry.snapshot.status {
@@ -259,8 +297,8 @@ struct PayJoyWidgetView: View {
     }
 
     private var accessoryShortTime: String {
-        if let offDuty = entry.offDutySecondsUntilWorkStart {
-            return offDuty.shortCountdownText
+        if entry.snapshot.status == .beforeWork || entry.snapshot.status == .restDay {
+            return entry.nextWorkStart.map { $0.timeIntervalSince(entry.date).shortCountdownText } ?? L10n.t("休息")
         }
         switch entry.snapshot.status {
         case .afterWork:
@@ -281,19 +319,19 @@ struct PayJoyWidgetView: View {
     }
 
     @ViewBuilder
-    private func offDutyWidget(secondsUntilWorkStart: TimeInterval) -> some View {
+    private var offDutyWidget: some View {
         if family == .systemSmall {
             VStack(alignment: .leading, spacing: 7) {
-                Text(L10n.t("休息中"))
+                Text(offDutyTitle)
                     .font(.system(size: 16, weight: .black, design: .rounded))
-                Text(L10n.t("下次上班"))
+                Text(offDutyPrimaryLabel)
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .foregroundStyle(WidgetColors.muted)
-                Text(secondsUntilWorkStart.countdownText)
+                Text(offDutyPrimaryValue)
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .minimumScaleFactor(0.68)
                     .lineLimit(1)
-                Text(L10n.t("不着急，先好好休息"))
+                Text(nextWorkText)
                     .font(.system(size: 10, weight: .bold, design: .rounded))
                     .foregroundStyle(WidgetColors.muted)
                     .lineLimit(2)
@@ -306,19 +344,25 @@ struct PayJoyWidgetView: View {
         } else {
             HStack(spacing: family == .systemLarge ? 22 : 14) {
                 VStack(alignment: .leading, spacing: 7) {
-                    Text(L10n.t("休息中"))
+                    Text(offDutyTitle)
                         .font(.system(size: family == .systemLarge ? 22 : 16, weight: .black, design: .rounded))
-                    Text(L10n.t("下次上班"))
+                    Text(offDutyPrimaryLabel)
                         .font(.system(size: 11, weight: .heavy, design: .rounded))
                         .foregroundStyle(WidgetColors.muted)
-                    Text(secondsUntilWorkStart.countdownText)
+                    Text(offDutyPrimaryValue)
                         .font(.system(size: family == .systemLarge ? 34 : 28, weight: .black, design: .rounded))
                         .minimumScaleFactor(0.68)
                         .lineLimit(1)
-                    Text(L10n.t("这段时间归你，工作先放一边。"))
+                    Text(nextWorkText)
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundStyle(WidgetColors.muted)
                         .lineLimit(2)
+                    if let goal = entry.personalGoal, let progress = entry.personalGoalProgress {
+                        Text("\(goal.title) · \(Int(progress.progress * 100))%")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundStyle(WidgetColors.muted)
+                            .lineLimit(1)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -330,6 +374,30 @@ struct PayJoyWidgetView: View {
             .padding(.horizontal, family == .systemLarge ? 24 : 16)
             .padding(.vertical, family == .systemLarge ? 22 : 12)
         }
+    }
+
+    private var offDutyTitle: String {
+        switch entry.snapshot.status {
+        case .afterWork: L10n.t("今日到账")
+        case .beforeWork: L10n.t("钱包热身中")
+        default: L10n.t("休息日")
+        }
+    }
+
+    private var offDutyPrimaryLabel: String {
+        entry.snapshot.status == .afterWork ? L10n.t("今日已赚") : L10n.t("下次上班")
+    }
+
+    private var offDutyPrimaryValue: String {
+        if entry.snapshot.status == .afterWork {
+            return PrivacyText.money(entry.snapshot.todayEarned, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol)
+        }
+        return entry.nextWorkStart.map { $0.timeIntervalSince(entry.date).shortCountdownText } ?? L10n.t("休息日")
+    }
+
+    private var nextWorkText: String {
+        guard let nextWorkStart = entry.nextWorkStart else { return L10n.t("不着急，先好好休息") }
+        return L10n.t("下次上班") + " · " + nextWorkStart.formatted(.dateTime.weekday(.wide).hour().minute())
     }
 
     private var smallWidget: some View {
@@ -361,7 +429,7 @@ struct PayJoyWidgetView: View {
                 .minimumScaleFactor(0.56)
                 .lineLimit(1)
 
-            Text(PrivacyText.perSecond(entry.snapshot.earnedPerSecond, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+            Text(L10n.t("下班倒计时") + " " + entry.snapshot.secondsUntilOffWork.shortCountdownText)
                 .font(.system(size: 10, weight: .black, design: .rounded))
                 .foregroundStyle(WidgetColors.ink)
                 .minimumScaleFactor(0.72)
@@ -403,7 +471,7 @@ struct PayJoyWidgetView: View {
                     .foregroundStyle(WidgetColors.ink)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
-                Text(PrivacyText.perSecond(entry.snapshot.earnedPerSecond, hidden: hidesSensitiveAmounts, currencySymbol: currencySymbol))
+                Text(L10n.t("下班倒计时") + " " + entry.snapshot.secondsUntilOffWork.shortCountdownText)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundStyle(WidgetColors.ink)
                     .lineLimit(1)
@@ -446,6 +514,10 @@ struct PayJoyWidgetView: View {
                     .foregroundStyle(WidgetColors.muted)
                     .lineLimit(1)
                     .minimumScaleFactor(0.68)
+                Text(L10n.t("下班倒计时") + " " + entry.snapshot.secondsUntilOffWork.shortCountdownText)
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(WidgetColors.muted)
+                    .lineLimit(1)
                 if progress.progress >= 1 {
                     Text(L10n.t("已达成"))
                         .font(.system(size: 11, weight: .black, design: .rounded))
@@ -580,23 +652,6 @@ struct PayJoyWidgetView: View {
         ]
     }
 
-}
-
-struct WidgetProgress: View {
-    let progress: Double
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule().fill(WidgetColors.cream)
-                Capsule()
-                    .fill(WidgetColors.coin)
-                    .frame(width: max(12, proxy.size.width * CGFloat(min(1, max(0, progress)))))
-            }
-            .overlay(Capsule().stroke(WidgetColors.outline.opacity(0.82), lineWidth: 1.4))
-        }
-        .frame(height: 11)
-    }
 }
 
 private struct DividerLine: View {

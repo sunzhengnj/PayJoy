@@ -32,6 +32,36 @@ final class SalaryCalculatorTests: XCTestCase {
         XCTAssertEqual(calculator.dailySalary(for: settings), 900, accuracy: 0.001)
     }
 
+    func testEditableSalaryNumbersRespectRegionalDecimalSeparators() {
+        let english = Locale(identifier: "en_US")
+        XCTAssertEqual(LocalizedDecimalInput.display(10_000.5, locale: english), "10000.5")
+        XCTAssertEqual(LocalizedDecimalInput.sanitize("10,000.5", locale: english), "10000.5")
+        XCTAssertEqual(LocalizedDecimalInput.parse("10000.5", locale: english), 10_000.5)
+
+        let german = Locale(identifier: "de_DE")
+        XCTAssertEqual(LocalizedDecimalInput.display(10_000.5, locale: german), "10000,5")
+        XCTAssertEqual(LocalizedDecimalInput.sanitize("10.000,5", locale: german), "10000,5")
+        XCTAssertEqual(LocalizedDecimalInput.parse("10000,5", locale: german), 10_000.5)
+        XCTAssertEqual(LocalizedDecimalInput.sanitize("21,758", locale: german, maxFractionDigits: 2), "21,75")
+        XCTAssertEqual(LocalizedDecimalInput.parse("21,75", locale: german), 21.75)
+    }
+
+    func testFullWidthSalaryInputPreservesRegionalDecimalValue() {
+        let japanese = Locale(identifier: "ja_JP")
+        let japaneseInput = LocalizedDecimalInput.sanitize("１２，３４５．６７", locale: japanese)
+        XCTAssertEqual(LocalizedDecimalInput.parse(japaneseInput, locale: japanese), 12_345.67)
+
+        let german = Locale(identifier: "de_DE")
+        let germanInput = LocalizedDecimalInput.sanitize("１２．３４５，６７", locale: german)
+        XCTAssertEqual(LocalizedDecimalInput.parse(germanInput, locale: german), 12_345.67)
+    }
+
+    func testFullWidthPaidDaysInputPreservesFractionLimit() {
+        let german = Locale(identifier: "de_DE")
+        let input = LocalizedDecimalInput.sanitize("２１，７５８", locale: german, maxFractionDigits: 2)
+        XCTAssertEqual(LocalizedDecimalInput.parse(input, locale: german), 21.75)
+    }
+
     @MainActor
     func testHomeBubbleRestStateOverridesLateNightAndFriday() {
         let rest = [L10n.t("现在先休息，开工以后再说。"), L10n.t("这段时间归你，工作先放一边。")]
@@ -240,10 +270,9 @@ final class SalaryCalculatorTests: XCTestCase {
         XCTAssertEqual(progress.estimatedCompletionDate, date("2026-05-18 00:00:00"))
     }
 
-    func testPreferencesKeepGoalRemindersOptInByDefault() throws {
+    func testPreferencesKeepInitialSetupDefaults() throws {
         let data = try JSONEncoder().encode(AppPreferences.defaultValue)
         let restored = try JSONDecoder().decode(AppPreferences.self, from: data)
-        XCTAssertFalse(restored.goalRemindersEnabled)
         XCTAssertFalse(restored.hasCompletedInitialSetup)
         XCTAssertTrue(restored.unlockedBadgeIDs.isEmpty)
     }
@@ -332,9 +361,11 @@ final class SalaryCalculatorTests: XCTestCase {
                 XCTFail("Unable to enumerate \(sourceRoot.lastPathComponent) source files")
                 return
             }
-            sourceFiles.append(contentsOf: sourceEnumerator.compactMap {
+            let files = sourceEnumerator.compactMap {
                 ($0 as? URL).flatMap { $0.pathExtension == "swift" ? $0 : nil }
-            })
+            }
+            XCTAssertFalse(files.isEmpty, "No Swift sources found under \(sourceRoot.path)")
+            sourceFiles.append(contentsOf: files)
         }
         let patterns = [
             #"L10n\.(?:t|format)\(\s*\"((?:\\.|[^\"\\])*)\""#,
@@ -359,11 +390,45 @@ final class SalaryCalculatorTests: XCTestCase {
             }
         }
 
-        for language in [AppLanguage.en, .ja, .ko] {
+        XCTAssertFalse(keys.isEmpty, "Interface string scan must find localization keys")
+        let defaults = UserDefaults.standard
+        let preferencesKey = "payjoy.app.preferences"
+        let originalPreferences = defaults.data(forKey: preferencesKey)
+        defer {
+            if let originalPreferences {
+                defaults.set(originalPreferences, forKey: preferencesKey)
+            } else {
+                defaults.removeObject(forKey: preferencesKey)
+            }
+        }
+        // A numeric percentage in prose (such as "25% of") is not a format argument.
+        let formatExpression = try NSRegularExpression(
+            pattern: #"(?<![\d%])%(?:\d+\$)?[-+0 #]*\d*(?:\.\d+)?(?:hh|h|ll|l|z|t|j)?([@a-zA-Z])"#
+        )
+        func formatArgumentTypes(in text: String) -> [String] {
+            let range = NSRange(text.startIndex..., in: text)
+            return formatExpression.matches(in: text, range: range).compactMap { match in
+                guard let typeRange = Range(match.range(at: 1), in: text) else { return nil }
+                return String(text[typeRange])
+            }.sorted()
+        }
+
+        for language in [AppLanguage.zhHant, .en, .ja, .ko] {
             let untranslated = L10n.untranslatedKeys(Array(keys), language: language)
             XCTAssertTrue(
                 untranslated.isEmpty,
                 "\(language.rawValue) untranslated literals: \(untranslated.sorted().joined(separator: ", "))"
+            )
+
+            var preferences = AppPreferences.defaultValue
+            preferences.appLanguage = language
+            defaults.set(try JSONEncoder().encode(preferences), forKey: preferencesKey)
+            let formatMismatches = keys.filter {
+                formatArgumentTypes(in: $0) != formatArgumentTypes(in: L10n.t($0))
+            }
+            XCTAssertTrue(
+                formatMismatches.isEmpty,
+                "\(language.rawValue) format argument mismatches: \(formatMismatches.sorted().joined(separator: ", "))"
             )
 
             let dynamicKeys = [
@@ -373,6 +438,35 @@ final class SalaryCalculatorTests: XCTestCase {
                 L10n.untranslatedKeys(dynamicKeys, language: language).isEmpty,
                 "\(language.rawValue) untranslated dynamic strings"
             )
+        }
+    }
+
+    func testTraditionalMarketToneFollowsInterfaceLanguage() throws {
+        let defaults = UserDefaults.standard
+        let preferencesKey = "payjoy.app.preferences"
+        let originalPreferences = defaults.data(forKey: preferencesKey)
+        defer {
+            if let originalPreferences {
+                defaults.set(originalPreferences, forKey: preferencesKey)
+            } else {
+                defaults.removeObject(forKey: preferencesKey)
+            }
+        }
+
+        let cases: [(AppLanguage, AppMarket, String)] = [
+            (.en, .hongKong, "Create closing capsule"),
+            (.ja, .taiwan, "退勤カプセルをつくる"),
+            (.zhHans, .hongKong, "生成收工胶囊"),
+            (.zhHant, .hongKong, "整一張放工膠囊"),
+            (.zhHant, .taiwan, "生成下班膠囊"),
+            (.zhHant, .globalEnglish, "生成下班膠囊")
+        ]
+        for (language, market, expected) in cases {
+            var preferences = AppPreferences.defaultValue
+            preferences.appLanguage = language
+            preferences.marketOverride = market
+            defaults.set(try JSONEncoder().encode(preferences), forKey: preferencesKey)
+            XCTAssertEqual(L10n.t("生成收工胶囊"), expected, "\(language.rawValue), \(market.rawValue)")
         }
     }
 
@@ -398,7 +492,9 @@ final class SalaryCalculatorTests: XCTestCase {
             return
         }
 
-        for file in sourceEnumerator.compactMap({ $0 as? URL }) where file.pathExtension == "swift" {
+        let sourceFiles = sourceEnumerator.compactMap({ $0 as? URL }).filter { $0.pathExtension == "swift" }
+        XCTAssertFalse(sourceFiles.isEmpty, "Membership label scan must read Swift source files")
+        for file in sourceFiles {
             let source = try String(contentsOf: file, encoding: .utf8)
             let expression = file.lastPathComponent == "L10n.swift" ? literal : interfaceCall
             let sourceRange = NSRange(source.startIndex..., in: source)
@@ -615,28 +711,6 @@ final class SalaryCalculatorTests: XCTestCase {
         XCTAssertLessThan(compressedPayload.utf8.count, legacyPayload.utf8.count)
         XCTAssertEqual(try PayJoyCloudPayloadCodec.decode(compressedPayload), snapshot)
         XCTAssertEqual(try PayJoyCloudPayloadCodec.decode(legacyPayload), snapshot)
-    }
-
-    func testGoalReminderUsesWorkEndOnEstimatedCompletionDay() {
-        var settings = SalarySettings.defaultValue
-        settings.workEnd = WorkTime(hour: 18, minute: 30)
-        let completionDay = date("2026-05-18 00:00:00")
-
-        let beforeWorkEnd = WorkReminderScheduler.goalReminderFireDate(
-            completionDate: completionDay,
-            workEnd: settings.workEnd,
-            now: date("2026-05-18 10:00:00"),
-            calendar: calendar
-        )
-        XCTAssertEqual(beforeWorkEnd, date("2026-05-18 18:30:00"))
-
-        let afterWorkEnd = WorkReminderScheduler.goalReminderFireDate(
-            completionDate: completionDay,
-            workEnd: settings.workEnd,
-            now: date("2026-05-18 19:00:00"),
-            calendar: calendar
-        )
-        XCTAssertNil(afterWorkEnd)
     }
 
     func testPastCalendarCorrectionUsesActualIncomeInsteadOfEstimate() {
@@ -939,6 +1013,42 @@ final class SalaryCalculatorTests: XCTestCase {
                 for: date("2026-05-23 00:05:00"),
                 settings: settings
             )
+        )
+    }
+
+    func testNextScheduledWorkStartUsesWorkdaysAndManualDayChanges() throws {
+        let settings = SalarySettings.defaultValue
+        let fridayAfterWork = date("2026-05-22 19:00:00")
+        XCTAssertEqual(
+            calculator.nextScheduledWorkStart(after: fridayAfterWork, settings: settings),
+            date("2026-05-25 09:00:00")
+        )
+        XCTAssertEqual(
+            calculator.nextScheduledWorkStart(after: date("2026-05-25 08:30:00"), settings: settings),
+            date("2026-05-25 09:00:00")
+        )
+
+        let mondayRest = SalaryDayRecord(
+            dateKey: "2026-05-25",
+            kind: .rest,
+            note: "",
+            settingsSnapshot: settings,
+            scheduledAmount: 0,
+            earnedAmount: 0,
+            isEstimated: true,
+            updatedAt: fridayAfterWork
+        )
+        XCTAssertEqual(
+            calculator.nextScheduledWorkStart(after: fridayAfterWork, settings: settings, records: [mondayRest]),
+            date("2026-05-26 09:00:00")
+        )
+
+        var sundayShift = mondayRest
+        sundayShift.dateKey = "2026-05-24"
+        sundayShift.kind = .normal
+        XCTAssertEqual(
+            calculator.nextScheduledWorkStart(after: fridayAfterWork, settings: settings, records: [mondayRest, sundayShift]),
+            date("2026-05-24 09:00:00")
         )
     }
 

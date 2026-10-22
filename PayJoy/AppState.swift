@@ -7,7 +7,6 @@ import Observation
 import StoreKit
 import UIKit
 import UserNotifications
-import WidgetKit
 
 @MainActor
 @Observable
@@ -17,7 +16,6 @@ final class AppState {
             store.save(settings)
             refreshEstimatedSalaryDayRecords()
             refreshCurrentSalaryDayRecord(refreshSettingsSnapshot: true)
-            refreshWidgetTimelines()
             updateLiveActivityIfNeeded()
             if preferences.remindersEnabled {
                 reminderScheduler.scheduleWorkdayReminders(settings: settings)
@@ -27,7 +25,6 @@ final class AppState {
             } else if preferences.lunchRemindersEnabled {
                 setLunchRemindersEnabled(false)
             }
-            scheduleGoalReminderIfNeeded()
             refreshUnlockedBadgeIDsIfNeeded()
             scheduleCloudSyncIfNeeded()
         }
@@ -41,20 +38,13 @@ final class AppState {
     var preferences: AppPreferences {
         didSet {
             store.savePreferences(preferences)
-            refreshWidgetTimelines()
             updateLiveActivityIfNeeded()
-            if preferences.goalRemindersEnabled {
-                scheduleGoalReminderIfNeeded()
-            } else {
-                reminderScheduler.cancelGoalReminder()
-            }
             scheduleCloudSyncIfNeeded()
         }
     }
     var overtimeDateKeys: Set<String> {
         didSet {
             store.saveOvertimeDays(overtimeDateKeys)
-            refreshWidgetTimelines()
             updateLiveActivityIfNeeded()
             scheduleCloudSyncIfNeeded()
         }
@@ -70,7 +60,6 @@ final class AppState {
         didSet {
             store.saveEarlyLeaveDays(earlyLeaveDateKeys)
             refreshCurrentSalaryDayRecord()
-            refreshWidgetTimelines()
             updateLiveActivityIfNeeded()
             refreshUnlockedBadgeIDsIfNeeded()
             scheduleCloudSyncIfNeeded()
@@ -80,9 +69,7 @@ final class AppState {
         didSet {
             guard !Self.isScreenshotMode else { return }
             store.saveSalaryDayRecords(salaryDayRecords)
-            refreshWidgetTimelines()
             updateLiveActivityIfNeeded()
-            scheduleGoalReminderIfNeeded()
             refreshUnlockedBadgeIDsIfNeeded()
             scheduleCloudSyncIfNeeded()
         }
@@ -91,8 +78,6 @@ final class AppState {
         didSet {
             guard !Self.isScreenshotMode else { return }
             store.saveActualSalaryRecords(actualSalaryRecords)
-            refreshWidgetTimelines()
-            scheduleGoalReminderIfNeeded()
             scheduleCloudSyncIfNeeded()
         }
     }
@@ -100,9 +85,7 @@ final class AppState {
         didSet {
             guard !Self.isScreenshotMode else { return }
             store.saveWishExperiences(wishExperiences)
-            refreshWidgetTimelines()
             updateLiveActivityIfNeeded()
-            scheduleGoalReminderIfNeeded()
             refreshUnlockedBadgeIDsIfNeeded()
             scheduleCloudSyncIfNeeded()
         }
@@ -114,8 +97,16 @@ final class AppState {
             scheduleCloudSyncIfNeeded()
         }
     }
+    var focusData: FocusData {
+        didSet {
+            guard !Self.isScreenshotMode else { return }
+            store.saveFocusData(focusData)
+        }
+    }
     var now: Date
     var selectedTab: AppTab = .home
+    var isFocusPresented = false
+    var moyuStartedAt: Date?
     var isTabBarHidden = false
     var reminderPermissionState: ReminderPermissionState = .unknown
     var liveActivityErrorMessage: String?
@@ -136,6 +127,7 @@ final class AppState {
     var shouldPresentPaydayCelebration = false
     var shouldPresentClosingReceipt = false
     private var pendingClosingReceiptAfterPayday = false
+    private var pendingClosingReceiptAfterFocus = false
     private var pendingClosingReceiptAfterOvertime = false
     private var pendingCrossMidnightClosingReceiptDate: Date?
 
@@ -147,12 +139,11 @@ final class AppState {
     private let engagementAnalytics: any EngagementAnalytics
     private let wishPlanningExporter: any WishPlanningExporting
     @ObservationIgnored private var pendingCloudSyncTask: Task<Void, Never>?
-    @ObservationIgnored private var pendingWidgetRefreshTask: Task<Void, Never>?
     @ObservationIgnored private var transactionUpdatesTask: Task<Void, Never>?
     @ObservationIgnored private var isApplyingCloudSnapshot = false
     @ObservationIgnored private var isDeletingAccountData = false
     @ObservationIgnored private var activeCloudOperationCount = 0
-    @ObservationIgnored private var lastGoalReminderRefreshMinute: Int?
+    @ObservationIgnored private var lastBadgeRefreshMinute: Int?
     @ObservationIgnored private var lastSalaryRecordRefreshDateKey: String?
     @ObservationIgnored private var appLockCredential: AppLockCredential?
 
@@ -194,11 +185,15 @@ final class AppState {
         self.actualSalaryRecords = screenshotMode ? Self.screenshotActualSalaryRecords : store.loadActualSalaryRecords()
         self.wishExperiences = screenshotMode ? Self.screenshotWishExperiences : store.loadWishExperiences()
         self.engagementState = screenshotMode ? Self.screenshotEngagementState : store.loadEngagementState()
+        self.focusData = screenshotMode ? FocusData() : store.loadFocusData()
         self.appleAccount = store.loadAppleAccount()
         self.now = screenshotMode ? Self.screenshotNow : now
         self.proPriceText = ""
-        self.selectedTab = screenshotMode && Self.screenshotScreen == "wish-tab" ? .wish : .home
+        let restoresFocus = focusData.active != nil || focusData.pendingResult != nil
+        self.selectedTab = screenshotMode && Self.screenshotScreen == "wish-tab" ? .wish
+            : (restoresFocus || (screenshotMode && Self.screenshotScreen == "featured-focus-tab")) ? .focus : .home
         self.appLockCredential = screenshotMode ? nil : loadedAppLockCredential
+        self.isFocusPresented = restoresFocus
         AppNotificationResponseHandler.shared.routeHandler = { [weak self] route in
             self?.handleNotificationRoute(route)
         }
@@ -210,6 +205,7 @@ final class AppState {
             syncMessage = L10n.t("数据保存在本机")
             return
         }
+        reminderScheduler.cancelLegacyGoalReminder()
         enforceProFeatureAvailability()
         refreshReminderAuthorization()
         startTransactionUpdatesListener()
@@ -255,6 +251,12 @@ final class AppState {
             earlyLeaveDateKeys: earlyLeaveDateKeys,
             records: salaryDayRecords
         )
+    }
+
+    var nextWorkStartDate: Date? {
+        guard activeOvertimeRecord == nil,
+              [.beforeWork, .afterWork, .restDay].contains(snapshot.status) else { return nil }
+        return calculator.nextScheduledWorkStart(after: now, settings: settings, records: salaryDayRecords)
     }
 
     var focusedWish: WishExperience? {
@@ -364,20 +366,208 @@ final class AppState {
     func updateClock() {
         guard !Self.isScreenshotMode else { return }
         now = Date()
+        reconcileFocusSession()
         let dateKey = todayDateKey
         if lastSalaryRecordRefreshDateKey != dateKey {
             lastSalaryRecordRefreshDateKey = dateKey
             refreshCurrentSalaryDayRecord()
         }
         let minute = Int(now.timeIntervalSince1970 / 60)
-        if lastGoalReminderRefreshMinute != minute {
-            lastGoalReminderRefreshMinute = minute
-            scheduleGoalReminderIfNeeded()
+        if lastBadgeRefreshMinute != minute {
+            lastBadgeRefreshMinute = minute
             refreshUnlockedBadgeIDsIfNeeded()
         }
         if isLiveActivityActive, Int(now.timeIntervalSince1970) % 15 == 0 {
             updateLiveActivity()
         }
+    }
+
+    var focusToOffWorkDuration: TimeInterval? {
+        guard snapshot.status == .working,
+              activeOvertimeRecord == nil,
+              !hasLeftWorkEarlyToday,
+              (5 * 60...60 * 60).contains(snapshot.secondsUntilOffWork) else { return nil }
+        return snapshot.secondsUntilOffWork
+    }
+
+    var canShowFocusOffWorkTime: Bool {
+        if let session = focusData.active, session.endsAtWork {
+            return now < session.endDate
+        }
+        return snapshot.status == .working && activeOvertimeRecord == nil && !hasLeftWorkEarlyToday
+    }
+
+    var todayFocusDuration: TimeInterval {
+        focusData.records
+            .filter { Calendar.current.isDate($0.startedAt, inSameDayAs: now) }
+            .reduce(0) { $0 + $1.focusedDuration }
+    }
+
+    var recentFocusDuration: TimeInterval {
+        let start = Calendar.current.date(byAdding: .day, value: -6, to: Calendar.current.startOfDay(for: now)) ?? now
+        return focusData.records
+            .filter { $0.startedAt >= start && $0.startedAt <= now }
+            .reduce(0) { $0 + $1.focusedDuration }
+    }
+
+    var todayCompletedFocusCount: Int {
+        focusData.records.filter { $0.completed && Calendar.current.isDate($0.startedAt, inSameDayAs: now) }.count
+    }
+
+    var recentCompletedFocusCount: Int {
+        let start = Calendar.current.date(byAdding: .day, value: -6, to: Calendar.current.startOfDay(for: now)) ?? now
+        return focusData.records.filter { $0.completed && $0.startedAt >= start && $0.startedAt <= now }.count
+    }
+
+    func presentFocus() {
+        isFocusPresented = true
+    }
+
+    @discardableResult
+    func startFocus(minutes: Int, endsAtWork: Bool = false) -> Bool {
+        guard focusData.active == nil, FocusSession.durationMinuteRange.contains(minutes) else { return false }
+        let start = Date()
+        now = start
+        guard !endsAtWork || focusToOffWorkDuration != nil else { return false }
+        let duration = endsAtWork ? focusToOffWorkDuration! : TimeInterval(minutes * 60)
+        let hadEarningsActivity = isLiveActivityActive
+        var updated = focusData
+        updated.active = FocusSession(startedAt: start, duration: duration, endsAtWork: endsAtWork)
+        updated.pendingResultID = nil
+        updated.restoreEarningsActivity = hadEarningsActivity
+        focusData = updated
+        moyuStartedAt = nil
+        isFocusPresented = true
+        scheduleFocusNotification()
+        if hadEarningsActivity { updateLiveActivity() } else { startLiveActivity() }
+        return true
+    }
+
+    func pauseFocus() {
+        guard var session = focusData.active else { return }
+        now = Date()
+        if session.remaining(at: now) <= 0 {
+            reconcileFocusSession()
+            return
+        }
+        session.pause(at: now)
+        focusData.active = session
+        cancelFocusNotification(for: session.id)
+        updateLiveActivityIfNeeded()
+    }
+
+    func resumeFocus() {
+        guard var session = focusData.active, session.isPaused else { return }
+        now = Date()
+        if session.endsAtWork && now >= session.endDate {
+            reconcileFocusSession()
+            return
+        }
+        session.resume(at: now)
+        focusData.active = session
+        scheduleFocusNotification()
+        updateLiveActivityIfNeeded()
+    }
+
+    func endFocus() {
+        guard let session = focusData.active else { return }
+        now = Date()
+        finishFocus(completed: !session.isPaused && session.remaining(at: now) <= 0)
+    }
+
+    func dismissFocusResult(openClosingReceipt: Bool = false) {
+        let hadFullScreenPresentation = isFocusPresented
+        focusData.pendingResultID = nil
+        pendingClosingReceiptAfterFocus = openClosingReceipt
+        isFocusPresented = false
+        if !hadFullScreenPresentation {
+            focusPresentationDidDismiss()
+        }
+    }
+
+    func focusPresentationDidDismiss() {
+        preparePaydayCelebrationIfNeeded()
+        guard pendingClosingReceiptAfterFocus else { return }
+        pendingClosingReceiptAfterFocus = false
+        openClosingReceipt()
+    }
+
+    func reconcileFocusSession() {
+        guard let session = focusData.active else { return }
+        if session.endsAtWork && now >= session.endDate {
+            finishFocus(completed: !session.isPaused)
+        } else if !session.isPaused && session.remaining(at: now) <= 0 {
+            finishFocus(completed: true)
+        }
+    }
+
+    private func finishFocus(completed: Bool) {
+        guard let session = focusData.active else { return }
+        let restoreActivity = focusData.restoreEarningsActivity
+        var updated = focusData
+        let endedAt = (completed || (session.endsAtWork && now >= session.endDate)) ? session.endDate : now
+        guard updated.finish(at: endedAt, completed: completed) != nil else { return }
+        updated.restoreEarningsActivity = false
+        focusData = updated
+        cancelFocusNotification(for: session.id)
+        isFocusPresented = true
+        if restoreActivity { updateLiveActivityIfNeeded() } else { endLiveActivity() }
+    }
+
+    private func scheduleFocusNotification() {
+        guard let session = focusData.active, !session.isPaused else { return }
+        let sessionID = session.id
+        Task {
+            let center = UNUserNotificationCenter.current()
+            let settings = await center.notificationSettings()
+            let allowed: Bool
+            if settings.authorizationStatus == .notDetermined {
+                allowed = (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+            } else {
+                allowed = [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus)
+            }
+            guard allowed,
+                  let current = focusData.active,
+                  current.id == sessionID,
+                  !current.isPaused else { return }
+            let scheduledEndDate = current.endDate
+            let interval = current.endDate.timeIntervalSince(Date())
+            guard interval > 1 else { return }
+            let content = UNMutableNotificationContent()
+            content.title = L10n.t("这一段完成了")
+            content.body = L10n.t("打开开薪查看专注结果。")
+            content.sound = .default
+            content.userInfo[AppNotificationResponseHandler.routeUserInfoKey] = AppNotificationRoute.focus.rawValue
+            let request = UNNotificationRequest(
+                identifier: focusNotificationIdentifier(for: sessionID),
+                content: content,
+                trigger: UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+            )
+            do {
+                try await center.add(request)
+            } catch {
+                return
+            }
+            guard let latest = focusData.active,
+                  latest.id == sessionID,
+                  !latest.isPaused else {
+                cancelFocusNotification(for: sessionID)
+                return
+            }
+            if latest.endDate != scheduledEndDate {
+                scheduleFocusNotification()
+            }
+        }
+    }
+
+    private func cancelFocusNotification(for id: UUID) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [focusNotificationIdentifier(for: id)]
+        )
+    }
+
+    private func focusNotificationIdentifier(for id: UUID) -> String {
+        "payjoy.focus.\(id.uuidString)"
     }
 
     func startOvertimeNow() {
@@ -565,6 +755,9 @@ final class AppState {
     private func preparePaydayCelebrationIfNeeded() {
         guard preferences.hasCompletedInitialSetup,
               !isAppLocked,
+              focusData.active == nil,
+              focusData.pendingResult == nil,
+              !isFocusPresented,
               isTodayPayday else { return }
         let key = todayDateKey
         guard store.lastPaydayCelebrationDate() != key else { return }
@@ -867,18 +1060,6 @@ final class AppState {
             .map { Calendar.current.startOfDay(for: $0) }
     }
 
-    func refreshWidgetTimelines() {
-        WidgetCenter.shared.reloadTimelines(ofKind: "PayJoyEarningsWidgetV3")
-        pendingWidgetRefreshTask?.cancel()
-        pendingWidgetRefreshTask = Task { @MainActor in
-            for delay in [250_000_000, 1_000_000_000] {
-                try? await Task.sleep(nanoseconds: UInt64(delay))
-                guard !Task.isCancelled else { return }
-                WidgetCenter.shared.reloadTimelines(ofKind: "PayJoyEarningsWidgetV3")
-            }
-        }
-    }
-
     var isLiveActivityAvailable: Bool {
         ActivityAuthorizationInfo().areActivitiesEnabled
     }
@@ -898,7 +1079,7 @@ final class AppState {
         do {
             _ = try Activity.request(
                 attributes: PayJoyActivityAttributes(title: L10n.t("开薪中")),
-                content: ActivityContent(state: liveActivityState(), staleDate: Date(timeIntervalSinceNow: 60)),
+                content: ActivityContent(state: liveActivityState(), staleDate: liveActivityStaleDate),
                 pushType: nil
             )
         } catch {
@@ -909,13 +1090,21 @@ final class AppState {
     func updateLiveActivity() {
         let content = ActivityContent(
             state: liveActivityState(),
-            staleDate: Date(timeIntervalSinceNow: 60)
+            staleDate: liveActivityStaleDate
         )
         Task {
             for activity in Activity<PayJoyActivityAttributes>.activities {
                 await activity.update(content)
             }
         }
+    }
+
+    private var liveActivityStaleDate: Date? {
+        if let session = focusData.active {
+            return session.isPaused && !session.endsAtWork ? nil : session.endDate
+        }
+        if let nextWorkStart = nextWorkStartDate { return nextWorkStart }
+        return Date(timeIntervalSinceNow: 60)
     }
 
     private func updateLiveActivityIfNeeded() {
@@ -941,17 +1130,21 @@ final class AppState {
     }
 
     private func liveActivityState() -> PayJoyActivityAttributes.ContentState {
-        let offDutyRemaining = offDutySecondsUntilWorkStart
+        let nextWorkStart = nextWorkStartDate
+        let isOffDuty = activeOvertimeRecord == nil
+            && [.beforeWork, .afterWork, .restDay].contains(snapshot.status)
         return PayJoyActivityAttributes.ContentState(
             earned: snapshot.todayEarned,
             total: snapshot.todayTotal,
             perSecond: snapshot.earnedPerSecond,
             progress: snapshot.progress,
             statusTitle: snapshot.status.title,
-            endDate: offDutyRemaining.map { now.addingTimeInterval($0) } ?? workEndDate(for: now),
-            remainingText: (offDutyRemaining ?? snapshot.secondsUntilOffWork).countdownText,
-            countdownTitle: offDutyRemaining == nil ? L10n.t("下班倒计时") : L10n.t("下次上班"),
-            isOffDuty: offDutyRemaining != nil,
+            endDate: nextWorkStart ?? (isOffDuty ? now : workEndDate(for: now)),
+            remainingText: nextWorkStart.map { $0.timeIntervalSince(now).countdownText }
+                ?? (isOffDuty ? L10n.t("休息中") : snapshot.secondsUntilOffWork.countdownText),
+            countdownTitle: nextWorkStart == nil
+                ? (isOffDuty ? L10n.t("今天") : L10n.t("下班倒计时")) : L10n.t("下次上班"),
+            isOffDuty: isOffDuty,
             hidesSensitiveAmounts: preferences.hideSensitiveAmounts,
             currencySymbol: settings.currencySymbol,
             visualTheme: preferences.selectedTheme,
@@ -965,7 +1158,9 @@ final class AppState {
             goalCompletionText: personalGoalProgress.flatMap { progress in
                 guard progress.progress < 1, let date = progress.estimatedCompletionDate else { return nil }
                 return L10n.format("预计 %@ 达成。", date.localizedDateText)
-            }
+            },
+            focusEndDate: focusData.active?.isPaused == false ? focusData.active?.endDate : nil,
+            focusPausedRemaining: focusData.active?.pausedRemaining
         )
     }
 
@@ -1062,43 +1257,6 @@ final class AppState {
                 reminderScheduler.scheduleLunchReminders(settings: settings)
             }
         }
-    }
-
-    func setGoalRemindersEnabled(_ isEnabled: Bool) {
-        Task {
-            guard isEnabled else {
-                var updatedPreferences = preferences
-                updatedPreferences.goalRemindersEnabled = false
-                preferences = updatedPreferences
-                reminderScheduler.cancelGoalReminder()
-                reminderPermissionState = await reminderScheduler.authorizationState()
-                return
-            }
-
-            guard personalGoal != nil else {
-                syncMessage = L10n.t("请先设置一个开薪目标。")
-                return
-            }
-
-            let granted = await reminderScheduler.requestAuthorization()
-            reminderPermissionState = await reminderScheduler.authorizationState()
-            var updatedPreferences = preferences
-            updatedPreferences.goalRemindersEnabled = granted
-            preferences = updatedPreferences
-            if granted {
-                scheduleGoalReminderIfNeeded()
-            }
-        }
-    }
-
-    private func scheduleGoalReminderIfNeeded() {
-        guard preferences.goalRemindersEnabled,
-              let goal = personalGoal,
-              let progress = personalGoalProgress else {
-            reminderScheduler.cancelGoalReminder()
-            return
-        }
-        reminderScheduler.scheduleGoalReminder(goal: goal, progress: progress, settings: settings, now: now)
     }
 
     var isSignedInWithApple: Bool {
@@ -1244,7 +1402,6 @@ final class AppState {
             selectedAppIcon: .classic,
             remindersEnabled: true,
             lunchRemindersEnabled: false,
-            goalRemindersEnabled: false,
             showCoinRain: true,
             reduceMotion: true,
             showDecimalCents: true,
@@ -1288,7 +1445,8 @@ final class AppState {
             ]
         }
 
-        if screenshotScreen == "home-after-midnight" || screenshotScreen == "home-rest-day" || screenshotScreen == "weekly-echo" {
+        if screenshotScreen == "home-after-midnight" || screenshotScreen == "home-rest-day"
+            || screenshotScreen == "weekly-echo" || screenshotScreen == "featured-home" {
             return []
         }
 
@@ -1555,6 +1713,15 @@ final class AppState {
             } else {
                 openClosingReceipt()
             }
+        case .focus:
+            now = Date()
+            reconcileFocusSession()
+            if focusData.active != nil || focusData.pendingResult != nil {
+                isFocusPresented = true
+            } else {
+                isFocusPresented = false
+                selectedTab = .focus
+            }
         }
     }
 
@@ -1756,6 +1923,11 @@ final class AppState {
             isAppLocked = false
         }
         preparePaydayCelebrationIfNeeded()
+        if focusData.active != nil {
+            now = Date()
+            reconcileFocusSession()
+            updateLiveActivityIfNeeded()
+        }
     }
 
     func setAppLockPasscode(_ passcode: String) {
@@ -2080,8 +2252,15 @@ final class AppState {
 
     private func resetLocalData() {
         endLiveActivity()
+        if let session = focusData.active {
+            cancelFocusNotification(for: session.id)
+        }
+        focusData = FocusData()
+        isFocusPresented = false
+        moyuStartedAt = nil
         reminderScheduler.cancelWorkdayReminders()
         reminderScheduler.cancelLunchReminders()
+        reminderScheduler.cancelLegacyGoalReminder()
         store.clearAllLocalData()
         appLockCredential = nil
         appleAccount = nil
@@ -2245,6 +2424,7 @@ final class AppState {
 
 enum AppNotificationRoute: String, Sendable {
     case closingReceipt
+    case focus
 }
 
 final class AppNotificationResponseHandler: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
@@ -2265,11 +2445,15 @@ final class AppNotificationResponseHandler: NSObject, UNUserNotificationCenterDe
 
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        guard let route = Self.route(from: response.notification.request.content.userInfo) else { return }
-        await MainActor.run { [weak self] in
-            self?.routeHandler?(route)
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let route = Self.route(from: response.notification.request.content.userInfo)
+        DispatchQueue.main.async { [weak self] in
+            if let route {
+                self?.routeHandler?(route)
+            }
+            completionHandler()
         }
     }
 }
@@ -2280,7 +2464,6 @@ final class WorkReminderScheduler {
     private let endPrefix = "payjoy.work.end"
     private let lunchStartPrefix = "payjoy.lunch.start"
     private let lunchEndPrefix = "payjoy.lunch.end"
-    private let goalPrefix = "payjoy.goal.complete"
 
     init(center: UNUserNotificationCenter = .current()) {
         self.center = center
@@ -2370,42 +2553,8 @@ final class WorkReminderScheduler {
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
-    func scheduleGoalReminder(goal: WishExperience, progress: PersonalGoalProgress, settings: SalarySettings, now: Date) {
-        cancelGoalReminder()
-        guard progress.progress < 1,
-              let completionDate = progress.estimatedCompletionDate,
-              let triggerDate = Self.goalReminderFireDate(
-                completionDate: completionDate,
-                workEnd: settings.workEnd,
-                now: now
-              ) else { return }
-
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate)
-
-        let content = UNMutableNotificationContent()
-        content.title = L10n.t("目标达成提醒")
-        content.body = L10n.format("%@ 就要达成了，今天也辛苦了。", goal.title)
-        content.sound = .default
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        center.add(UNNotificationRequest(identifier: goalPrefix, content: content, trigger: trigger))
-    }
-
-    static func goalReminderFireDate(
-        completionDate: Date,
-        workEnd: WorkTime,
-        now: Date,
-        calendar: Calendar = .current
-    ) -> Date? {
-        var components = calendar.dateComponents([.year, .month, .day], from: completionDate)
-        components.hour = workEnd.hour
-        components.minute = workEnd.minute
-        components.second = 0
-        guard let triggerDate = calendar.date(from: components), triggerDate > now else { return nil }
-        return triggerDate
-    }
-
-    func cancelGoalReminder() {
-        center.removePendingNotificationRequests(withIdentifiers: [goalPrefix])
+    func cancelLegacyGoalReminder() {
+        center.removePendingNotificationRequests(withIdentifiers: ["payjoy.goal.complete"])
     }
 
     private func addReminder(

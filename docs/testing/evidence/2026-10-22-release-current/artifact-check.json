@@ -1,0 +1,72 @@
+{
+  "bundles": [
+    {
+      "path": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/Build/Products/Release-iphoneos/PayJoy.app",
+      "executable": "PayJoy",
+      "sha256": "3d55c6ad6818282cc25755203887f4a20d6552f413bc2a683ca23bc0fd4bc37a",
+      "version": "1.6",
+      "build": "11",
+      "minimum_os": "17.0",
+      "sdk_name": "iphoneos27.1",
+      "mach_o_build": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/Build/Products/Release-iphoneos/PayJoy.app/PayJoy:\nLoad command 12\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform IOS\n    minos 17.0\n      sdk 27.1\n   ntools 1\n     tool LD\n  version 27037.1\n",
+      "privacy_manifest_matches_source": true,
+      "assets_car_present": true
+    },
+    {
+      "path": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/Build/Products/Release-iphoneos/PayJoy.app/PlugIns/PayJoyWidgets.appex",
+      "executable": "PayJoyWidgets",
+      "sha256": "62eac352e5715ee47d517663bfc418a85a7a26bd5c2472f4639967e374f41575",
+      "version": "1.6",
+      "build": "11",
+      "minimum_os": "17.0",
+      "sdk_name": "iphoneos27.1",
+      "mach_o_build": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/Build/Products/Release-iphoneos/PayJoy.app/PlugIns/PayJoyWidgets.appex/PayJoyWidgets:\nLoad command 12\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform IOS\n    minos 17.0\n      sdk 27.1\n   ntools 1\n     tool LD\n  version 27037.1\n",
+      "privacy_manifest_matches_source": true,
+      "assets_car_present": true
+    }
+  ],
+  "duo_symbols_verified_weak": [
+    "ArrangementView",
+    "reservedRegions",
+    "UIHingeInteraction"
+  ],
+  "debug_only_flag_strings_present": {
+    "PAYJOY_SCREENSHOT_MODE": false,
+    "PAYJOY_DUO_TEST_POSE": false
+  },
+  "packaged_info_localizations": {
+    "en": {
+      "CFBundleDisplayName": "ClockJoy",
+      "CFBundleName": "ClockJoy"
+    },
+    "ja": {
+      "CFBundleDisplayName": "ClockJoy",
+      "CFBundleName": "ClockJoy"
+    },
+    "ko": {
+      "CFBundleDisplayName": "ClockJoy",
+      "CFBundleName": "ClockJoy"
+    },
+    "zh-Hans": {
+      "CFBundleDisplayName": "开薪",
+      "CFBundleName": "开薪"
+    },
+    "zh-Hant-HK": {
+      "CFBundleDisplayName": "開薪",
+      "CFBundleName": "開薪"
+    },
+    "zh-Hant-TW": {
+      "CFBundleDisplayName": "開薪",
+      "CFBundleName": "開薪"
+    },
+    "zh-Hant": {
+      "CFBundleDisplayName": "開薪",
+      "CFBundleName": "開薪"
+    }
+  },
+  "source_unchanged_during_build": true,
+  "limits": [
+    "Unsigned Release compile product, not an archive or App Store validation.",
+    "No app launched; no iOS 17 execution, physical fold continuity or performance proven."
+  ]
+}

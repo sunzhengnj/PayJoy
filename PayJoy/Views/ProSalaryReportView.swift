@@ -133,6 +133,7 @@ struct ProSalaryReportView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @State private var showsSharePoster: Bool
+    @State private var scrollPosition = AdaptiveScrollPosition()
     private let reportThemeOverride: AppVisualTheme?
     private let period: StatsPeriod
 
@@ -147,19 +148,60 @@ struct ProSalaryReportView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                heroCard
-                styleInsight
-                sharePosterButton
-                trendCard
-                annualOverview
+        GeometryReader { space in
+            let layout = AdaptiveLayoutContext(proxy: space)
+            let isExpanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+            Group {
+                if isExpanded {
+                    AdaptiveTwoColumn {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                reportOverview
+                            }
+                            .scrollTargetLayout()
+                            .padding(.bottom, 32)
+                        }
+                        .scrollPosition(id: $scrollPosition.primary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = false
+                        })
+                    } secondary: {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                reportDetails
+                            }
+                            .scrollTargetLayout()
+                            .padding(.bottom, 32)
+                        }
+                        .scrollPosition(id: $scrollPosition.secondary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = true
+                        })
+                    }
+                    .padding(.horizontal, AppTheme.pagePadding)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 14) {
+                            reportOverview
+                            reportDetails
+                        }
+                        .scrollTargetLayout()
+                        .padding(.horizontal, AppTheme.pagePadding)
+                        .padding(.bottom, 32)
+                        .frame(maxWidth: 620)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .scrollPosition(id: $scrollPosition.compact)
+                    .adaptiveSinglePane(in: layout)
+                }
             }
-            .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.bottom, 32)
+            .onChange(of: isExpanded) { _, expanded in
+                scrollPosition.transition(toExpanded: expanded, isSecondary: { position in
+                    ["report-share", "report-trend", "report-year"].contains(position)
+                })
+            }
         }
         .background(AppTheme.paper.ignoresSafeArea())
-        .defaultScrollAnchor(.top)
         .navigationTitle(L10n.t("工资报告"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -194,6 +236,19 @@ struct ProSalaryReportView: View {
             transaction.animation = nil
             transaction.disablesAnimations = true
         }
+    }
+
+    @ViewBuilder
+    private var reportOverview: some View {
+        heroCard.id("report-hero")
+        styleInsight.id("report-insight")
+    }
+
+    @ViewBuilder
+    private var reportDetails: some View {
+        sharePosterButton.id("report-share")
+        trendCard.id("report-trend")
+        annualOverview.id("report-year")
     }
 
     private var currentSummary: SalaryMonthSummary {
@@ -585,8 +640,8 @@ private struct SalaryReportSharePosterSheet: View {
                         insight: insight,
                         showsAmount: showsAmount
                     )
-                    .frame(maxWidth: 360)
                     .aspectRatio(3 / 4, contentMode: .fit)
+                    .frame(maxWidth: 360)
                     .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .shadow(color: AppTheme.shadow.opacity(0.18), radius: 1, x: 4, y: 4)
 
@@ -640,6 +695,7 @@ private struct SalaryReportSharePosterSheet: View {
                 #endif
             }
         }
+        .adaptiveSinglePane()
     }
 
     private var privacyControl: some View {
@@ -844,7 +900,7 @@ private struct SalaryReportSharePoster: View {
                     .frame(height: 10 * unit)
 
                     HStack {
-                        Text(L10n.t("由 ClockJoy 开薪生成"))
+                        Text(L10n.t("由 ClockJoy 生成"))
                         Spacer()
                         Text(L10n.t("让每一份努力都有回响"))
                     }

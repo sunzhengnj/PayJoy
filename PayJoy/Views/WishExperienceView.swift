@@ -26,33 +26,78 @@ struct WishExperienceView: View {
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var presentedSheet: WishSheet?
+    @State private var scrollPosition = AdaptiveScrollPosition()
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
-                if let wish = appState.focusedWish {
-                    focusedWishCard(wish)
-                    otherWishes(excluding: wish.id)
+        GeometryReader { space in
+            let layout = AdaptiveLayoutContext(proxy: space)
+            let isExpanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+            Group {
+                if isExpanded {
+                    AdaptiveTwoColumn {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                titleBlock.id("wish-title")
+                                if let wish = appState.focusedWish {
+                                    focusedWishCard(wish).id("wish-focused")
+                                } else {
+                                    emptyWishCard.id("wish-focused")
+                                }
+                            }
+                            .scrollTargetLayout()
+                            .padding(.top, 14)
+                            .padding(.bottom, 30)
+                        }
+                        .scrollPosition(id: $scrollPosition.primary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = false
+                        })
+                    } secondary: {
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 14) {
+                                otherWishes(excluding: appState.focusedWish?.id)
+                                archiveLink.id("wish-archive")
+                            }
+                            .scrollTargetLayout()
+                            .padding(.top, 14)
+                            .padding(.bottom, 30)
+                        }
+                        .scrollPosition(id: $scrollPosition.secondary)
+                        .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                            scrollPosition.lastWidePaneWasSecondary = true
+                        })
+                    }
+                    .padding(.horizontal, AppTheme.pagePadding)
                 } else {
-                    emptyWishCard
-                    otherWishes(excluding: nil)
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 14) {
+                            titleBlock.id("wish-title")
+                            if let wish = appState.focusedWish {
+                                focusedWishCard(wish).id("wish-focused")
+                                otherWishes(excluding: wish.id)
+                            } else {
+                                emptyWishCard.id("wish-focused")
+                                otherWishes(excluding: nil)
+                            }
+                            archiveLink.id("wish-archive")
+                        }
+                        .scrollTargetLayout()
+                        .padding(.horizontal, AppTheme.pagePadding)
+                        .padding(.top, 14)
+                        .padding(.bottom, 90)
+                    }
+                    .scrollPosition(id: $scrollPosition.compact)
+                    .adaptiveSinglePane(in: layout)
                 }
-
-                archiveLink
             }
-            .padding(.horizontal, AppTheme.pagePadding)
-            .padding(.top, 14)
-            .padding(.bottom, 90)
+            .onChange(of: isExpanded) { _, expanded in
+                scrollPosition.transition(toExpanded: expanded, isSecondary: { position in
+                    position == "wish-archive" || position == "wish-others-heading" || position.hasPrefix("wish-other-")
+                })
+            }
         }
         .background(AppTheme.paper.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .safeAreaInset(edge: .top, spacing: 0) {
-            titleBlock
-                .padding(.horizontal, AppTheme.pagePadding)
-                .padding(.top, 10)
-                .padding(.bottom, 12)
-                .background(AppTheme.paper)
-        }
         .sheet(item: $presentedSheet) { sheet in
             switch sheet {
             case .capture:
@@ -245,44 +290,44 @@ struct WishExperienceView: View {
     private func otherWishes(excluding focusedID: UUID?) -> some View {
         let wishes = appState.activeWishes.filter { $0.id != focusedID }
         if !wishes.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Text(L10n.t("也在发光"))
-                    .font(.headline.weight(.black))
-                    .foregroundStyle(AppTheme.ink)
-                ForEach(wishes) { wish in
-                    Button {
-                        appState.focusWish(id: wish.id)
-                    } label: {
-                        HStack(spacing: 12) {
-                            WishCoverImage(wish: wish)
-                                .frame(width: 88, height: 72)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.outline, lineWidth: 1))
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(wish.title)
-                                    .font(.subheadline.weight(.black))
-                                    .foregroundStyle(AppTheme.ink)
-                                    .lineLimit(2)
-                                Text(L10n.format("当前进度 %d%%", Int(((wish.progress ?? 0) * 100).rounded())))
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(AppTheme.textGray)
-                            }
-                            Spacer()
-                            Text(L10n.t("设为聚焦"))
-                                .font(.caption.weight(.black))
+            Text(L10n.t("也在发光"))
+                .font(.headline.weight(.black))
+                .foregroundStyle(AppTheme.ink)
+                .id("wish-others-heading")
+            ForEach(wishes) { wish in
+                Button {
+                    appState.focusWish(id: wish.id)
+                } label: {
+                    HStack(spacing: 12) {
+                        WishCoverImage(wish: wish)
+                            .frame(width: 88, height: 72)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.outline, lineWidth: 1))
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(wish.title)
+                                .font(.subheadline.weight(.black))
                                 .foregroundStyle(AppTheme.ink)
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 6)
-                                .background(AppTheme.coin)
-                                .clipShape(Capsule())
+                                .lineLimit(2)
+                            Text(L10n.format("当前进度 %d%%", Int(((wish.progress ?? 0) * 100).rounded())))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(AppTheme.textGray)
                         }
-                        .padding(10)
-                        .background(AppTheme.cream)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.outline, lineWidth: 1.3))
+                        Spacer()
+                        Text(L10n.t("设为聚焦"))
+                            .font(.caption.weight(.black))
+                            .foregroundStyle(AppTheme.ink)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 6)
+                            .background(AppTheme.coin)
+                            .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .padding(10)
+                    .background(AppTheme.cream)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.outline, lineWidth: 1.3))
                 }
+                .buttonStyle(.plain)
+                .id("wish-other-\(wish.id.uuidString)")
             }
         }
     }
@@ -505,6 +550,7 @@ private struct WishProgressEditorSheet: View {
             }
         }
         .payJoyKeyboardDismissToolbar()
+        .adaptiveSinglePane()
     }
 
     private var wishProgressHeaderCopy: some View {
@@ -665,6 +711,7 @@ private struct WishRealizationSheet: View {
                 }
             }
         }
+        .adaptiveSinglePane()
     }
 }
 
@@ -690,6 +737,7 @@ private struct WishArchiveView: View {
             }
         }
         .listStyle(.plain)
+        .adaptiveSinglePane()
         .scrollContentBackground(.hidden)
         .background(AppTheme.paper)
         .navigationTitle(L10n.t("愿望收藏"))
@@ -874,6 +922,7 @@ private struct WishCaptureSheet: View {
                 ProPaywallSheet()
             }
         }
+        .adaptiveSinglePane()
     }
 
     private var cleanedText: String {

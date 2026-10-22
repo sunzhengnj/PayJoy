@@ -4,6 +4,35 @@ enum AppConstants {
     static let appGroupIdentifier = "group.app.payjoy.kaixin"
 }
 
+enum LocalizedDecimalInput {
+    static func display(_ value: Double, locale: Locale = .current) -> String {
+        value.formatted(.number.grouping(.never).precision(.fractionLength(0...2)).locale(locale))
+    }
+
+    static func sanitize(_ input: String, locale: Locale = .current, maxFractionDigits: Int? = nil) -> String {
+        let separator = locale.decimalSeparator ?? "."
+        let normalized = input.applyingTransform(.fullwidthToHalfwidth, reverse: false) ?? input
+        var hasSeparator = false
+        var fractionDigits = 0
+        var result = ""
+        for character in normalized {
+            if String(character) == separator, !hasSeparator {
+                result.append(contentsOf: separator)
+                hasSeparator = true
+            } else if character.isNumber {
+                if hasSeparator, let maxFractionDigits, fractionDigits >= maxFractionDigits { continue }
+                result.append(character)
+                if hasSeparator { fractionDigits += 1 }
+            }
+        }
+        return result
+    }
+
+    static func parse(_ input: String, locale: Locale = .current) -> Double? {
+        try? Double(input, format: .number.locale(locale))
+    }
+}
+
 enum AppLanguage: String, Codable, CaseIterable, Identifiable, Hashable {
     case system
     case zhHans
@@ -802,7 +831,6 @@ struct AppPreferences: Codable, Equatable {
     var selectedAppIcon: AppIconChoice
     var remindersEnabled: Bool
     var lunchRemindersEnabled: Bool
-    var goalRemindersEnabled: Bool
     var showCoinRain: Bool
     var reduceMotion: Bool
     var showDecimalCents: Bool
@@ -822,7 +850,6 @@ struct AppPreferences: Codable, Equatable {
         selectedAppIcon: .classic,
         remindersEnabled: false,
         lunchRemindersEnabled: false,
-        goalRemindersEnabled: false,
         showCoinRain: true,
         reduceMotion: false,
         showDecimalCents: true,
@@ -840,7 +867,6 @@ struct AppPreferences: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case remindersEnabled
         case lunchRemindersEnabled
-        case goalRemindersEnabled
         case showCoinRain
         case reduceMotion
         case showDecimalCents
@@ -865,7 +891,6 @@ struct AppPreferences: Codable, Equatable {
         selectedAppIcon: AppIconChoice,
         remindersEnabled: Bool,
         lunchRemindersEnabled: Bool,
-        goalRemindersEnabled: Bool,
         showCoinRain: Bool,
         reduceMotion: Bool,
         showDecimalCents: Bool,
@@ -884,7 +909,6 @@ struct AppPreferences: Codable, Equatable {
         self.selectedAppIcon = selectedAppIcon
         self.remindersEnabled = remindersEnabled
         self.lunchRemindersEnabled = lunchRemindersEnabled
-        self.goalRemindersEnabled = goalRemindersEnabled
         self.showCoinRain = showCoinRain
         self.reduceMotion = reduceMotion
         self.showDecimalCents = showDecimalCents
@@ -906,7 +930,6 @@ struct AppPreferences: Codable, Equatable {
         selectedAppIcon = try container.decodeIfPresent(AppIconChoice.self, forKey: .selectedAppIcon) ?? .classic
         remindersEnabled = try container.decodeIfPresent(Bool.self, forKey: .remindersEnabled) ?? false
         lunchRemindersEnabled = try container.decodeIfPresent(Bool.self, forKey: .lunchRemindersEnabled) ?? false
-        goalRemindersEnabled = try container.decodeIfPresent(Bool.self, forKey: .goalRemindersEnabled) ?? false
         showCoinRain = try container.decodeIfPresent(Bool.self, forKey: .showCoinRain) ?? true
         reduceMotion = try container.decodeIfPresent(Bool.self, forKey: .reduceMotion) ?? false
         showDecimalCents = try container.decodeIfPresent(Bool.self, forKey: .showDecimalCents) ?? true
@@ -928,7 +951,6 @@ struct AppPreferences: Codable, Equatable {
         try container.encode(selectedAppIcon, forKey: .selectedAppIcon)
         try container.encode(remindersEnabled, forKey: .remindersEnabled)
         try container.encode(lunchRemindersEnabled, forKey: .lunchRemindersEnabled)
-        try container.encode(goalRemindersEnabled, forKey: .goalRemindersEnabled)
         try container.encode(showCoinRain, forKey: .showCoinRain)
         try container.encode(reduceMotion, forKey: .reduceMotion)
         try container.encode(showDecimalCents, forKey: .showDecimalCents)

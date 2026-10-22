@@ -29,3 +29,11 @@ artifacts/
 .codex-derived-data*/
 AppStoreScreenshots/
 design-qa.md
+
+# Generated simulator evidence (keep local; commit the evidence notes and checks)
+docs/testing/evidence/**/*.png
+docs/testing/evidence/**/*.mov
+docs/testing/evidence/**/*.mp4
+docs/testing/evidence/**/*.sample
+marketing/app-store/featured-candidate/qa/
+marketing/app-store/featured-candidate/raw/

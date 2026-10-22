@@ -1,0 +1,80 @@
+[
+  {
+    "source_root": "PayJoy",
+    "literal_references": [
+      {
+        "name": "widget_guide_preview_v1",
+        "source": "PayJoy/PayJoyApp.swift",
+        "line": 405
+      },
+      {
+        "name": "decor_sparkle_v1",
+        "source": "PayJoy/Components/AppComponents.swift",
+        "line": 164
+      },
+      {
+        "name": "coin_single_v1",
+        "source": "PayJoy/Views/SalaryCalendarView.swift",
+        "line": 528
+      },
+      {
+        "name": "pro_passport_artwork_v3",
+        "source": "PayJoy/Views/ProfileView.swift",
+        "line": 2543
+      },
+      {
+        "name": "pro_passport_cover_v1",
+        "source": "PayJoy/Views/ProfileView.swift",
+        "line": 2662
+      },
+      {
+        "name": "home_header_lettering_spaced_v2",
+        "source": "PayJoy/Views/HomeView.swift",
+        "line": 600
+      },
+      {
+        "name": "home_header_lettering_spaced_v2",
+        "source": "PayJoy/Views/HomeView.swift",
+        "line": 604
+      },
+      {
+        "name": "coin_single_v1",
+        "source": "PayJoy/Views/HomeView.swift",
+        "line": 634
+      },
+      {
+        "name": "coin_single_v1",
+        "source": "PayJoy/Views/HomeView.swift",
+        "line": 642
+      },
+      {
+        "name": "decor_sun_progress_v1",
+        "source": "PayJoy/Views/HomeView.swift",
+        "line": 2893
+      },
+      {
+        "name": "wish_journey_preview_v1",
+        "source": "PayJoy/Views/WishExperienceView.swift",
+        "line": 344
+      },
+      {
+        "name": "coin_pile_v1",
+        "source": "PayJoy/Views/StatsView.swift",
+        "line": 698
+      },
+      {
+        "name": "onboarding_time_to_income_v1",
+        "source": "PayJoy/Views/AppRootView.swift",
+        "line": 450
+      }
+    ],
+    "unresolved": [],
+    "limit": "Only literal names in Image/AssetImage calls; no dynamic keys or rendered images verified."
+  },
+  {
+    "source_root": "PayJoyWidgets",
+    "literal_references": [],
+    "unresolved": [],
+    "limit": "Only literal names in Image/AssetImage calls; no dynamic keys or rendered images verified."
+  }
+]

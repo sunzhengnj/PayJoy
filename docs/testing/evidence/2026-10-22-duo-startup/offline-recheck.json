@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-22 Asia/Shanghai",
+  "scope": "Read-only host and runtime recheck; no simulator boot, app launch, build, or test.",
+  "host": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434\n",
+  "hardware_and_swap": "hw.model: Mac16,10\nhw.memsize: 17179869184\nvm.swapusage: total = 13312.00M  used = 11669.75M  free = 1642.25M  (encrypted)\n",
+  "booted_devices": "== Devices ==\n-- iOS 26.5 --\n-- iOS 27.1 --\n",
+  "runtime_registration": "== Disk Images ==\n-- iOS --\niOS 27.1 (24A94425) - 2F27E9A4-1309-4303-A4AF-9452FA479668 (Ready)\niOS 26.5 (23F77) - FCFE3260-C3F7-44CA-B579-BA9162B7C8B1 (Ready)\n\nTotal Disk Images: 2 (15.2G)\n",
+  "active_build_test_guest_processes": "",
+  "guest_log_sha256": "1d02b1586297931db25ca943003f4f8b872c8c6e78d34d38a48812eb037f609b",
+  "excerpt_sha256": "3bbaa9ea55801f7792c09f9b131601b35c4a19539244968bb2dd56dd61430c26",
+  "guest_log_path": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/duo-progress-window-2026-10-22.log",
+  "note": "The excerpt is selected evidence. Full local guest log archive retained; no external submission."
+}

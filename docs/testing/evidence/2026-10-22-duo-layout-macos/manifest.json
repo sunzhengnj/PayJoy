@@ -1,0 +1,47 @@
+{
+  "package": "/Volumes/CodexOffload/Builds/PayJoyCoreAudit-3vc6zrqo",
+  "platform": "native macOS; PAYJOY_DUO_SDK disabled",
+  "extraction": [
+    {
+      "source": "PayJoy/Components/AppComponents.swift",
+      "start_marker": "struct AdaptiveLayoutContext {",
+      "end_marker": "private struct AdaptiveLayoutContextKey:",
+      "exact_block_sha256": "4f1ace0806e20a9715f2500953bf1b61ac3640ba8d6e6f6400ec1e511c4a47a8",
+      "source_sha256": "397bdd67640993e37e3ba5fd1f4441cebbd16e4cc6d174a561b2369d10cb23d3"
+    },
+    {
+      "source": "PayJoy/Components/AppComponents.swift",
+      "start_marker": "struct TabChromeOccupancy:",
+      "end_marker": "struct ComicTabBar:",
+      "exact_block_sha256": "0150ee9fdd71f3ab5f95d6c630aa45f334dee6ec52bc5ab369afa6d5fb9a1376",
+      "source_sha256": "397bdd67640993e37e3ba5fd1f4441cebbd16e4cc6d174a561b2369d10cb23d3"
+    },
+    {
+      "source": "PayJoy/Views/FocusView.swift",
+      "start_marker": "enum DeskClockMode:",
+      "end_marker": "struct DeskClockView:",
+      "exact_block_sha256": "cee9e61ae2abd3c0fcc4abcd891683392103208941421f6cf1a506a11a0a937c",
+      "source_sha256": "4aebb48a82b4a33e73dbf42abffe47675c04db05e5405a332583b7273e3e6035"
+    }
+  ],
+  "test_source_sha256": "d00a2a8ea2af0bddfede646bc9ace929eec8d91e7a6f090a32f8f87b14c09c1a",
+  "test_count": 7,
+  "test_edits": "module import only; all seven existing test methods unchanged",
+  "theme_source": "entire production AppTheme.swift symlink; no geometry constants or business-model stubs",
+  "limitations": [
+    "Does not execute iOS reservedRegions or UIHingeInteraction",
+    "Does not verify SwiftUI layout rendering, touch, or physical folding"
+  ],
+  "result": {
+    "exit_code": 0,
+    "executed": 7,
+    "failures": 0
+  },
+  "ios_build": {
+    "command": "nice -n 20 xcodebuild -project PayJoy.xcodeproj -scheme PayJoy -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /Volumes/CodexOffload/Builds/PayJoyDuoStatic -jobs 1 CODE_SIGNING_ALLOWED=NO build-for-testing",
+    "log": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/duo-build-for-testing-2026-10-22-appearance.log",
+    "exit_code": 0,
+    "result": "TEST BUILD SUCCEEDED",
+    "focus_view_sha256": "4aebb48a82b4a33e73dbf42abffe47675c04db05e5405a332583b7273e3e6035"
+  }
+}

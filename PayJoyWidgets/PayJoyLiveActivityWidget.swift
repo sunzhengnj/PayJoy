@@ -5,98 +5,133 @@ import WidgetKit
 struct PayJoyLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PayJoyActivityAttributes.self) { context in
-            PayJoyLockScreenActivityView(state: context.state)
+            PayJoyLockScreenActivityView(state: context.state, isStale: context.isStale)
                 .activityBackgroundTint(.black)
                 .activitySystemActionForegroundColor(WidgetColors.coin)
         } dynamicIsland: { context in
                 DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(context.state.isOffDuty == true ? L10n.t("休息中") : L10n.t("今日已赚"))
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.72))
-                            .lineLimit(1)
-                        Text(
-                            context.state.isOffDuty == true
-                                ? L10n.t("这段时间归你")
-                                : PrivacyText.money(context.state.earned, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol)
-                        )
-                            .font(.system(size: 17, weight: .black, design: .rounded))
+                    if context.state.focusEndDate != nil || context.state.focusPausedRemaining != nil {
+                        Text(L10n.t("本段剩余"))
+                            .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.72)
+                            .padding(.leading, 10)
+                    } else {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(context.state.isOffDuty == true ? L10n.t("休息中") : L10n.t("今日已赚"))
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.72))
+                                .lineLimit(1)
+                            Text(
+                                context.state.isOffDuty == true
+                                    ? L10n.t("这段时间归你")
+                                    : PrivacyText.money(context.state.earned, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol)
+                            )
+                                .font(.system(size: 17, weight: .black, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
+                        }
+                        .padding(.leading, 10)
                     }
-                    .padding(.leading, 10)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    VStack(alignment: .trailing, spacing: 3) {
-                        Text(context.state.countdownTitle ?? L10n.t("下班倒计时"))
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.72))
-                            .lineLimit(1)
-                        Text(context.state.remainingText)
+                    if context.state.focusEndDate != nil || context.state.focusPausedRemaining != nil {
+                        focusTimer(state: context.state, isStale: context.isStale)
+                            .font(.system(size: 19, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.trailing, 10)
+                    } else {
+                        VStack(alignment: .trailing, spacing: 3) {
+                            Text(context.state.countdownTitle ?? L10n.t("下班倒计时"))
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white.opacity(0.72))
+                                .lineLimit(1)
+                            Group {
+                                if context.state.isOffDuty == true {
+                                    OffDutyCountdownText(state: context.state)
+                                } else {
+                                    Text(context.state.remainingText)
+                                }
+                            }
                             .font(.system(size: 17, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
                             .lineLimit(1)
                             .minimumScaleFactor(0.72)
+                        }
+                        .padding(.trailing, 10)
                     }
-                    .padding(.trailing, 10)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack(spacing: 8) {
-                        VStack(alignment: .leading, spacing: 5) {
-                            if context.state.isOffDuty == true {
-                                Text(L10n.t("不着急，先好好休息"))
-                                    .font(.caption.weight(.black))
-                                    .foregroundStyle(.white)
-                                Text(L10n.t("工作先放一边。"))
-                                    .font(.caption2.weight(.bold))
-                                    .foregroundStyle(WidgetColors.coin)
-                            } else if let title = context.state.goalTitle, let goalProgress = context.state.goalProgress {
-                                Text(title)
-                                    .font(.caption.weight(.black))
-                                    .foregroundStyle(.white)
-                                    .lineLimit(1)
-                                WidgetProgress(progress: goalProgress)
-                                    .frame(height: 8)
-                                Text(context.state.goalCompletionText ?? context.state.goalRemainingText ?? "")
-                                    .font(.caption2.weight(.bold))
-                                    .foregroundStyle(WidgetColors.coin)
-                                    .lineLimit(1)
-                            } else {
-                                Text(PrivacyText.perSecond(context.state.perSecond, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol))
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(WidgetColors.coin)
-                                WidgetProgress(progress: context.state.progress)
-                                    .frame(height: 8)
+                    if context.state.focusEndDate == nil && context.state.focusPausedRemaining == nil {
+                        HStack(spacing: 8) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                if context.state.isOffDuty == true {
+                                    Text(L10n.t("不着急，先好好休息"))
+                                        .font(.caption.weight(.black))
+                                        .foregroundStyle(.white)
+                                    Text(L10n.t("工作先放一边。"))
+                                        .font(.caption2.weight(.bold))
+                                        .foregroundStyle(WidgetColors.coin)
+                                } else if let title = context.state.goalTitle, let goalProgress = context.state.goalProgress {
+                                    Text(title)
+                                        .font(.caption.weight(.black))
+                                        .foregroundStyle(.white)
+                                        .lineLimit(1)
+                                    WidgetProgress(progress: goalProgress)
+                                        .frame(height: 8)
+                                    Text(context.state.goalCompletionText ?? context.state.goalRemainingText ?? "")
+                                        .font(.caption2.weight(.bold))
+                                        .foregroundStyle(WidgetColors.coin)
+                                        .lineLimit(1)
+                                } else {
+                                    Text(PrivacyText.perSecond(context.state.perSecond, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol))
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(WidgetColors.coin)
+                                    WidgetProgress(progress: context.state.progress)
+                                        .frame(height: 8)
+                                }
                             }
+                            LiveActivityWorkerImage(width: 62, height: 40, theme: context.state.visualTheme)
                         }
-                        LiveActivityWorkerImage(width: 62, height: 40, theme: context.state.visualTheme)
+                        .padding(.horizontal, 8)
                     }
-                    .padding(.horizontal, 8)
                 }
             } compactLeading: {
-                Text(context.state.isOffDuty == true ? L10n.t("休息中") : L10n.t("开薪中"))
+                Text(context.state.focusEndDate != nil || context.state.focusPausedRemaining != nil
+                     ? L10n.t("专注")
+                     : context.state.isOffDuty == true ? L10n.t("休息中") : L10n.t("开薪中"))
                     .font(.system(size: 13, weight: .black, design: .rounded))
                     .foregroundStyle(WidgetColors.coin)
             } compactTrailing: {
-                HStack(spacing: 5) {
-                    Text(
-                        context.state.isOffDuty == true
-                            ? context.state.remainingText
-                            : PrivacyText.compactMoney(context.state.earned, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol)
-                    )
+                if context.state.focusEndDate != nil || context.state.focusPausedRemaining != nil {
+                    focusTimer(state: context.state, isStale: context.isStale)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                } else {
+                    HStack(spacing: 5) {
+                        Group {
+                            if context.state.isOffDuty == true {
+                                OffDutyCountdownText(state: context.state)
+                            } else {
+                                Text(PrivacyText.compactMoney(context.state.earned, hidden: context.state.hidesSensitiveAmounts, currencySymbol: context.state.currencySymbol))
+                            }
+                        }
                         .font(.system(size: 13, weight: .black, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.78)
-                    if context.state.isOffDuty != true {
-                        CoinSymbol()
-                            .frame(width: 18, height: 18)
+                        if context.state.isOffDuty != true {
+                            CoinSymbol()
+                                .frame(width: 18, height: 18)
+                        }
                     }
                 }
             } minimal: {
-                if context.state.isOffDuty == true {
+                if context.state.focusEndDate != nil || context.state.focusPausedRemaining != nil {
+                    Image(systemName: "timer")
+                        .foregroundStyle(WidgetColors.coin)
+                } else if context.state.isOffDuty == true {
                     Text(L10n.t("休"))
                         .font(.system(size: 13, weight: .black, design: .rounded))
                         .foregroundStyle(WidgetColors.coin)
@@ -107,14 +142,44 @@ struct PayJoyLiveActivityWidget: Widget {
             }
         }
     }
+
+    @ViewBuilder
+    private func focusTimer(state: PayJoyActivityAttributes.ContentState, isStale: Bool) -> some View {
+        if isStale {
+            Text(L10n.t("已到点"))
+        } else if let remaining = state.focusPausedRemaining {
+            Text(focusTimeText(remaining))
+        } else if let endDate = state.focusEndDate {
+            Text(timerInterval: Date()...max(Date(), endDate), countsDown: true)
+                .monospacedDigit()
+        }
+    }
 }
 
-struct PayJoyLockScreenActivityView: View {
+private struct OffDutyCountdownText: View {
     let state: PayJoyActivityAttributes.ContentState
 
     var body: some View {
         Group {
-            if state.isOffDuty == true {
+            if state.endDate > Date() {
+                Text(timerInterval: Date()...state.endDate, countsDown: true)
+            } else {
+                Text(state.remainingText)
+            }
+        }
+        .monospacedDigit()
+    }
+}
+
+struct PayJoyLockScreenActivityView: View {
+    let state: PayJoyActivityAttributes.ContentState
+    var isStale = false
+
+    var body: some View {
+        Group {
+            if state.focusEndDate != nil || state.focusPausedRemaining != nil {
+                focusView
+            } else if state.isOffDuty == true {
                 offDutyView
             } else {
                 earningsView
@@ -127,6 +192,33 @@ struct PayJoyLockScreenActivityView: View {
         .widgetAccentable(false)
     }
 
+    private var focusView: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(isStale ? L10n.t("已到点") : state.focusPausedRemaining == nil ? L10n.t("本段剩余") : L10n.t("已暂停"))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.7))
+                if isStale {
+                    Text(L10n.t("打开查看结果"))
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                } else if let remaining = state.focusPausedRemaining {
+                    Text(focusTimeText(remaining))
+                        .font(.system(size: 27, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                } else if let endDate = state.focusEndDate {
+                    Text(timerInterval: Date()...max(Date(), endDate), countsDown: true)
+                        .font(.system(size: 27, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                }
+            }
+            .foregroundStyle(.white)
+            Spacer()
+            Image(systemName: "timer")
+                .font(.system(size: 26, weight: .light))
+                .foregroundStyle(.white.opacity(0.65))
+        }
+    }
+
     private var offDutyView: some View {
         HStack(alignment: .center, spacing: 14) {
             VStack(alignment: .leading, spacing: 7) {
@@ -136,7 +228,7 @@ struct PayJoyLockScreenActivityView: View {
                 Text(state.countdownTitle ?? L10n.t("下次上班"))
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .foregroundStyle(.white.opacity(0.68))
-                Text(state.remainingText)
+                OffDutyCountdownText(state: state)
                     .font(.system(size: 24, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1)
@@ -205,6 +297,11 @@ struct PayJoyLockScreenActivityView: View {
                 .frame(width: 110)
         }
     }
+}
+
+private func focusTimeText(_ interval: TimeInterval) -> String {
+    let seconds = max(0, Int(ceil(interval)))
+    return String(format: "%02d:%02d", seconds / 60, seconds % 60)
 }
 
 private struct LiveActivitySideVisual: View {

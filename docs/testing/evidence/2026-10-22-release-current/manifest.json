@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-22 Asia/Shanghai",
+  "configuration": "Release",
+  "destination": "generic/platform=iOS",
+  "code_signing_allowed": false,
+  "build_exit_code": 0,
+  "command": "nice -n 20 xcodebuild -project PayJoy.xcodeproj -scheme PayJoy -configuration Release -destination 'generic/platform=iOS' -derivedDataPath /Volumes/CodexOffload/Builds/PayJoyDuoStatic -jobs 1 CODE_SIGNING_ALLOWED=NO SWIFT_USE_PARALLEL_WHOLE_MODULE_OPTIMIZATION=NO SWIFT_USE_PARALLEL_WMO_TARGETS=NO 'OTHER_SWIFT_FLAGS=$(inherited) -DPAYJOY_DUO_SDK -j1 -num-threads 1' build",
+  "observed_compiler_flags": [
+    {
+      "module": "PayJoyWidgets",
+      "jobs": [
+        "1"
+      ],
+      "threads": [
+        "1",
+        "1"
+      ],
+      "duo_define": true
+    },
+    {
+      "module": "PayJoyWidgets",
+      "jobs": [
+        "1"
+      ],
+      "threads": [
+        "1",
+        "1"
+      ],
+      "duo_define": true
+    },
+    {
+      "module": "PayJoyWidgets",
+      "jobs": [
+        "1"
+      ],
+      "threads": [
+        "1",
+        "1"
+      ],
+      "duo_define": true
+    },
+    {
+      "module": "PayJoy",
+      "jobs": [
+        "1"
+      ],
+      "threads": [
+        "1",
+        "1"
+      ],
+      "duo_define": true
+    },
+    {
+      "module": "PayJoy",
+      "jobs": [
+        "1"
+      ],
+      "threads": [
+        "1",
+        "1"
+      ],
+      "duo_define": true
+    },
+    {
+      "module": "PayJoy",
+      "jobs": [
+        "1"
+      ],
+      "threads": [
+        "1",
+        "1"
+      ],
+      "duo_define": true
+    }
+  ],
+  "source_before": "source-before.json",
+  "artifact_check": "artifact-check.json",
+  "attempts": [
+    {
+      "log": "initial-build.log",
+      "exit_code": 0,
+      "note": "Initial Release compiled; Xcode appended -num-threads 10 after explicit 1, so not evidence of a one-thread compiler limit."
+    },
+    {
+      "log": "unsupported-dry-run.log",
+      "exit_code": 64,
+      "note": "Xcode 27.1 rejected -dry-run as no longer supported; no compile launched by this invocation."
+    },
+    {
+      "log": "serial-build.log",
+      "exit_code": 0,
+      "note": "Final command disabled parallel WMO; all observed driver/backend thread arguments equal 1."
+    }
+  ],
+  "evidence_sha256": {
+    "unsupported-dry-run.log": "e45d7ac1ae79b332edd71ada52938e50141722b3cee279f437d642d94897415f",
+    "serial-build.log": "def38e9679b33aac2cb426f912933d265c848d365a5a8f7ecf42e60af7d1f5e7",
+    "undefined-symbols.txt": "1b678a515b8e7573e8d6b14242acd5460a4486586d8402dd882d37bb741d83f4",
+    "source-before.json": "491667eab28d535eca7935c7d841007e3b900b586995a9deddec38fe65b5e201",
+    "initial-build.log": "21005fcfd643165102244310bc9e6f4553f7ae2dd8c594b83f37903ec98084bf",
+    "duo-weak-symbols.txt": "509943d00fc15491da19d6b72304710cf23fc7f6271a460faa2caf1c7f92da01",
+    "artifact-check.json": "ac7bee7cc2ddf3515e94df5dee0bd1f1def4dc0808b69d3c0a3c3542da0d361b",
+    "literal-assets.json": "88c9e434a1281eec6e75748b69f8bbae2fc0a926fce48f0d55c2e4186f712805"
+  },
+  "limits": [
+    "Unsigned compile output, not an archive, distribution validation, upload or runtime test.",
+    "No iPhone or simulator app launched; no iOS 17 or Duo runtime proof.",
+    "Compiler concurrency observations do not measure app animation frame rate, memory or energy use."
+  ]
+}

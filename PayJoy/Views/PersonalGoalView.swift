@@ -255,6 +255,7 @@ struct GoalCelebrationSheet: View {
             }
         }
         .environment(\.locale, Locale(identifier: L10n.currentLanguage.localeIdentifier))
+        .adaptiveSinglePane()
     }
 
     private var prefersReducedMotion: Bool {

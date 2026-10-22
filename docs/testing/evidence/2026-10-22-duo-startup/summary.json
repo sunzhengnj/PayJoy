@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-22 Asia/Shanghai",
+  "device": "PayJoy Verified Duo",
+  "udid": "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+  "runtime": "iOS 27.1 24A94425",
+  "host": "Mac16,10; 16GB; macOS 27.0.1 26A434",
+  "xcode": "27.1 27A9275",
+  "concurrent_simulators": 1,
+  "app_installed_or_launched": false,
+  "result": "Duo initialization remains unverified. One throttled attempt returned terminal DataMigrationFailed; latest unthrottled-priority probe stopped by host-load protection.",
+  "observations": [
+    "Compressed UDIF lzfse runtime image; diskimagesiod peaked around 315-357% CPU in sampled process output",
+    "Boot progressed from BackBoard to LaunchServices and then MobileSafari data migration",
+    "Sequential 3610MB cache prewarm did not prevent the next boot CPU peak",
+    "Final initialization attempt stopped after top sampling exceeded a 4-second timeout",
+    "All owned devices shut down; host CPU idle recovered to about 72%"
+  ],
+  "limitations": [
+    "No completed Duo launch, screenshot, app interaction, or final root-cause proof",
+    "First probe scripts stopped early based on global idle; they cannot establish that initialization would otherwise fail",
+    "Automatic descendant priority detection initially missed launchd_sim because comm had no path; priority was applied separately to 160 simulator processes during final attempt",
+    "Progress window incident cause not established; some guest OS log strings lack UUID text",
+    "No migration preferences edited, no device erased, no runtime replaced during these probes"
+  ],
+  "additional_observations": [
+    "Temporary 30% duty-cycle probe kept CPU idle about 36-48% and returned terminal Data Migration Failed after 19s. SIGSTOP/SIGCONT throttling can affect system timing; not a normal launch validation.",
+    "Offline guest log collected with log collect --directory: at 09:59:03 migration daemon reported Reporting migration failure due to migration progress window incident; 35 plugin results were successful.",
+    "At 10:06:52 guest reported System build version unchanged ... Migration not necessary. Terminal failure therefore reused persisted prior migration outcome; no specific plugin failure identified.",
+    "Latest priority-only probe used no periodic SIGSTOP. Bootstatus returned terminal Data Migration Failed at 4s; CPU stayed near 0% idle for five samples, so device was shut down at 9.6s before screenshot or app launch.",
+    "Local diagnose and guest log archives are under /Volumes/CodexOffload/Builds/PayJoyDuoStatic. They have not been uploaded or submitted."
+  ],
+  "coredevice_registration": {
+    "before_refresh": [],
+    "after_refresh": [
+      {
+        "name": "PayJoy Fresh Duo",
+        "identifier": "333A368D-1950-4B7F-9E7C-714C7CC7F664"
+      },
+      {
+        "name": "PayJoy Verified Duo",
+        "identifier": "A199B0FE-1420-4D85-A191-5E91A9C10FCF"
+      },
+      {
+        "name": "iPhone Duo",
+        "identifier": "C7DD7735-E7EA-4D82-B666-5C0B9CA99520"
+      }
+    ],
+    "action": "Gracefully restart user CoreDeviceService with all simulators shut down; no devices created or erased",
+    "sdk_runtime_match_probe": "Temporarily mapped iphoneos27.1 to installed build; no change; restored --default before service refresh"
+  },
+  "display_probe": {
+    "trigger": "Device Hub Start, existing Verified Duo only",
+    "inner": "Default capture is 2007x2853; closed inner display black",
+    "outer": "Explicit --display=primary capture 1398x2034 shows Apple boot logo",
+    "application_launched": false,
+    "limits": "CPU stayed near zero idle; protection shut down device. No application UI or completed startup proven."
+  },
+  "current_runtime_registration": {
+    "identifier": "2F27E9A4-1309-4303-A4AF-9452FA479668",
+    "build": "24A94425",
+    "state": "Ready / Verified",
+    "related_experiment": "../2026-10-22-runtime-encoding/summary.json",
+    "device_data_preserved": true
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "device": "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+  "runtime": "iOS 27.1",
+  "version": "1.6 (11) Debug arm64",
+  "sources": {
+    "PayJoy/Views/HomeView.swift": "9f595d13e6c4bb5d92fd25ea832f1bfe29186a3d2332f4ceed7ce6ebbaa05102",
+    "PayJoy/Components/AppComponents.swift": "2bd53fd46fbea753dfa336dbd8e5f50d3cab127a5867500185a0765424c57abf"
+  },
+  "executable_sha256": "6d9b200a9dbd2c4b210f5d918975cfce531b944922618352301d4a65cc34ce77",
+  "verified": [
+    "Header actions visible on closed outer display",
+    "Scroll content renders to outer display bottom without blank clipping band",
+    "Debug simulator build succeeded"
+  ],
+  "pending": [
+    "Scroll-to-bottom action reachability",
+    "Full four-pose regression",
+    "Other pages using adaptiveSinglePane",
+    "Ordinary iPhone regression"
+  ]
+}

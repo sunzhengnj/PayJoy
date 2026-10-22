@@ -1,0 +1,8 @@
+{"elapsed": 1.1, "idle_percent": 0.0, "host_spawn_ms": 14.4, "controlled_processes": 46, "bootstatus_exit": null}
+{"elapsed": 2.1, "idle_percent": 0.0, "host_spawn_ms": 30.6, "controlled_processes": 47, "bootstatus_exit": null}
+{"elapsed": 3.2, "idle_percent": 0.0, "host_spawn_ms": 37.7, "controlled_processes": 52, "bootstatus_exit": null}
+{"elapsed": 4.3, "idle_percent": 0.0, "host_spawn_ms": 92.5, "controlled_processes": 66, "bootstatus_exit": null}
+{"elapsed": 5.5, "idle_percent": 0.1, "host_spawn_ms": 248.9, "controlled_processes": 69, "bootstatus_exit": 0}
+{"bootstatus_text": "Monitoring boot status for PayJoy Verified Duo (A199B0FE-1420-4D85-A191-5E91A9C10FCF).\n[2026-10-22 02:28:49 +0000] Status=1, isTerminal=NO, Elapsed=00:03.\n\tWaiting on BackBoard\n\n[2026-10-22 02:28:51 +0000] Status=3, isTerminal=YES, Elapsed=00:05.\n\tData Migration Failed\n\n", "screenshot_exit": 0, "screenshot": "/Volumes/CodexOffload/Builds/PayJoyDuoStatic/duo-devicehub-outer-probe-2026-10-22.png"}
+{"shutdown_exit": 0}
+{"result": "captured_for_review", "elapsed": 12.0}

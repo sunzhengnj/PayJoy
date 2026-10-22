@@ -1,8 +1,11 @@
 import SwiftUI
 
 struct HomeView: View {
+    var onRootVisibilityChange: ((Bool) -> Void)? = nil
+    var onPresentationChange: ((Bool) -> Void)? = nil
     @Environment(AppState.self) private var appState
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.payJoyAmbientMotionEnabled) private var ambientMotionEnabled
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var amountPulse = false
@@ -15,22 +18,36 @@ struct HomeView: View {
     @State private var showsMembershipPrompt = false
     @State private var showsProPaywall = false
     @State private var showsWeeklyEcho = false
+    @State private var showsMoyuFocusConfirmation = false
+    @State private var showsMoyuFocusConflict = false
+    @State private var showsFocusStartUnavailable = false
+    @State private var finishedMoyuSession: MoyuSession?
+    @State private var scrollPosition = AdaptiveScrollPosition()
+    @State private var isVisible = false
 
     var body: some View {
         ZStack {
             if !prefersReducedMotion {
-                ComicTwinkleField(enabled: true)
+                ComicTwinkleField(enabled: isBackgroundMotionActive)
                     .opacity(shouldShowRewardRain ? 0.32 : 0.9)
             }
-            if shouldShowRewardRain {
+            if shouldShowRewardRain && isBackgroundMotionActive {
                 CoinRainLayer(style: appState.activeOvertimeRecord == nil ? .coin : .redPacket)
                     .allowsHitTesting(false)
                     .transition(.opacity)
             }
 
-            ScrollView(showsIndicators: false) {
+            GeometryReader { availableSpace in
+                let layout = AdaptiveLayoutContext(proxy: availableSpace)
+                let snapshot = appState.snapshot
+                let isExpanded = !dynamicTypeSize.isAccessibilitySize && layout.hasRoomForTwoColumns
+                Group {
+                if isExpanded {
+                    expandedHome(snapshot: snapshot)
+                } else {
+                    ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 14) {
-                    header
+                    header.id("home-header")
                     if !dynamicTypeSize.isAccessibilitySize {
                         hero
                             .padding(.bottom, -8)
@@ -41,22 +58,25 @@ struct HomeView: View {
                         PaydaySoonCard(daysUntilPayday: paydaySoonDays)
                     }
                     EarningsCard(
-                        snapshot: appState.snapshot,
-                        pulse: amountPulse && !prefersReducedMotion,
-                        reduceMotion: prefersReducedMotion,
+                        snapshot: snapshot,
+                        pulse: amountPulse && !prefersReducedMotion && isBackgroundMotionActive,
+                        reduceMotion: prefersReducedMotion || !isBackgroundMotionActive,
                         showDecimalCents: appState.preferences.showDecimalCents,
                         hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
                         currencySymbol: appState.settings.currencySymbol
                     )
+                    .id("home-earnings")
                     if appState.canOpenClosingReceipt {
                         ClosingReceiptHomeCard(receipt: appState.todayClosingReceipt) {
                             appState.openClosingReceipt()
                         }
+                        .id("home-receipt")
                     }
                     if appState.shouldShowWeeklyEcho {
                         WeeklyEchoHomeCard(receiptCount: appState.currentWeekClosingReceipts.count) {
                             showsWeeklyEcho = true
                         }
+                        .id("home-echo")
                     }
                     if appState.activeOvertimeRecord != nil || appState.canStartOvertime || appState.todayOvertimeDuration > 0 {
                         OvertimeActionCard(
@@ -77,24 +97,22 @@ struct HomeView: View {
                                 overtimePresentation = .manual(defaultStart: appState.defaultOvertimeStartDate, defaultEnd: appState.defaultOvertimeEndDate)
                             }
                         )
+                        .id("home-overtime")
                     }
-                    if appState.snapshot.status == .restDay {
+                    if snapshot.status == .restDay {
+                        let weeklyReport = appState.weeklyPayReport
                         WeeklyPayReportCard(
-                            report: appState.weeklyPayReport,
+                            report: weeklyReport,
                             hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
                             currencySymbol: appState.settings.currencySymbol,
                             style: .compact
                         )
                         HStack(spacing: 10) {
-                            SmallMetricCard(
-                                title: L10n.t("下次上班"),
-                                value: offDutySecondsUntilWorkStart?.countdownText ?? L10n.t("休息中"),
-                                caption: L10n.t("不着急，先好好休息")
-                            )
+                            nextWorkCountdownCard
                             SmallMetricCard(
                                 title: L10n.t("本周战报"),
                                 value: PrivacyText.compactMoney(
-                                    appState.weeklyPayReport.earnedAmount,
+                                    weeklyReport.earnedAmount,
                                     hidden: appState.preferences.hideSensitiveAmounts,
                                     currencySymbol: appState.settings.currencySymbol
                                 ),
@@ -102,59 +120,76 @@ struct HomeView: View {
                             )
                         }
                     }
-                    if [.beforeWork, .working, .lunchBreak].contains(appState.snapshot.status) {
-                        ProgressSummaryCard(snapshot: appState.snapshot, hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol)
+                    if [.beforeWork, .working, .lunchBreak].contains(snapshot.status) {
+                        ProgressSummaryCard(snapshot: snapshot, hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol)
+                            .id("home-progress")
                     }
-                    if appState.snapshot.status == .afterWork {
+                    if snapshot.status == .afterWork {
                         DailyPayReportCard(
-                            snapshot: appState.snapshot,
+                            snapshot: snapshot,
                             hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
                             currencySymbol: appState.settings.currencySymbol
                         )
+                        .id("home-daily-report")
+                        nextWorkCountdownCard
                     }
-                    if [.beforeWork, .working, .lunchBreak].contains(appState.snapshot.status) {
+                    if [.beforeWork, .working, .lunchBreak].contains(snapshot.status) {
                         HStack(spacing: 10) {
-                            if let secondsUntilWorkStart = offDutySecondsUntilWorkStart {
-                                SmallMetricCard(
-                                    title: L10n.t("下次上班"),
-                                    value: secondsUntilWorkStart.countdownText,
-                                    caption: L10n.t("不着急，先好好休息")
-                                )
+                            if snapshot.status == .beforeWork {
+                                nextWorkCountdownCard
                             } else {
-                                SmallMetricCard(title: L10n.t("下班倒计时"), value: appState.snapshot.secondsUntilOffWork.countdownText, caption: appState.settings.workEnd.displayText)
+                                SmallMetricCard(title: L10n.t("下班倒计时"), value: snapshot.secondsUntilOffWork.countdownText, caption: appState.settings.workEnd.displayText)
                             }
                             SmallMetricCard(
                                 title: L10n.t("今天还可赚"),
-                                value: PrivacyText.compactMoney(appState.snapshot.remainingToday, hidden: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol),
+                                value: PrivacyText.compactMoney(snapshot.remainingToday, hidden: appState.preferences.hideSensitiveAmounts, currencySymbol: appState.settings.currencySymbol),
                                 caption: L10n.t("继续回血")
                             )
                         }
                     }
-                    if [.beforeWork, .working, .lunchBreak].contains(appState.snapshot.status) {
+                    if [.beforeWork, .working, .lunchBreak].contains(snapshot.status) {
                         MoyuCard(
-                            snapshot: appState.snapshot,
+                            snapshot: snapshot,
                             hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
                             currencySymbol: appState.settings.currencySymbol,
-                            reduceMotion: prefersReducedMotion
+                            reduceMotion: prefersReducedMotion,
+                            showsFocusConflict: $showsMoyuFocusConflict,
+                            finishedSession: $finishedMoyuSession
                         )
+                        .id("home-moyu")
                     }
                     if appState.canLeaveWorkEarlyToday {
                         EarlyLeaveButton(
-                            remainingToday: appState.snapshot.remainingToday,
+                            remainingToday: snapshot.remainingToday,
                             hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
                             currencySymbol: appState.settings.currencySymbol
                         ) {
                             earlyLeaveConfirmation = .leave
                         }
+                        .id("home-early-leave")
                     } else if appState.hasLeftWorkEarlyToday {
                         CancelEarlyLeaveButton {
                             earlyLeaveConfirmation = .cancel
                         }
+                        .id("home-early-leave")
                     }
                 }
+                .scrollTargetLayout()
                 .padding(.horizontal, AppTheme.pagePadding)
                 .padding(.top, 12)
                 .padding(.bottom, 86)
+                .frame(maxWidth: 560)
+                .frame(maxWidth: .infinity)
+                    }
+                    .scrollPosition(id: $scrollPosition.compact)
+                    .adaptiveSinglePane(in: layout)
+                }
+                }
+                .onChange(of: isExpanded) { _, expanded in
+                    scrollPosition.transition(toExpanded: expanded, isSecondary: { position in
+                        ["home-actions", "home-receipt", "home-echo", "home-overtime", "home-wish", "home-moyu", "home-early-leave"].contains(position)
+                    }, expandedOnlyAnchors: ["home-actions", "home-wish"])
+                }
             }
 
             if let confirmation = earlyLeaveConfirmation {
@@ -186,6 +221,7 @@ struct HomeView: View {
             }
 
         }
+        .environment(\.payJoyAmbientMotionEnabled, isBackgroundMotionActive)
         .background(AppTheme.paper)
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $isBossModePresented) {
@@ -241,10 +277,20 @@ struct HomeView: View {
                 .presentationBackground(AppTheme.paper)
         }
         .onAppear {
+            isVisible = true
+            onRootVisibilityChange?(true)
+            onPresentationChange?(canAutoShowDesk)
             refreshBubble(force: true)
             if ProcessInfo.processInfo.environment["PAYJOY_SCREENSHOT_SCREEN"] == "boss" {
                 isBossModePresented = true
             }
+        }
+        .onDisappear {
+            isVisible = false
+            onRootVisibilityChange?(false)
+        }
+        .onChange(of: canAutoShowDesk) { _, available in
+            onPresentationChange?(available)
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
@@ -264,7 +310,7 @@ struct HomeView: View {
             let cents = Int(newValue * 100)
             guard cents != lastEarnedCents else { return }
             lastEarnedCents = cents
-            if prefersReducedMotion {
+            if prefersReducedMotion || !isBackgroundMotionActive {
                 amountPulse = false
             } else {
                 withAnimation(.spring(response: 0.18, dampingFraction: 0.55)) {
@@ -273,6 +319,237 @@ struct HomeView: View {
             }
         }
         .sensoryFeedback(.success, trigger: appState.todayClosingReceipt?.id)
+        .alert(L10n.t("正在摸鱼"), isPresented: $showsMoyuFocusConfirmation) {
+            Button(L10n.t("取消"), role: .cancel) {}
+            Button(L10n.t("结束摸鱼并开始专注")) {
+                if !appState.startFocus(minutes: 25, endsAtWork: true) {
+                    Task { @MainActor in
+                        await Task.yield()
+                        showsFocusStartUnavailable = true
+                    }
+                }
+            }
+        } message: {
+            Text(L10n.t("两种计时不能同时进行。"))
+        }
+        .alert(L10n.t("正在专注"), isPresented: $showsMoyuFocusConflict) {
+            Button(L10n.t("取消"), role: .cancel) {}
+            Button(L10n.t("结束专注并开始摸鱼")) {
+                appState.endFocus()
+                appState.dismissFocusResult()
+                finishedMoyuSession = nil
+                appState.moyuStartedAt = Date()
+            }
+        } message: {
+            Text(L10n.t("两种计时不能同时进行。"))
+        }
+        .alert(L10n.t("现在无法专注到下班"), isPresented: $showsFocusStartUnavailable) {
+            Button(L10n.t("知道了"), role: .cancel) {}
+        } message: {
+            Text(L10n.t("工作状态或剩余时间已变化，原有计时未改变。"))
+        }
+    }
+
+    private var canAutoShowDesk: Bool {
+        overtimePresentation == nil && earlyLeaveConfirmation == nil
+            && !isBossModePresented && !showsMembershipPrompt && !showsProPaywall
+            && !showsWeeklyEcho && !showsMoyuFocusConfirmation && !showsMoyuFocusConflict
+            && !showsFocusStartUnavailable
+    }
+
+    private func expandedHome(snapshot: EarningsSnapshot) -> some View {
+        AdaptiveTwoColumn {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    header.id("home-header")
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        hero.padding(.bottom, -8)
+                    }
+                    if appState.isTodayPayday {
+                        PaydayTodayCard()
+                    } else if let paydaySoonDays = appState.paydaySoonDays {
+                        PaydaySoonCard(daysUntilPayday: paydaySoonDays)
+                    }
+                    EarningsCard(
+                        snapshot: snapshot,
+                        pulse: amountPulse && !prefersReducedMotion && isBackgroundMotionActive,
+                        reduceMotion: prefersReducedMotion || !isBackgroundMotionActive,
+                        showDecimalCents: appState.preferences.showDecimalCents,
+                        hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                        currencySymbol: appState.settings.currencySymbol
+                    )
+                    .id("home-earnings")
+                    if snapshot.status == .restDay {
+                        WeeklyPayReportCard(
+                            report: appState.weeklyPayReport,
+                            hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                            currencySymbol: appState.settings.currencySymbol,
+                            style: .compact
+                        )
+                        nextWorkCountdownCard
+                    }
+                    if [.beforeWork, .working, .lunchBreak].contains(snapshot.status) {
+                        ProgressSummaryCard(
+                            snapshot: snapshot,
+                            hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                            currencySymbol: appState.settings.currencySymbol
+                        )
+                        .id("home-progress")
+                        if snapshot.status == .beforeWork {
+                            nextWorkCountdownCard
+                        } else {
+                            SmallMetricCard(
+                                title: L10n.t("下班倒计时"),
+                                value: snapshot.secondsUntilOffWork.countdownText,
+                                caption: appState.settings.workEnd.displayText
+                            )
+                        }
+                    }
+                    if snapshot.status == .afterWork {
+                        DailyPayReportCard(
+                            snapshot: snapshot,
+                            hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                            currencySymbol: appState.settings.currencySymbol
+                        )
+                        .id("home-daily-report")
+                        nextWorkCountdownCard
+                    }
+                }
+                .scrollTargetLayout()
+                .padding(.top, 28)
+                .padding(.bottom, 30)
+            }
+            .scrollPosition(id: $scrollPosition.primary)
+            .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                scrollPosition.lastWidePaneWasSecondary = false
+            })
+        } secondary: {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    expandedFocusActions
+                        .id("home-actions")
+                    if appState.canOpenClosingReceipt {
+                        ClosingReceiptHomeCard(receipt: appState.todayClosingReceipt) {
+                            appState.openClosingReceipt()
+                        }
+                        .id("home-receipt")
+                    }
+                    if appState.shouldShowWeeklyEcho {
+                        WeeklyEchoHomeCard(receiptCount: appState.currentWeekClosingReceipts.count) {
+                            showsWeeklyEcho = true
+                        }
+                        .id("home-echo")
+                    }
+                    if appState.activeOvertimeRecord != nil || appState.canStartOvertime || appState.todayOvertimeDuration > 0 {
+                        OvertimeActionCard(
+                            activeRecord: appState.activeOvertimeRecord,
+                            activeDuration: appState.activeOvertimeDuration,
+                            todayDuration: appState.todayOvertimeDuration,
+                            canStart: appState.canStartOvertime,
+                            defaultStart: appState.defaultOvertimeStartDate,
+                            startAction: { overtimePresentation = .start(defaultStart: appState.now) },
+                            stopAction: {
+                                if let record = appState.activeOvertimeRecord {
+                                    overtimePresentation = .stop(record: record, defaultEnd: appState.now)
+                                }
+                            },
+                            manualAction: {
+                                overtimePresentation = .manual(
+                                    defaultStart: appState.defaultOvertimeStartDate,
+                                    defaultEnd: appState.defaultOvertimeEndDate
+                                )
+                            }
+                        )
+                        .id("home-overtime")
+                    }
+                    if let wish = appState.focusedWish {
+                        Button {
+                            appState.selectedTab = .wish
+                        } label: {
+                            ComicCard {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(L10n.t("愿望"))
+                                        .font(.caption.weight(.bold))
+                                    Text(wish.title)
+                                        .font(.title3.weight(.heavy))
+                                    Text(L10n.format("当前进度 %d%%", Int(((wish.progress ?? 0) * 100).rounded())))
+                                        .font(.subheadline)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .id("home-wish")
+                    }
+                    if [.beforeWork, .working, .lunchBreak].contains(snapshot.status) {
+                        MoyuCard(
+                            snapshot: snapshot,
+                            hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                            currencySymbol: appState.settings.currencySymbol,
+                            reduceMotion: prefersReducedMotion,
+                            showsFocusConflict: $showsMoyuFocusConflict,
+                            finishedSession: $finishedMoyuSession
+                        )
+                        .id("home-moyu")
+                    }
+                    if appState.canLeaveWorkEarlyToday {
+                        EarlyLeaveButton(
+                            remainingToday: snapshot.remainingToday,
+                            hidesSensitiveAmounts: appState.preferences.hideSensitiveAmounts,
+                            currencySymbol: appState.settings.currencySymbol
+                        ) {
+                            earlyLeaveConfirmation = .leave
+                        }
+                        .id("home-early-leave")
+                    } else if appState.hasLeftWorkEarlyToday {
+                        CancelEarlyLeaveButton { earlyLeaveConfirmation = .cancel }
+                            .id("home-early-leave")
+                    }
+                }
+                .scrollTargetLayout()
+                .padding(.top, 28)
+                .padding(.bottom, 30)
+            }
+            .scrollPosition(id: $scrollPosition.secondary)
+            .simultaneousGesture(DragGesture(minimumDistance: 5).onChanged { _ in
+                scrollPosition.lastWidePaneWasSecondary = true
+            })
+        }
+        .padding(.horizontal, AppTheme.pagePadding)
+    }
+
+    private var expandedFocusActions: some View {
+        ComicCard {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L10n.t("专注"))
+                    .font(.title3.weight(.heavy))
+                PrimaryButton(title: appState.focusData.active == nil ? L10n.t("开始专注") : L10n.t("继续专注")) {
+                    if appState.focusData.active == nil {
+                        appState.selectedTab = .focus
+                    } else {
+                        appState.presentFocus()
+                    }
+                }
+                if let duration = appState.focusToOffWorkDuration {
+                    Button(L10n.format("专注到下班 · %d 分钟", Int(ceil(duration / 60)))) {
+                        if appState.moyuStartedAt != nil {
+                            showsMoyuFocusConfirmation = true
+                        } else {
+                            if !appState.startFocus(minutes: 25, endsAtWork: true) {
+                                showsFocusStartUnavailable = true
+                            }
+                        }
+                    }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .background(AppTheme.cream, in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppTheme.outline, lineWidth: 1))
+                    .buttonStyle(PayJoyPressStyle())
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private var shouldShowRewardRain: Bool {
@@ -282,12 +559,26 @@ struct HomeView: View {
         !prefersReducedMotion
     }
 
+    private var isBackgroundMotionActive: Bool {
+        isVisible && scenePhase == .active && appState.selectedTab == .home
+            && ambientMotionEnabled && canAutoShowDesk && !appState.isFocusPresented
+    }
+
     private var prefersReducedMotion: Bool {
         appState.preferences.reduceMotion || accessibilityReduceMotion
     }
 
     private var offDutySecondsUntilWorkStart: TimeInterval? {
         appState.offDutySecondsUntilWorkStart
+    }
+
+    private var nextWorkCountdownCard: some View {
+        let nextStart = appState.nextWorkStartDate
+        return SmallMetricCard(
+            title: nextStart == nil ? L10n.t("今天") : L10n.t("下次上班"),
+            value: nextStart.map { $0.timeIntervalSince(appState.now).countdownText } ?? L10n.t("休息中"),
+            caption: L10n.t("不着急，先好好休息")
+        )
     }
 
     private var showsRestPresentation: Bool {
@@ -376,7 +667,7 @@ struct HomeView: View {
                     headerActions
                         .frame(maxWidth: .infinity, alignment: .topTrailing)
                 }
-                .frame(height: 116)
+                .frame(height: 147, alignment: .top)
             }
         }
         .frame(maxWidth: .infinity)
@@ -444,16 +735,17 @@ struct HomeView: View {
                     removal: .opacity
                 ))
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: 360)
         .frame(height: max(100, AppTheme.heroSectionHeight - 18))
-        .animation(prefersReducedMotion ? nil : .spring(response: 0.34, dampingFraction: 0.72), value: heroBubbleText)
+        .frame(maxWidth: .infinity)
+        .animation(prefersReducedMotion || !isBackgroundMotionActive ? nil : .spring(response: 0.34, dampingFraction: 0.72), value: heroBubbleText)
     }
 
     private func refreshBubble(force: Bool) {
         let now = Date()
         guard force || now.timeIntervalSince(lastBubbleRefresh) > 30 else { return }
         let next = Self.randomBubbleText(for: appState, excluding: heroBubbleText)
-        if prefersReducedMotion {
+        if prefersReducedMotion || !isBackgroundMotionActive {
             heroBubbleText = next
         } else {
             withAnimation(.spring(response: 0.34, dampingFraction: 0.72)) {
@@ -690,6 +982,8 @@ private struct EarlyLeaveConfirmationOverlay: View {
                 .ignoresSafeArea()
                 .onTapGesture(perform: dismiss)
 
+            GeometryReader { geometry in
+                ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: confirmation.iconName)
@@ -754,6 +1048,11 @@ private struct EarlyLeaveConfirmationOverlay: View {
             }
             .shadow(color: AppTheme.shadow.opacity(0.24), radius: 0, x: 5, y: 5)
             .padding(.horizontal, 24)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: geometry.size.height)
+                }
+            }
+            .adaptiveSinglePane()
         }
     }
 }
@@ -838,6 +1137,7 @@ struct WeeklyEchoSheet: View {
                 ClosingReceiptActivityView(activityItems: [item.caption, item.url])
             }
         }
+        .adaptiveSinglePane()
     }
 
     @MainActor
@@ -1079,6 +1379,7 @@ struct ClosingReceiptFlowView: View {
         .onAppear {
             receipt = appState.closingReceiptForPresentation
         }
+        .adaptiveSinglePane()
     }
 
     private var resolvedReceipt: ClosingCapsule? {
@@ -1648,6 +1949,7 @@ struct ClosingReceiptHistoryView: View {
                                 capsule: receipt,
                                 showsNavigationActions: false
                             )
+                            .adaptiveSinglePane()
                         } label: {
                             historyRow(receipt)
                         }
@@ -1691,6 +1993,7 @@ struct ClosingReceiptHistoryView: View {
         .fullScreenCover(isPresented: $showsPaywall) {
             ProPaywallSheet()
         }
+        .adaptiveSinglePane()
     }
 
     private func historyRow(_ receipt: ClosingCapsule) -> some View {
@@ -1781,6 +2084,8 @@ private struct BossCalculatorView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
+            GeometryReader { geometry in
+                ScrollView(showsIndicators: false) {
             VStack(spacing: 14) {
                 Spacer()
 
@@ -1829,6 +2134,9 @@ private struct BossCalculatorView: View {
                 .padding(.horizontal, 18)
                 .padding(.bottom, 20)
             }
+                .frame(minHeight: geometry.size.height, alignment: .bottom)
+                }
+            }
 
             if showsExitGuide {
                 BossKeyExitGuide {
@@ -1840,6 +2148,8 @@ private struct BossCalculatorView: View {
                 .zIndex(2)
             }
         }
+        .adaptiveSinglePane()
+        .background(Color.black.ignoresSafeArea())
         .preferredColorScheme(.dark)
         .onAppear {
             guard !didShowExitGuide else { return }
@@ -2190,6 +2500,7 @@ struct OvertimeStartSheet: View {
             }
         }
         .environment(\.locale, Locale(identifier: L10n.currentLanguage.localeIdentifier))
+        .adaptiveSinglePane()
     }
 }
 
@@ -2267,6 +2578,7 @@ struct OvertimeStopSheet: View {
             }
         }
         .environment(\.locale, Locale(identifier: L10n.currentLanguage.localeIdentifier))
+        .adaptiveSinglePane()
     }
 }
 
@@ -2365,6 +2677,7 @@ struct OvertimeEntrySheet: View {
             }
         }
         .environment(\.locale, Locale(identifier: L10n.currentLanguage.localeIdentifier))
+        .adaptiveSinglePane()
     }
 }
 
@@ -2660,13 +2973,14 @@ private struct SmallMetricCard: View {
 }
 
 private struct MoyuCard: View {
+    @Environment(AppState.self) private var appState
     let snapshot: EarningsSnapshot
     let hidesSensitiveAmounts: Bool
     let currencySymbol: String
     let reduceMotion: Bool
+    @Binding var showsFocusConflict: Bool
 
-    @State private var startedAt: Date?
-    @State private var finishedSession: MoyuSession?
+    @Binding var finishedSession: MoyuSession?
 
     var body: some View {
         ComicCard(background: AppTheme.cream, padding: 12) {
@@ -2675,7 +2989,7 @@ private struct MoyuCard: View {
                     snapshot: snapshot,
                     hidesSensitiveAmounts: hidesSensitiveAmounts,
                     currencySymbol: currencySymbol,
-                    startedAt: startedAt,
+                    startedAt: appState.moyuStartedAt,
                     finishedSession: finishedSession,
                     start: startMoyu,
                     stop: stopMoyu,
@@ -2692,33 +3006,43 @@ private struct MoyuCard: View {
                     .accessibilityHidden(true)
             }
         }
+
     }
 
     private func startMoyu() {
+        if appState.focusData.active != nil {
+            showsFocusConflict = true
+            return
+        }
+        beginMoyu()
+    }
+
+    private func beginMoyu() {
         withAnimation(reduceMotion ? nil : .spring(response: 0.24, dampingFraction: 0.82)) {
             finishedSession = nil
-            startedAt = Date()
+            appState.moyuStartedAt = Date()
         }
     }
 
     private func stopMoyu() {
-        guard let startedAt else { return }
+        guard let startedAt = appState.moyuStartedAt else { return }
         let duration = max(0, Date().timeIntervalSince(startedAt))
         withAnimation(reduceMotion ? nil : .spring(response: 0.24, dampingFraction: 0.82)) {
             finishedSession = MoyuSession(duration: duration, amount: duration * snapshot.earnedPerSecond)
-            self.startedAt = nil
+            appState.moyuStartedAt = nil
         }
     }
 
     private func clearMoyu() {
         withAnimation(reduceMotion ? nil : .spring(response: 0.24, dampingFraction: 0.82)) {
             finishedSession = nil
-            startedAt = nil
+            appState.moyuStartedAt = nil
         }
     }
 }
 
 private struct MoyuActionPanel: View {
+    @Environment(AppState.self) private var appState
     let snapshot: EarningsSnapshot
     let hidesSensitiveAmounts: Bool
     let currencySymbol: String
@@ -2731,9 +3055,7 @@ private struct MoyuActionPanel: View {
     var body: some View {
         Group {
             if let startedAt {
-                TimelineView(.periodic(from: .now, by: 1)) { timeline in
-                    runningContent(startedAt: startedAt, now: timeline.date)
-                }
+                runningContent(startedAt: startedAt, now: appState.now)
             } else if let finishedSession {
                 finishedContent(finishedSession)
             } else {

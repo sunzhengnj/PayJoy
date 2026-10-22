@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2650"
+   LastUpgradeVersion = "2700"
    version = "1.8">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -65,7 +65,7 @@
          </TestableReference>
       </Testables>
       <StoreKitConfigurationFileReference
-         identifier = "../PayJoy/Configuration/PayJoy.storekit">
+         identifier = "../../PayJoy/Configuration/PayJoy.storekit">
       </StoreKitConfigurationFileReference>
    </TestAction>
    <LaunchAction
@@ -90,7 +90,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../PayJoy/Configuration/PayJoy.storekit">
+         identifier = "../../PayJoy/Configuration/PayJoy.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

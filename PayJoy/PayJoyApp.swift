@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct PayJoyApp: App {
+    @UIApplicationDelegateAdaptor(PayJoyAppDelegate.self) private var appDelegate
     @State private var appState = AppState()
 
     var body: some Scene {
@@ -16,13 +17,46 @@ struct PayJoyApp: App {
                 .environment(appState)
                 .environment(\.locale, Locale(identifier: appState.preferences.appLanguage.localeIdentifier))
                 .environment(\.payJoyReduceMotion, appState.preferences.reduceMotion)
-                .preferredColorScheme(appState.preferences.selectedTheme == .midnight ? .dark : .light)
+                .preferredColorScheme(
+                    (AppState.isScreenshotMode && ScreenshotScreen.current.rawValue.hasPrefix("paywall"))
+                        || appState.preferences.selectedTheme == .midnight
+                        ? .dark : .light
+                )
+        }
+    }
+}
+
+private final class PayJoyAppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        FocusOrientationPolicy.orientation(for: window?.windowScene)
+    }
+}
+
+enum FocusOrientationPolicy {
+    private static var orientations: [String: UIInterfaceOrientationMask] = [:]
+
+    static func orientation(for scene: UIWindowScene?) -> UIInterfaceOrientationMask {
+        guard let scene else { return .portrait }
+        return orientations[scene.session.persistentIdentifier] ?? .portrait
+    }
+
+    static func update(orientation: UIInterfaceOrientationMask, in scene: UIWindowScene?, requestRotation: Bool = true) {
+        guard let scene else { return }
+        orientations[scene.session.persistentIdentifier] = orientation
+        if let rootViewController = scene.windows.first(where: \.isKeyWindow)?.rootViewController {
+            (rootViewController.presentedViewController ?? rootViewController).setNeedsUpdateOfSupportedInterfaceOrientations()
+        }
+        guard requestRotation else { return }
+        scene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation)) { error in
+            NSLog("Focus orientation update failed: %@", error.localizedDescription)
         }
     }
 }
 
 private enum ScreenshotScreen: String {
     case root
+    case featuredHome = "featured-home"
+    case featuredFocusTab = "featured-focus-tab"
     case home
     case homeAfterMidnight = "home-after-midnight"
     case homeRestDay = "home-rest-day"
@@ -71,6 +105,11 @@ private enum ScreenshotScreen: String {
     case wishRealization = "wish-realization"
     case closingReceipt = "closing-receipt"
     case closingReceiptComplete = "closing-receipt-complete"
+    case focusSetup = "focus-setup"
+    case focusRunning = "focus-running"
+    case focusPaused = "focus-paused"
+    case focusPausedOffWork = "focus-paused-offwork"
+    case focusDark = "focus-dark"
 
     static var current: ScreenshotScreen {
         let arguments = ProcessInfo.processInfo.arguments
@@ -85,13 +124,28 @@ private enum ScreenshotScreen: String {
 
 private struct ScreenshotHostView: View {
     @Environment(AppState.self) private var appState
+    @State private var focusShowsOffWorkTime = false
     private let screen = ScreenshotScreen.current
 
     var body: some View {
         Group {
             switch screen {
-            case .root:
+            case .root, .featuredHome, .featuredFocusTab:
                 AppRootView()
+            case .focusSetup, .focusRunning, .focusDark, .focusPaused, .focusPausedOffWork:
+                FocusView(showsOffWorkTime: $focusShowsOffWorkTime)
+                    .onAppear {
+                        guard screen != .focusSetup else { return }
+                        var data = appState.focusData
+                        var session = FocusSession(startedAt: appState.now, duration: 18 * 60 + 42)
+                        if screen == .focusPaused || screen == .focusPausedOffWork {
+                            session.pause(at: appState.now)
+                        }
+                        data.active = session
+                        data.prefersDarkBackground = screen == .focusDark
+                        appState.focusData = data
+                        focusShowsOffWorkTime = screen == .focusPausedOffWork
+                    }
             case .home, .homeAfterMidnight, .homeRestDay, .countdown:
                 NavigationStack { HomeView() }
             case .stats, .statsActualSalary, .statsLower:
