@@ -223,6 +223,8 @@ struct FocusView: View {
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 10, weight: .semibold))
                         }
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                     }
                     .accessibilityHint(L10n.t("切换显示的时间"))
                 } else {

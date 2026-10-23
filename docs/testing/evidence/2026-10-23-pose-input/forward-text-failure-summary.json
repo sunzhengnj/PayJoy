@@ -1,0 +1,55 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+        "deviceName" : "PayJoy Verified Duo",
+        "modelName" : "iPhone",
+        "osBuildNumber" : "24A94425",
+        "osVersion" : "27.1",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PayJoyUITests · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792747088.485,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Invalid frame dimension (negative or non-finite)."
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792747049.603,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertEqual failed: (\"XCTWaiterResult(rawValue: 2)\") is not equal to (\"XCTWaiterResult(rawValue: 1)\") - Clear the entire previous value before typing; actual: ",
+      "targetName" : "PayJoyUITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "InputAcceptanceTests/testFullWidthSalaryDecimalsFollowTheRegion()",
+      "testIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testFullWidthSalaryDecimalsFollowTheRegion",
+      "testName" : "testFullWidthSalaryDecimalsFollowTheRegion()"
+    }
+  ],
+  "title" : "Test - PayJoyUITests",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

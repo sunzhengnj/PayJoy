@@ -1,0 +1,122 @@
+[
+  {
+    "summary": "menu-red-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyClockMenuRed20261023.xcresult",
+    "result": "Failed",
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "first-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyPoseInputFirst20261023.xcresult",
+    "result": "Passed",
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  {
+    "summary": "final-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyPoseInputFinal20261023.xcresult",
+    "result": "Passed",
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  {
+    "summary": "unit-launch-failure-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyPoseInputUnit20261023.xcresult",
+    "result": "Failed",
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "unit-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyPoseInputUnitRetry20261023.xcresult",
+    "result": "Passed",
+    "passed": 139,
+    "failed": 0,
+    "skipped": 0
+  },
+  {
+    "summary": "combined-first-failure-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryFoldSaveRelaunch20261023.xcresult",
+    "result": "Failed",
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "selection-key-failure-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryRestored20261023.xcresult",
+    "result": "Failed",
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "restore-native-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryNativeRestore20261023.xcresult",
+    "result": "Passed",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  {
+    "summary": "native-menu-failure-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyPoseInputCompleted20261023.xcresult",
+    "result": "Failed",
+    "passed": 1,
+    "failed": 3,
+    "skipped": 0
+  },
+  {
+    "summary": "forward-text-failure-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryClearBothDirections20261023.xcresult",
+    "result": "Failed",
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "native-key-failure-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryMiddleReplacement20261023.xcresult",
+    "result": "Failed",
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "caret-drag-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryCaretDrag20261023.xcresult",
+    "result": "Passed",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  {
+    "summary": "accepted-first-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoyDuoInputAccepted20261023.xcresult",
+    "result": "Failed",
+    "passed": 7,
+    "failed": 1,
+    "skipped": 0
+  },
+  {
+    "summary": "restore-caret-end-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryRestoreCaretEnd20261023.xcresult",
+    "result": "Passed",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  {
+    "summary": "combined-fixed-summary.json",
+    "xcresult": "/Volumes/CodexOffload/Builds/PayJoySalaryFoldSaveRelaunchFixed20261023.xcresult",
+    "result": "Passed",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  }
+]

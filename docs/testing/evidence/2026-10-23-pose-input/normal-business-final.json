@@ -1,0 +1,89 @@
+{
+  "payjoy.salary.settings": {
+    "salaryAmount": 12345.67,
+    "currencyCode": "CNY",
+    "salaryType": "monthly",
+    "currencySymbol": "¥",
+    "monthlyPaidDays": 21.75,
+    "workStart": {
+      "hour": 9,
+      "minute": 30
+    },
+    "workEnd": {
+      "hour": 18,
+      "minute": 30
+    },
+    "lunchEnd": {
+      "hour": 13,
+      "minute": 0
+    },
+    "lunchStart": {
+      "hour": 12,
+      "minute": 0
+    },
+    "deductLunch": false,
+    "workdays": [
+      4,
+      3,
+      6,
+      2,
+      5
+    ]
+  },
+  "payjoy.focus.data.v1": {
+    "records": [
+      {
+        "startedAt": 814428723.927136,
+        "id": "CDC5DDF9-0E6A-4E6E-B587-5AD8F66ADE01",
+        "completed": true,
+        "focusedDuration": 120,
+        "endsAtWork": false,
+        "plannedDuration": 120,
+        "endedAt": 814429487.865577
+      },
+      {
+        "completed": true,
+        "focusedDuration": 361.10181498527527,
+        "id": "C9B00439-6D29-4F51-8614-DE70A5B5AF55",
+        "plannedDuration": 366.7008889913559,
+        "endedAt": 814370700,
+        "startedAt": 814370333.299111,
+        "endsAtWork": true
+      },
+      {
+        "completed": true,
+        "focusedDuration": 120,
+        "id": "0803B725-C6B5-4B87-A327-8F2F8894C8BE",
+        "plannedDuration": 120,
+        "endedAt": 814369837.670483,
+        "startedAt": 814369653.676517,
+        "endsAtWork": false
+      }
+    ],
+    "prefersDarkBackground": true,
+    "restoreEarningsActivity": false
+  },
+  "payjoy.engagement.state.v1": {
+    "dailyState": {
+      "dateKey": "2026-10-22",
+      "mood": "steady"
+    },
+    "capsules": [
+      {
+        "currencyCode": "CNY",
+        "revealsSalary": false,
+        "dateKey": "2026-10-22",
+        "companionID": "kai",
+        "id": "DE9816EC-F151-4B71-8644-D5E784D1464C",
+        "messageIndex": 0,
+        "workProgress": 1,
+        "tone": "gentle",
+        "earnedAmount": 454.54545454545456,
+        "createdAt": 814370757.078399,
+        "mood": "steady"
+      }
+    ],
+    "tone": "gentle",
+    "selectedCompanionID": "kai"
+  }
+}

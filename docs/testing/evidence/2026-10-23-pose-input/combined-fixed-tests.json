@@ -1,0 +1,59 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+      "deviceName" : "PayJoy Verified Duo",
+      "modelName" : "iPhone",
+      "osBuildNumber" : "24A94425",
+      "osVersion" : "27.1",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "name" : "Invalid frame dimension (negative or non-finite).",
+                      "nodeType" : "Runtime Warning"
+                    }
+                  ],
+                  "duration" : "5分钟17秒",
+                  "durationInSeconds" : 317.668466091156,
+                  "name" : "testNormalSalarySurvivesProcessRelaunch()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testNormalSalarySurvivesProcessRelaunch()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testNormalSalarySurvivesProcessRelaunch",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "InputAcceptanceTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "PayJoyUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "PayJoyPoseUITests",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

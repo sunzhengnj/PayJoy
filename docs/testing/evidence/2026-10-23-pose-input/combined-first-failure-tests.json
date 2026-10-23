@@ -1,0 +1,67 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+      "deviceName" : "PayJoy Verified Duo",
+      "modelName" : "iPhone",
+      "osBuildNumber" : "24A94425",
+      "osVersion" : "27.1",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "name" : "XCTAssertEqual failed: (\"XCTWaiterResult(rawValue: 2)\") is not equal to (\"XCTWaiterResult(rawValue: 1)\") - Clear the entire previous value before typing",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Volumes/CodexOffload/Projects/project/PayJoy/PayJoyUITests/InputAcceptanceTests.swift",
+                        "lineNumber" : 306
+                      }
+                    },
+                    {
+                      "name" : "Invalid frame dimension (negative or non-finite).",
+                      "nodeType" : "Runtime Warning"
+                    }
+                  ],
+                  "duration" : "3分钟3秒",
+                  "durationInSeconds" : 183.89756095409393,
+                  "name" : "testNormalSalarySurvivesProcessRelaunch()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testNormalSalarySurvivesProcessRelaunch()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testNormalSalarySurvivesProcessRelaunch",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                }
+              ],
+              "name" : "InputAcceptanceTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests",
+              "nodeType" : "Test Suite",
+              "result" : "Failed"
+            }
+          ],
+          "name" : "PayJoyUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Failed"
+        }
+      ],
+      "name" : "PayJoyPoseUITests",
+      "nodeType" : "Test Plan",
+      "result" : "Failed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

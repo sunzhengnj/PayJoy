@@ -1,0 +1,26 @@
+[
+  {
+    "file": "PayJoy/Views/FocusView.swift",
+    "sha256": "0614b429dd9d68691fc61390b5898bc46d314d1acf09d103ae0e4e68199d6898"
+  },
+  {
+    "file": "PayJoy/Views/SalarySettingsView.swift",
+    "sha256": "088436211625ab51f96472063eba8c72239423378135ae14ded02cd635d8edeb"
+  },
+  {
+    "file": "PayJoyUITests/InputAcceptanceTests.swift",
+    "sha256": "82ce4d01715255d5f3e2b4770401f68b083bd4fa99aa9d7e8c78fa556c7cd0b4"
+  },
+  {
+    "file": "PayJoy.xcodeproj/xcshareddata/xcschemes/PayJoyPoseUITests.xcscheme",
+    "sha256": "59abd7ef0dfdefff29a15996285a9cea07624a70e00988a35a382fda630a7672"
+  },
+  {
+    "file": "scripts/qa/duo_pose_control.swift",
+    "sha256": "104304bc8518cd3d711858e7fffe4e93926d1c8bc661f54f327a301af24efdee"
+  },
+  {
+    "file": "scripts/qa/run_duo_pose_tests.py",
+    "sha256": "d2dfccb3b4e7757a154b10bc85e34581614c6621c9418b9a38389f5c6b639426"
+  }
+]

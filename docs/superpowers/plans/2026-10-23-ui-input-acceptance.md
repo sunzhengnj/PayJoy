@@ -33,9 +33,9 @@
 
 ### Task 2: Actual pose and persistence checks
 
-- [ ] Use the working UI runner to keep input focused while Device Hub changes actual hinge poses; assert draft retention and actions remain reachable.
-- [ ] Verify salary Save→process relaunch→reopen in normal mode and restore the dedicated simulator's settings afterward.
-- [ ] Update acceptance evidence with exact scope and remaining gaps; commit/push the verified milestone on2.0.0.
+- [x] Use the working UI runner to keep input focused while Device Hub changes actual hinge poses; assert draft retention and actions remain reachable.
+- [x] Verify salary Save→process relaunch→reopen in normal mode and restore the dedicated simulator's settings afterward.
+- [x] Update acceptance evidence with exact scope and remaining gaps; commit/push the verified milestone on2.0.0.
 
 ## Execution ledger
 
@@ -57,3 +57,15 @@
 - Task1 verified: four input/layout tests passed in PayJoyInputUIFinal20261023.xcresult. Its extra display case still used the wrong PopUpButton query; final Button query passed as a targeted rerun in PayJoyFocusDisplayUICleanLaunch20261023.xcresult. A separate transient start tap did not enter a session, then the same source passed on retry; cause unproven, not recorded as a production fix.
 - Current139/139 iOS unit tests passed,0failed/0skipped, PayJoyInputUnit20261023.xcresult. Source hashes, per-case status and retained failure are verified by docs/testing/evidence/2026-10-23-input-ui/verify-results.py. Task2 remains open for actual hinge draft/focus and normal-mode process persistence.
 - Review finding to carry into Task2: native time-menu label frame was about81×19pt. Verify its full hit region against the44pt target while correcting actual pose boundaries; do not claim that this milestone passed every focus control's touch area.
+
+- Task2 in progress: real Device Hub actions are acknowledged through a test-only file handshake. The first run passed both full-width draft/caret cycles, including external-screen Closed→Open, and the menu now measures44pt. Its normal-mode persistence case reused an already-equal target value, so it is insufficient proof of a new write. Strengthen it with a24123.89/20.5 baseline verified after relaunch before writing12345.67/21.75. Also verify primary-action reachability in each fold pane, returning explicitly to editing afterward.
+- Ruling: use an explicit live Device Hub PID, validated from the current process inventory. NSRunningApplication's bundle lookup returned a stale pid=-1 record on this host; AX access to the known Device Hub PID succeeds. The control tool rejects missing buttons/actions instead of silently treating them as success.
+- Native menu hit-area RED: the time selector measured19.333pt high; add a44pt minimum frame and rectangular contentShape without changing timing semantics. A targeted display switch remains running after the change.
+- Task2 intermediate: four strengthened UI cases passed, including primary-action hit testing and normal-mode contrasting baseline→save→cold relaunch→restore for both regions.139 iOS unit cases passed on retry; the earlier test-host connection timeout is retained and its cause remains unproven.
+- Additional combination: move actual half-fold→rotate→open into the normal-mode edit/save/relaunch case. Its first run passed Japanese, then failed the German field-clear precondition before the second save; the dedicated simulator retained the temporary24123.89/20.5 baseline. Recovery and final combined acceptance are required before this task is complete.
+- Diagnostic: tapping the visual end and deleting by string count can leave a suffix after rotation. Native command-A also failed to select the field in this test (actual24123,8 after one delete); neither failure proves a product persistence defect. The native editing menu restored the original settings once, but a subsequent run failed for placeholder-only input and missing edit menus after opening. Captured business fields still matched the original after that run.
+- Diagnostic: typeText(forwardDelete) inserts its private character instead of deleting; typeKey(leftArrow) did not move the caret in a targeted probe. Retain both failed summaries; do not count those event methods as successful input verification.
+- Correction: salary replacement now drags the caret by touch, types7 and asserts it was appended, then deletes exactly the existing length plus1 and verifies empty before typing the requested value. Fresh empty focus fields are typed directly. The Japanese/German fixture Save→reopen case passed with this helper.
+- Complete8-case run:7passed,1failed,0skipped. Valid/invalid focus inputs, display switching, expanded salary controls and both actual draft/caret cycles passed. Normal-mode persistence failed its caret precondition:20.5 became20.75 instead of20.57, so no target was saved. A drag ending inside the trailing-aligned short field can still stop before the last glyph. Move the endpoint24pt past the field's trailing edge, restore original settings, then rerun only that affected normal-mode case. Keep the failed run distinct from the seven successful cases.
+
+- Task2 verified: the seven UI cases remain individually passed in PayJoyDuoInputAccepted20261023.xcresult (its normal-mode precondition failed). After correcting only the QA drag endpoint, the affected normal-mode fold/save/relaunch case passed in PayJoySalaryFoldSaveRelaunchFixed20261023.xcresult, both regions, with7actual pose acknowledgements. Original three business fields were independently restored;202local screenshots are indexed. Current application source matches139/139 iOS unit verification. The larger Goal and acceptance matrix remain open.
