@@ -3,7 +3,18 @@ import SwiftUI
 @main
 struct PayJoyApp: App {
     @UIApplicationDelegateAdaptor(PayJoyAppDelegate.self) private var appDelegate
-    @State private var appState = AppState()
+    @State private var appState = PayJoyApp.makeAppState()
+
+    private static func makeAppState() -> AppState {
+#if DEBUG
+        if AppState.isScreenshotMode {
+            let store = SettingsStore.screenshotFixture()
+            let analytics = LocalEngagementAnalytics(defaults: UserDefaults(suiteName: SettingsStore.screenshotFixtureDomain)!)
+            return AppState(store: store, engagementAnalytics: analytics)
+        }
+#endif
+        return AppState()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +25,10 @@ struct PayJoyApp: App {
                     AppRootView()
                 }
             }
+#if DEBUG
+                .defaultAppStorage(AppState.isScreenshotMode
+                    ? UserDefaults(suiteName: SettingsStore.screenshotFixtureDomain)! : .standard)
+#endif
                 .environment(appState)
                 .environment(\.locale, Locale(identifier: appState.preferences.appLanguage.localeIdentifier))
                 .environment(\.payJoyReduceMotion, appState.preferences.reduceMotion)
@@ -57,6 +72,12 @@ private enum ScreenshotScreen: String {
     case root
     case featuredHome = "featured-home"
     case featuredFocusTab = "featured-focus-tab"
+    case deskLunch = "desk-lunch"
+    case deskBeforeWork = "desk-before-work"
+    case deskAfterWork = "desk-after-work"
+    case deskRestDay = "desk-rest-day"
+    case deskNoNextWork = "desk-no-next-work"
+    case deskOvertimeMidnight = "desk-overtime-midnight"
     case home
     case homeAfterMidnight = "home-after-midnight"
     case homeRestDay = "home-rest-day"
@@ -130,7 +151,8 @@ private struct ScreenshotHostView: View {
     var body: some View {
         Group {
             switch screen {
-            case .root, .featuredHome, .featuredFocusTab:
+            case .root, .featuredHome, .featuredFocusTab, .deskLunch, .deskBeforeWork,
+                 .deskAfterWork, .deskRestDay, .deskNoNextWork, .deskOvertimeMidnight:
                 AppRootView()
             case .focusSetup, .focusRunning, .focusDark, .focusPaused, .focusPausedOffWork:
                 FocusView(showsOffWorkTime: $focusShowsOffWorkTime)

@@ -1,0 +1,9 @@
+{
+  "keysBefore": 14,
+  "keysAfter": 14,
+  "changedKeys": [
+    "payjoy.salary.day.records",
+    "payjoy.salary.settings"
+  ],
+  "identical": false
+}

@@ -1,0 +1,13 @@
+{
+  "status": "paused",
+  "reason": "User requested wrap-up and pause",
+  "milestoneComplete": false,
+  "goalComplete": false,
+  "pending": [
+    "Phone salary keyboard viewport RED/GREEN",
+    "Phone salary fixture normal-store isolation",
+    "Remaining original Duo/focus/motion/device acceptance"
+  ],
+  "lastBuildSucceeded": true,
+  "latestAddedHeightAssertionExecuted": false
+}

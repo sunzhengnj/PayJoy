@@ -31,6 +31,10 @@ struct AppRootView: View {
                 && !appState.shouldPresentPaydayCelebration
                 && layout.canShowDeskClock
             let bottomSafeArea = proxy.safeAreaInsets.bottom
+#if DEBUG
+            let deskAudit = ProcessInfo.processInfo.environment["PAYJOY_DESK_AUDIT"] == "1"
+                ? "PAYJOY_DESK_GATE show=\(showDesk) setup=\(needsInitialSetup) tab=\(appState.selectedTab) root=\(homeRootVisible) clear=\(homePresentationClear) hidden=\(appState.isTabBarHidden) suppressed=\(deskSuppressedForCurrentFold) focus=\(appState.isFocusPresented) receipt=\(appState.shouldPresentClosingReceipt) payday=\(appState.shouldPresentPaydayCelebration) can=\(layout.canShowDeskClock) size=\(layout.size) division=\(layout.divisionRegions)" : ""
+#endif
             let occupancy = TabChromeLayout.occupancy(
                 barVisible: barVisible && !useSystemTabs && !showDesk,
                 bottomSafeArea: bottomSafeArea
@@ -40,19 +44,17 @@ struct AppRootView: View {
                 Group {
                     if needsInitialSetup {
                         NavigationStack { EmotionalOnboardingView() }
-                    } else if useSystemTabs {
+                    } else {
                         TabView(selection: $appState.selectedTab) {
                             ForEach(AppTab.allCases) { tab in
                                 tabContent(tab, showDesk: showDesk)
-                                    .toolbar(appState.isTabBarHidden || showDesk ? .hidden : .automatic, for: .tabBar)
+                                    .toolbar(!useSystemTabs || appState.isTabBarHidden || showDesk ? .hidden : .automatic, for: .tabBar)
                                     .tabItem {
                                         Label(tab.title, systemImage: tab.icon)
                                     }
                                     .tag(tab)
                             }
                         }
-                    } else {
-                        tabContent(appState.selectedTab, showDesk: showDesk)
                     }
                 }
                 .padding(.bottom, padding.contentBottomInset)
@@ -83,6 +85,10 @@ struct AppRootView: View {
             .onChange(of: shouldKeepScreenAwake(showDesk: showDesk)) { _, shouldKeepAwake in
                 UIApplication.shared.isIdleTimerDisabled = shouldKeepAwake
             }
+#if DEBUG
+            .onAppear { writeDeskAudit(deskAudit, layout: layout) }
+            .onChange(of: deskAudit) { _, value in writeDeskAudit(value, layout: layout) }
+#endif
         }
         .background(WindowSceneReader(
             onSceneChange: { activeWindowScene = $0 },
@@ -184,6 +190,20 @@ struct AppRootView: View {
     private var prefersReducedMotion: Bool {
         appState.preferences.reduceMotion || accessibilityReduceMotion
     }
+
+#if DEBUG
+    private func writeDeskAudit(_ value: String, layout: AdaptiveLayoutContext) {
+        guard !value.isEmpty else { return }
+        NSLog("%@", value)
+        let axis = layout.horizontalDivision != nil ? "horizontal"
+            : layout.verticalDivision != nil ? "vertical" : "none"
+        let record: [String: Any] = ["axis": axis, "updatedAt": Date().timeIntervalSince1970,
+                                     "pid": ProcessInfo.processInfo.processIdentifier, "gate": value]
+        if let data = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]) {
+            try? data.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("payjoy-desk-layout.json"), options: .atomic)
+        }
+    }
+#endif
 
     @ViewBuilder
     private var privacyShield: some View {

@@ -1,0 +1,8 @@
+{
+  "equal": false,
+  "beforeKeyCount": 15,
+  "afterKeyCount": 15,
+  "changedKeys": [
+    "payjoy.analytics.aggregate.mainlandChina.closingReceiptOpened"
+  ]
+}

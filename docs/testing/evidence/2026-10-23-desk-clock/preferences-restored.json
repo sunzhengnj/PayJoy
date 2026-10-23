@@ -1,0 +1,16 @@
+{
+  "simulatorShutdown": true,
+  "keys": {
+    "payjoy.focus.keepScreenAwake": {
+      "before": true,
+      "after": false,
+      "existsAfter": true
+    },
+    "payjoy.boss.key.didShowExitGuide": {
+      "before": true,
+      "after": null,
+      "existsAfter": false
+    }
+  },
+  "otherKeysUnchanged": true
+}

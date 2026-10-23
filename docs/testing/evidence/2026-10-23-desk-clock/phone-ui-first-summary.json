@@ -1,0 +1,55 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "0A9D47BA-14F0-49B4-B0A7-CDE5A28DD72A",
+        "deviceName" : "PayJoy Review iPhone",
+        "modelName" : "iPhone 17e",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 2,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PayJoyPoseUITests · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792756514.603,
+  "passedTests" : 2,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Invalid frame dimension (negative or non-finite)."
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792756426.828,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed - Attributes: Application, 0x10639e6c0, pid: 2715, label: 'ClockJoy'\nElement subtree:\n →Application, 0x10639e6c0, pid: 2715, label: 'ClockJoy'\n    Window (Main), 0x10639e800, {{0.0, 0.0}, {390.0, 844.0}}\n      Other, 0x10639e940, {{0.0, 0.0}, {390.0, 844.0}}\n        Other, 0x10639ea80, {{0.0, 0.0}, {390.0, 844.0}}\n          Other, 0x10639ebc0, {{0.0, 0.0}, {390.0, 844.0}}\n            Other, 0x10639ed00, {{0.0, 0.0}, {390.0, 844.0}}\n              Other, 0x10639ee40, {{0.0, 47.0}, {390.0, 763.0}}\n              Other, 0x10639ef80, {{0.0, 47.0}, {390.0, 763.0}}\n              Other, 0x10639f0c0, {{0.0, 0.0}, {390.0, 844.0}}\n                Other, 0x10639f200, {{0.0, 0.0}, {390.0, 844.0}}\n                  Other, 0x10639f340, {{0.0, 0.0}, {390.0, 844.0}}\n                    Other, 0x10639f480, {{0.0, 0.0}, {390.0, 844.0}}\n                      Other, 0x10639f5c0, {{0.0, 0.0}, {390.0, 844.0}}\n                        Other, 0x10639f700, {{0.0, 0.0}, {390.0, 844.0}}\n                          Button, 0x10639f840, {{22.0, 55.0}, {44.0, 44.0}}, identifier: 'chevron.down', label: '收起专注，计时继续'\n                          Button, 0x10639f980, {{220.0, 55.0}, {44.0, 44.0}}, label: '切换横屏'\n                          Button, 0x10639fac0, {{272.0, 55.0}, {44.0, 44.0}}, identifier: 'moon', label: '切换为黑底'\n                          Button, 0x10639fc00, {{324.0, 55.0}, {44.0, 44.0}}, label: '专注设置'\n                            Button, 0x10639fd40, {{324.0, 55.0}, {44.0, 44.0}}\n                              Image, 0x10639fe80, {{336.7, 75.0}, {19.0, 4.3}}, identifier: 'ellipsis', label: '更多'\n                          Button, 0x111434000, {{97.0, 746.0}, {72.0, 44.0}}, label: '暂停'\n                          Button, 0x111434140, {{221.0, 746.0}, {72.0, 44.0}}, label: '结束'\n                          StaticText, 0x111434280, {{163.2, 326.7}, {63.7, 19.3}}, label: '本段剩余'\n                          StaticText, 0x1114343c0, {{16.8, 362.0}, {356.3, 148.3}}, label: '本段剩余', value: 25:00\n                Other, 0x111434500, {{0.0, 761.0}, {390.0, 83.0}}\n                  Other, 0x111434640, {{0.0, 0.0}, {390.0, 844.0}}\n                  Other, 0x111434780, {{0.0, 761.0}, {390.0, 83.0}}\n      Other, 0x1114348c0, {{0.0, 0.0}, {390.0, 844.0}}\n        Other, 0x111434a00, {{0.0, 0.0}, {390.0, 844.0}}\n          Other, 0x111434b40, {{0.0, 0.0}, {390.0, 844.0}}\n            Button, 0x111434c80, {{22.0, 55.0}, {44.0, 44.0}}, identifier: 'chevron.down', label: '收起专注，计时继续'\n            Button, 0x111434dc0, {{220.0, 55.0}, {44.0, 44.0}}, label: '切换横屏'\n            Button, 0x111434f00, {{272.0, 55.0}, {44.0, 44.0}}, identifier: 'moon', label: '切换为黑底'\n            Button, 0x111435040, {{324.0, 55.0}, {44.0, 44.0}}, label: '专注设置'\n              Button, 0x111435180, {{324.0, 55.0}, {44.0, 44.0}}\n                Image, 0x1114352c0, {{336.7, 75.0}, {19.0, 4.3}}, identifier: 'ellipsis', label: '更多'\n            Button, 0x111435400, {{97.0, 746.0}, {72.0, 44.0}}, label: '暂停'\n            Button, 0x111435540, {{221.0, 746.0}, {72.0, 44.0}}, label: '结束'\n            StaticText, 0x111435680, {{163.2, 326.7}, {63.7, 19.3}}, label: '本段剩余'\n            StaticText, 0x1114357c0, {{16.8, 362.0}, {356.3, 148.3}}, label: '本段剩余', value: 25:00\nPath to element:\n →Application, 0x10639e6c0, pid: 2715, label: 'ClockJoy'\nQuery chain:\n →Find: Target Application 'app.payjoy.kaixin'\n  Output: {\n    Application, 0x111435900, pid: 2715, label: 'ClockJoy'\n  }\n",
+      "targetName" : "PayJoyUITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "InputAcceptanceTests/testChangingClockDisplayKeepsFocusRunning()",
+      "testIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testChangingClockDisplayKeepsFocusRunning",
+      "testName" : "testChangingClockDisplayKeepsFocusRunning()"
+    }
+  ],
+  "title" : "Test - PayJoyPoseUITests",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 3
+}

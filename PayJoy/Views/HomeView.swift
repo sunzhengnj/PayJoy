@@ -1422,7 +1422,7 @@ struct ClosingReceiptFlowView: View {
                             .foregroundStyle(AppTheme.textGray)
                         Text(
                             PrivacyText.money(
-                                appState.snapshot.todayEarned,
+                                appState.closingReceiptEarnedAmount,
                                 hidden: appState.preferences.hideSensitiveAmounts,
                                 currencySymbol: appState.settings.currencySymbol
                             )

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "PayJoy/PayJoyApp.swift",
+    "sha256": "9cc064c8a1f49f0d76577e60df70f8dd0d1007941f093334ad367c413c28a433"
+  },
+  {
+    "file": "PayJoy/AppState.swift",
+    "sha256": "007f0785898cf8226d82a1858139316be370fabce16a6282f3fb92ef0a5c740c"
+  },
+  {
+    "file": "PayJoy/Services/SettingsStore.swift",
+    "sha256": "a34f8edacfa06fbdbc6510776a6262ee7b2447013bf8c24f2efa3a96bbf8ad44"
+  },
+  {
+    "file": "PayJoyUITests/InputAcceptanceTests.swift",
+    "sha256": "30ed1b82f9f226acfecd66aacf397d0fd55875c1390774db07083b058c3da78c"
+  },
+  {
+    "file": "PayJoyUITests/DuoAcceptanceSupport.swift",
+    "sha256": "59aca4f3987fd8a92f8e6ab8009126a31ab32fa28a8f25b1becc54cb96acc586"
+  },
+  {
+    "file": "PayJoyUITests/DeskClockAcceptanceTests.swift",
+    "sha256": "78c945fedc3cda156383ef94dea76afe1e83373575e99e459de5f2f19995f633"
+  }
+]

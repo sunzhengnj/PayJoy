@@ -7,6 +7,40 @@ final class InputAcceptanceTests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
     }
 
+    func testScreenshotKeepAwakePreferenceResetsOnRelaunch() {
+        var app = launchFixture("focus-setup")
+        let toggle = app.switches["屏幕常亮"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 10))
+        XCTAssertEqual(toggle.value as? String, "0")
+        for _ in 0..<4 {
+            if toggle.isHittable { break }
+            app.swipeUp()
+        }
+        toggle.tap()
+        XCTAssertEqual(toggle.value as? String, "1")
+        app.terminate()
+
+        app = launchFixture("focus-setup")
+        let resetToggle = app.switches["屏幕常亮"]
+        XCTAssertTrue(resetToggle.waitForExistence(timeout: 10))
+        XCTAssertEqual(resetToggle.value as? String, "0", "Each screenshot fixture must start fresh")
+        attachScreenshot("fixture-keep-awake-reset")
+        app.terminate()
+    }
+
+    func testScreenshotBossGuideResetsOnRelaunch() {
+        for _ in 0..<2 {
+            let app = launchFixture("root")
+            let boss = app.buttons["老板键"]
+            XCTAssertTrue(boss.waitForExistence(timeout: 10))
+            boss.tap()
+            let guide = app.buttons["知道了"]
+            XCTAssertTrue(guide.waitForExistence(timeout: 10), "Each screenshot fixture must show its own first-use guide")
+            guide.tap()
+            app.terminate()
+        }
+    }
+
     func testFullWidthFocusMinutesStartTheRequestedDuration() {
         for (input, expected) in [("２５", "25:00"), ("2５", "25:00"), ("　４５　", "45:00")] {
             let app = launchFixture("focus-setup")
@@ -82,6 +116,12 @@ final class InputAcceptanceTests: XCTestCase {
                 XCTAssertEqual(paidDays.value as? String, "２１，７５８")
             }
             app.buttons["保存设置"].tap()
+            let profileScroll = app.scrollViews.containing(.staticText, identifier: "我的").firstMatch
+            let fullHeight = NSPredicate { _, _ in
+                profileScroll.exists && profileScroll.frame.height > app.windows.firstMatch.frame.height * 0.7
+            }
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: fullHeight, object: nil)], timeout: 5), .completed,
+                           "Saving must release the keyboard's layout space")
             openSalarySettings(in: app)
             let savedAmount = app.textFields["10000"]
             XCTAssertTrue(savedAmount.waitForExistence(timeout: 10))
@@ -213,11 +253,6 @@ final class InputAcceptanceTests: XCTestCase {
         return app
     }
 
-    private func requirePoseHost() throws {
-        try XCTSkipUnless(ProcessInfo.processInfo.environment["PAYJOY_DUO_POSE_HOST"] == "1",
-                          "Use PayJoyPoseUITests with scripts/qa/run_duo_pose_tests.py")
-    }
-
     private func verifyDraftAcrossPoses(in app: XCUIApplication, field: XCUIElement, expected: String, name: String, actionTitle: String) throws {
         for (index, action) in ["Partially Open", "Rotate Right", "Open", "Closed", "Open"].enumerated() {
             try requestPose(action)
@@ -243,27 +278,6 @@ final class InputAcceptanceTests: XCTestCase {
             field.tap()
             field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
         }
-    }
-
-    private func requestPose(_ action: String) throws {
-        let id = UUID().uuidString
-        let requestURL = FileManager.default.temporaryDirectory.appendingPathComponent("payjoy-duo-pose-\(id).json")
-        let ackURL = requestURL.appendingPathExtension("ack")
-        defer {
-            try? FileManager.default.removeItem(at: requestURL)
-            try? FileManager.default.removeItem(at: ackURL)
-        }
-        let data = try JSONSerialization.data(withJSONObject: ["id": id, "action": action, "ack": ackURL.path], options: [.sortedKeys])
-        try data.write(to: requestURL, options: .atomic)
-        let marker = "PAYJOY_DUO_POSE_REQUEST \(requestURL.path)\n"
-        FileHandle.standardOutput.write(Data(marker.utf8))
-        let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            FileManager.default.fileExists(atPath: ackURL.path)
-        }, object: nil)
-        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 35), .completed, "Host did not confirm \(action)")
-        let ack = try XCTUnwrap(try JSONSerialization.jsonObject(with: Data(contentsOf: ackURL)) as? [String: String])
-        XCTAssertEqual(ack["id"], id)
-        XCTAssertEqual(ack["action"], action)
     }
 
     private func launchFixture(_ screen: String, locale: String = "en_US") -> XCUIApplication {
@@ -298,11 +312,25 @@ final class InputAcceptanceTests: XCTestCase {
 
     private func replaceText(in field: XCUIElement, with text: String) {
         field.tap()
+        let app = XCUIApplication()
+        let scroll = app.scrollViews.firstMatch
+        let save = app.buttons["保存设置"]
+        for _ in 0..<6 {
+            let frame = field.frame
+            let top = scroll.frame.minY + 16
+            let bottom = min(scroll.frame.maxY, save.frame.minY) - 16
+            if field.isHittable && frame.minY >= top && frame.maxY <= bottom { break }
+            if frame.minY < top { scroll.swipeDown() } else { scroll.swipeUp() }
+        }
+        XCTAssertTrue(field.isHittable)
+        XCTAssertGreaterThanOrEqual(field.frame.minY, scroll.frame.minY)
+        XCTAssertLessThanOrEqual(field.frame.maxY, save.frame.minY, "Do not edit through the save footer")
         if let value = field.value as? String, !value.isEmpty {
             let middle = field.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             let end = field.coordinate(withNormalizedOffset: .zero)
                 .withOffset(CGVector(dx: field.frame.width + 24, dy: field.frame.height / 2))
             middle.press(forDuration: 0.6, thenDragTo: end)
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
             field.typeText("7")
             XCTAssertEqual(field.value as? String, value + "7", "Move the caret to the end before clearing")
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count + 1))
@@ -316,13 +344,5 @@ final class InputAcceptanceTests: XCTestCase {
         field.typeText(text)
     }
 
-    private func attachScreenshot(_ name: String) {
-        for (index, screen) in XCUIScreen.screens.enumerated() {
-            let screenshot = screen.screenshot()
-            let attachment = XCTAttachment(screenshot: screenshot)
-            attachment.name = "\(name)-display\(index)-\(Int(screenshot.image.size.width))x\(Int(screenshot.image.size.height))"
-            attachment.lifetime = .keepAlways
-            add(attachment)
-        }
-    }
+
 }

@@ -1,0 +1,10 @@
+{
+  "result": "TEST BUILD SUCCEEDED",
+  "swiftNumThreads": [
+    "1"
+  ],
+  "swiftJobs": [
+    "1"
+  ],
+  "log": "unit-build.log"
+}

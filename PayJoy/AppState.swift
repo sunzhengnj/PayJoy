@@ -423,10 +423,14 @@ final class AppState {
         isFocusPresented = true
     }
 
+    private var focusInteractionDate: Date {
+        Self.isScreenshotMode ? now : Date()
+    }
+
     @discardableResult
     func startFocus(minutes: Int, endsAtWork: Bool = false) -> Bool {
         guard focusData.active == nil, FocusSession.durationMinuteRange.contains(minutes) else { return false }
-        let start = Date()
+        let start = focusInteractionDate
         now = start
         guard !endsAtWork || focusToOffWorkDuration != nil else { return false }
         let duration = endsAtWork ? focusToOffWorkDuration! : TimeInterval(minutes * 60)
@@ -445,7 +449,7 @@ final class AppState {
 
     func pauseFocus() {
         guard var session = focusData.active else { return }
-        now = Date()
+        now = focusInteractionDate
         if session.remaining(at: now) <= 0 {
             reconcileFocusSession()
             return
@@ -458,7 +462,7 @@ final class AppState {
 
     func resumeFocus() {
         guard var session = focusData.active, session.isPaused else { return }
-        now = Date()
+        now = focusInteractionDate
         if session.endsAtWork && now >= session.endDate {
             reconcileFocusSession()
             return
@@ -471,7 +475,7 @@ final class AppState {
 
     func endFocus() {
         guard let session = focusData.active else { return }
-        now = Date()
+        now = focusInteractionDate
         finishFocus(completed: !session.isPaused && session.remaining(at: now) <= 0)
     }
 
@@ -1353,28 +1357,35 @@ final class AppState {
 
     private static var screenshotNow: Date {
         let calendarScreen = screenshotScreen == "calendar"
-        let afterMidnightScreen = screenshotScreen == "home-after-midnight"
-        let restDayScreen = screenshotScreen == "home-rest-day"
+        let afterMidnightScreen = screenshotScreen == "home-after-midnight" || screenshotScreen == "desk-overtime-midnight"
+        let restDayScreen = screenshotScreen == "home-rest-day" || screenshotScreen == "desk-rest-day"
         let weeklyEchoScreen = screenshotScreen == "weekly-echo"
         var components = DateComponents()
         components.calendar = Calendar(identifier: .gregorian)
         components.timeZone = TimeZone(identifier: "Asia/Shanghai")
         components.year = 2026
         components.month = calendarScreen ? 7 : 6
-        components.day = calendarScreen ? 14 : (restDayScreen ? 7 : (weeklyEchoScreen ? 5 : 3))
-        components.hour = afterMidnightScreen ? 0 : (weeklyEchoScreen ? 19 : 15)
-        components.minute = afterMidnightScreen ? 18 : 24
+        components.day = screenshotScreen == "desk-overtime-midnight" ? 4
+            : calendarScreen ? 14 : (restDayScreen ? 7 : (weeklyEchoScreen ? 5 : 3))
+        switch screenshotScreen {
+        case "desk-lunch": components.hour = 12; components.minute = 30
+        case "desk-before-work": components.hour = 8; components.minute = 0
+        case "desk-after-work": components.hour = 19; components.minute = 0
+        default:
+            components.hour = afterMidnightScreen ? 0 : (weeklyEchoScreen ? 19 : 15)
+            components.minute = afterMidnightScreen ? 18 : 24
+        }
         return components.date ?? Date()
     }
 
     private static var screenshotSettings: SalarySettings {
-        return SalarySettings(
+        var settings = SalarySettings(
             salaryType: .monthly,
             salaryAmount: 18_000,
             currencySymbol: "¥",
             workStart: WorkTime(hour: 9, minute: 30),
             workEnd: WorkTime(hour: 18, minute: 30),
-            deductLunch: false,
+            deductLunch: screenshotScreen == "desk-lunch",
             lunchStart: .defaultLunchStart,
             lunchEnd: .defaultLunchEnd,
             monthlyPaidDays: 21.75,
@@ -1384,6 +1395,8 @@ final class AppState {
                 screenshotScreen == "actual-salary" ||
                 screenshotScreen == "stats-actual-salary" ? 3 : nil
         )
+        if screenshotScreen == "desk-no-next-work" { settings.workdays = [] }
+        return settings
     }
 
     private static var screenshotProfile: UserProfile {
@@ -1445,9 +1458,15 @@ final class AppState {
             ]
         }
 
+        if screenshotScreen == "desk-overtime-midnight" {
+            let start = date(dayOffset: -1, hour: 22, minute: 45)
+            return [OvertimeRecord(startAt: start, endAt: nil, createdAt: start)]
+        }
+
         if screenshotScreen == "home-after-midnight" || screenshotScreen == "home-rest-day"
             || screenshotScreen == "weekly-echo" || screenshotScreen == "featured-home"
             || screenshotScreen == "featured-focus-tab"
+            || screenshotScreen.hasPrefix("desk-")
             || screenshotScreen.hasPrefix("focus-") {
             return []
         }
@@ -1460,6 +1479,7 @@ final class AppState {
     }
 
     private static var screenshotSalaryDayRecords: [SalaryDayRecord] {
+        if screenshotScreen == "desk-no-next-work" { return [] }
         let calendar = Calendar(identifier: .gregorian)
         let settings = screenshotSettings
         let calculator = SalaryCalculator(calendar: calendar)
@@ -1622,6 +1642,13 @@ final class AppState {
         return engagementState.capsules.first { $0.dateKey == dateKey }
     }
 
+    var closingReceiptEarnedAmount: Double {
+        let date = pendingCrossMidnightClosingReceiptDate ?? now
+        return calculator.dateKey(for: date) == todayDateKey
+            ? snapshot.todayEarned
+            : salaryCalendarDay(for: date).earnedAmount
+    }
+
     var visibleClosingReceipts: [ClosingCapsule] {
         let sorted = engagementState.capsules.sorted { $0.createdAt > $1.createdAt }
         return hasEffectivePro ? sorted : Array(sorted.prefix(7))
@@ -1737,9 +1764,7 @@ final class AppState {
         }
 
         let isCurrentDay = dateKey == todayDateKey
-        let earnedAmount = isCurrentDay
-            ? snapshot.todayEarned
-            : salaryCalendarDay(for: receiptDate).earnedAmount
+        let earnedAmount = closingReceiptEarnedAmount
         let workProgress = isCurrentDay ? min(1, max(0, snapshot.progress)) : 1
 
         let seed = dateKey.unicodeScalars.reduce(0) { $0 + Int($1.value) }
@@ -1926,7 +1951,7 @@ final class AppState {
         }
         preparePaydayCelebrationIfNeeded()
         if focusData.active != nil {
-            now = Date()
+            now = focusInteractionDate
             reconcileFocusSession()
             updateLiveActivityIfNeeded()
         }

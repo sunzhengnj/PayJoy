@@ -1,0 +1,32 @@
+[
+  {
+    "log": "unit-final-build.log",
+    "testBuildSucceeded": true,
+    "swiftNumThreads": [
+      "1"
+    ],
+    "swiftJobs": [
+      "1"
+    ]
+  },
+  {
+    "log": "normal-final-build.log",
+    "testBuildSucceeded": true,
+    "swiftNumThreads": [
+      "1"
+    ],
+    "swiftJobs": [
+      "1"
+    ]
+  },
+  {
+    "log": "keyboard-red-build.log",
+    "testBuildSucceeded": true,
+    "swiftNumThreads": [
+      "1"
+    ],
+    "swiftJobs": [
+      "1"
+    ]
+  }
+]

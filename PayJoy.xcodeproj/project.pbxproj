@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F02400000000000000000001 /* DeskClockAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02400000000000000000002 /* DeskClockAcceptanceTests.swift */; };
+		F02400000000000000000003 /* DuoAcceptanceSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02400000000000000000004 /* DuoAcceptanceSupport.swift */; };
 		000000000000000000000101 /* PayJoyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000201 /* PayJoyApp.swift */; };
 		000000000000000000000102 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000202 /* AppState.swift */; };
 		000000000000000000000103 /* SalaryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000203 /* SalaryModels.swift */; };
@@ -134,6 +136,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F02400000000000000000002 /* DeskClockAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskClockAcceptanceTests.swift; sourceTree = "<group>"; };
+		F02400000000000000000004 /* DuoAcceptanceSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoAcceptanceSupport.swift; sourceTree = "<group>"; };
 		000000000000000000000201 /* PayJoyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayJoyApp.swift; sourceTree = "<group>"; };
 		000000000000000000000202 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		000000000000000000000203 /* SalaryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryModels.swift; sourceTree = "<group>"; };
@@ -443,6 +447,8 @@
 			isa = PBXGroup;
 			children = (
 				F02300000000000000000002 /* InputAcceptanceTests.swift */,
+				F02400000000000000000002 /* DeskClockAcceptanceTests.swift */,
+				F02400000000000000000004 /* DuoAcceptanceSupport.swift */,
 			);
 			path = PayJoyUITests;
 			sourceTree = "<group>";
@@ -769,6 +775,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F02300000000000000000001 /* InputAcceptanceTests.swift in Sources */,
+				F02400000000000000000001 /* DeskClockAcceptanceTests.swift in Sources */,
+				F02400000000000000000003 /* DuoAcceptanceSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

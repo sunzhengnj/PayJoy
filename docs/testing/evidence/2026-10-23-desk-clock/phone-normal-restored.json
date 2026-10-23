@@ -1,0 +1,10 @@
+{
+  "simulatorShutdown": true,
+  "restoredKeys": [
+    "payjoy.salary.settings",
+    "payjoy.salary.day.records"
+  ],
+  "allPayJoyKeysMatchBefore": true,
+  "keysCompared": 14,
+  "runtimeIsolationAccepted": false
+}

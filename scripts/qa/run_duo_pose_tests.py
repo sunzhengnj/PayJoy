@@ -39,14 +39,45 @@ with log_path.open("w") as output:
                 request = json.loads(request_path.read_text())
                 if request["action"] not in actions or request["ack"] != str(request_path) + ".ack":
                     raise ValueError("Invalid pose request")
+                layout_path = None
+                previous_axis = None
+                if request.get("readsLayout"):
+                    container = subprocess.run(["xcrun", "simctl", "get_app_container", request["udid"], "app.payjoy.kaixin", "data"], check=True, capture_output=True, text=True, timeout=5)
+                    layout_path = Path(container.stdout.strip()) / "tmp/payjoy-desk-layout.json"
+                    if layout_path.exists():
+                        previous_axis = json.loads(layout_path.read_text())["axis"]
+                action_started = time.time()
                 result = subprocess.run([str(args.control), request["action"], str(args.device_hub_pid)], check=True, capture_output=True, text=True)
                 control = json.loads(result.stdout)
                 time.sleep(3)
+                layout = None
+                if layout_path:
+                    deadline = time.monotonic() + 12
+                    stable_since = time.monotonic()
+                    signature = None
+                    while time.monotonic() < deadline:
+                        if layout_path.exists():
+                            candidate = json.loads(layout_path.read_text())
+                            valid = candidate["updatedAt"] >= action_started and candidate["axis"] in {"horizontal", "vertical"}
+                            if request["action"] == "Rotate Right":
+                                valid = valid and candidate["axis"] != previous_axis
+                            current = candidate["gate"] if valid else None
+                            if current != signature:
+                                signature, stable_since = current, time.monotonic()
+                            if valid and time.monotonic() - stable_since >= 0.8:
+                                layout = candidate
+                                break
+                        time.sleep(0.1)
+                    if layout is None:
+                        raise RuntimeError("No fresh, stable division geometry from the Debug app")
                 screenshot = args.output / f"pose-{len(seen):02d}-{request['action'].replace(' ', '-')}.png"
                 subprocess.run(["screencapture", "-x", "-o", f"-l{control['windowID']}", str(screenshot)], check=True)
                 with events.open("a") as ledger:
-                    ledger.write(json.dumps({**request, "time": time.time(), "windowID": control["windowID"], "screenshot": str(screenshot)}) + "\n")
-                Path(request["ack"]).write_text(json.dumps({"id": request["id"], "action": request["action"]}))
+                    ledger.write(json.dumps({**request, "time": time.time(), "windowID": control["windowID"], "screenshot": str(screenshot), "layout": layout}) + "\n")
+                ack = {"id": request["id"], "action": request["action"]}
+                if layout:
+                    ack["axis"] = layout["axis"]
+                Path(request["ack"]).write_text(json.dumps(ack))
             time.sleep(0.1)
     except BaseException:
         process.terminate()

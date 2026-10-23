@@ -42,6 +42,17 @@ struct SettingsStore {
         self.sharedDefaults = sharedDefaults
     }
 
+#if DEBUG
+    static let screenshotFixtureDomain = "app.payjoy.kaixin.screenshot-fixture"
+
+    static func screenshotFixture() -> SettingsStore {
+        let domain = screenshotFixtureDomain
+        let defaults = UserDefaults(suiteName: domain)!
+        defaults.removePersistentDomain(forName: domain)
+        return SettingsStore(defaults: defaults, sharedDefaults: nil)
+    }
+#endif
+
     func load() -> SalarySettings {
         if let data = defaults.data(forKey: salaryKey),
            let settings = try? JSONDecoder().decode(SalarySettings.self, from: data) {

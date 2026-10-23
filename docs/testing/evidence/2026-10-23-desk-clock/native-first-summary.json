@@ -1,0 +1,63 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+        "deviceName" : "PayJoy Verified Duo",
+        "modelName" : "iPhone",
+        "osBuildNumber" : "24A94425",
+        "osVersion" : "27.1",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 2,
+      "passedTests" : 3,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PayJoyPoseUITests · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 2,
+  "finishTime" : 1792750905.815,
+  "passedTests" : 3,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Invalid frame dimension (negative or non-finite)."
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792750562.186,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "PayJoyUITests",
+      "testIdentifier" : 3,
+      "testIdentifierString" : "DeskClockAcceptanceTests/testEarlyCloseConfirmationAndReceiptBlockAutomaticEntry()",
+      "testIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/DeskClockAcceptanceTests/testEarlyCloseConfirmationAndReceiptBlockAutomaticEntry",
+      "testName" : "testEarlyCloseConfirmationAndReceiptBlockAutomaticEntry()"
+    },
+    {
+      "failureText" : "XCTAssertTrue failed - Attributes: Application, 0x10abae6c0, pid: 61668, label: '开薪'\nElement subtree:\n →Application, 0x10abae6c0, pid: 61668, label: '开薪'\n    Window, 0x10abae800, {{0.0, 0.0}, {669.0, 951.0}}\n      Other, 0x10abae940, {{0.0, 0.0}, {669.0, 951.0}}\n      Other, 0x10abaea80, {{0.0, 0.0}, {669.0, 951.0}}\n        Other, 0x10abaebc0, {{0.0, 0.0}, {669.0, 951.0}}\n          Other, 0x10abaed00, {{0.0, 0.0}, {669.0, 951.0}}\n            Other, 0x10abaee40, {{0.0, 0.0}, {669.0, 951.0}}\n              Other, 0x10abaef80, {{0.0, 0.0}, {669.0, 951.0}}\n                Other, 0x10abaf0c0, {{0.0, 0.0}, {669.0, 951.0}}\n                  Other, 0x10abaf200, {{0.0, 0.0}, {669.0, 951.0}}\n                    Other, 0x10abaf340, {{0.0, 0.0}, {669.0, 951.0}}\n                      Other, 0x10abaf480, {{0.0, 0.0}, {669.0, 951.0}}\n                        Other, 0x10abaf5c0, {{0.0, 0.0}, {669.0, 951.0}}\n                          Other, 0x10abaf700, {{0.0, 0.0}, {669.0, 951.0}}\n                            Other, 0x10abaf840, {{0.0, 0.0}, {669.0, 951.0}}\n                              Other, 0x10abaf980, {{0.0, 0.0}, {669.0, 951.0}}\n                                Other, 0x10abafac0, {{0.0, 0.0}, {669.0, 951.0}}\n                                  Other, 0x10abafc00, {{0.0, 0.0}, {669.0, 951.0}}\n                                    ScrollView, 0x10abafd40, {{0.0, 507.7}, {669.0, 443.3}}\n                                      Other, 0x10abafe80, {{0.0, 507.7}, {669.0, 1025.3}}\n                            Toolbar, 0x10a9c4000, {{0.0, 0.0}, {669.0, 951.0}}, identifier: 'Toolbar', label: '工具栏'\n                              Other, 0x10a9c4140, {{0.0, 0.0}, {0.0, 0.0}}\n                              Other, 0x10a9c4280, {{0.0, 0.0}, {669.0, 951.0}}\n                          Button, 0x10a9c43c0, {{16.0, 82.0}, {44.0, 44.0}}, identifier: 'chevron.down', label: '返回'\n                          Button, 0x10a9c4500, {{609.0, 82.0}, {44.0, 44.0}}, identifier: 'moon', label: '切换为黑底'\n                          StaticText, 0x10a9c4640, {{310.7, 203.4}, {47.7, 19.3}}, label: '距下班'\n                          StaticText, 0x10a9c4780, {{80.0, 230.3}, {509.0, 137.0}}, label: '距下班', value: 03:06:00\n                          ScrollView, 0x10a9c48c0, {{0.0, 495.7}, {669.0, 455.3}}\n                            Other, 0x10a9c4a00, {{0.0, 495.7}, {669.0, 421.7}}\n                              Button, 0x10a9c4b40, {{119.7, 660.3}, {430.0, 54.0}}, label: '开始专注 · 25 分钟'\n                              Switch, 0x10a9c4c80, {{204.5, 724.3}, {260.2, 28.0}}, label: '屏幕常亮', value: 0\n                                StaticText, 0x10a9c4dc0, {{204.5, 730.6}, {51.7, 15.7}}, label: '屏幕常亮'\n                                Switch, 0x10a9c4f00, {{403.7, 724.3}, {63.0, 28.0}}, value: 0\n                            Other, 0x10a9c5040, {{636.0, 495.7}, {30.0, 400.3}}, label: '垂直滚动条, 2页', value: 0%\n                              Other, 0x10a9c5180, {{663.0, 498.7}, {3.0, 394.0}}\n                            Other, 0x10a9c52c0, {{636.0, 495.7}, {30.0, 400.3}}, label: '垂直滚动条, 2页', value: 0%\n                              Other, 0x10a9c5400, {{663.0, 498.7}, {3.0, 394.0}}\n                Other, 0x10a9c5540, {{0.0, 0.0}, {669.0, 951.0}}\n                  Other, 0x10a9c5680, {{0.0, 868.0}, {669.0, 83.0}}\n                    Other, 0x10a9c57c0, {{0.0, 0.0}, {669.0, 951.0}}\n                    Other, 0x10a9c5900, {{0.0, 868.0}, {669.0, 83.0}}\n              Other, 0x10a9c5a40, {{0.0, 82.0}, {669.0, 835.0}}\n              Other, 0x10a9c5b80, {{0.0, 82.0}, {669.0, 835.0}}\nPath to element:\n →Application, 0x10abae6c0, pid: 61668, label: '开薪'\nQuery chain:\n →Find: Target Application 'app.payjoy.kaixin'\n  Output: {\n    Application, 0x10a9c5cc0, pid: 61668, label: '开薪'\n  }\n",
+      "targetName" : "PayJoyUITests",
+      "testIdentifier" : 5,
+      "testIdentifierString" : "DeskClockAcceptanceTests/testWorkStateClocksAndActions()",
+      "testIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/DeskClockAcceptanceTests/testWorkStateClocksAndActions",
+      "testName" : "testWorkStateClocksAndActions()"
+    }
+  ],
+  "title" : "Test - PayJoyPoseUITests",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 5
+}

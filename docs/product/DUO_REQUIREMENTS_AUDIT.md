@@ -29,7 +29,7 @@
 
 | 条目 | 实际实现与本轮结论 | 仍需设备确认 |
 |---|---|---|
-| Duo 系统 TabView、普通 iPhone 漫画底栏、复用 AppTab | AppRootView 用 hasDuoHinge latch 选择导航壳；保留原普通手机壳 | I01、D01；首次识别时机仍需看启动过程 |
+| Duo 系统 TabView、普通 iPhone 漫画底栏、复用 AppTab | AppRootView 在初始化后保持同一个TabView；hasDuoHinge只控制系统栏可见性，普通iPhone保留漫画底栏 | 当前Duo六项桌面测试与正常模式冷重开通过；全导航／普通手机完整流程仍见I01、D01 |
 | 系统铰链识别，同 scene 开合不反复换壳 | WindowSceneReader 使用 UIHingeInteraction；可用性一旦为 true 不因闭合／离开层级置回 false。SDK 头文件说明 handler 接收初始状态 | D01；冷启动展开／合上／桌面三种姿态 |
 | 尺寸、安全区、分区、遮挡统一布局上下文 | AdaptiveLayoutContext 从每个页面自己的 GeometryProxy 读取；不按设备型号或屏幕分辨率分支，不重复减 Geometry 已排除的安全区 | D02、D14 |
 | ArrangementView 与 reservedRegions，滚动容器外布局 | 双列使用 ArrangementView 包裹两个 ScrollView；Desk 按 reservedRegions 直接分配上下视区，滚动只在操作区。参见下方实现取舍 | D02、D16 |
@@ -77,3 +77,5 @@
 最新2.0.0(11)完整139项iOS XCTest通过。新增真实会话证明“距下班”可以与专注同时运行；三次暂停开合余量保持、自然完成及结果重启均只一条记录。实际常亮值与五语言标签画面、测试夹具修订分别记录在[本轮证据](../testing/evidence/2026-10-23-duo-focus-review/README.md)。未复现必须旋转才能恢复的持续黑屏，但原固定下班截止路径、性能与完整兼容矩阵仍未关闭。
 
 输入连续性新增[原生形态与持久化证据](../testing/evidence/2026-10-23-pose-input/README.md)：专注／薪资草稿在内外屏及两种半折叠姿态保留原文和光标；正常模式全角薪资经过开合、保存、进程重启后数值正确并恢复原设置。该组7项UI同轮成功、受影响专项重跑成功，不能写成一次8/8；完整软件输入法、多语言／主题与剩余页面仍需逐项实测。
+
+本轮已取得当前修订的141项iOS单测、六项桌面钟、两项视图偏好隔离及正常模式冷重开结果；每项失败、复跑与边界见[桌面钟验收记录](../testing/evidence/2026-10-23-desk-clock/README.md)。这组固定时间场景不替代完整Goal的真实计时、全部页面、性能及设备验收。

@@ -1,0 +1,50 @@
+[
+  {
+    "file": "PayJoy.xcodeproj/project.pbxproj",
+    "sha256": "a0195b578e44c41296516902d4ec2629d137b814ec428f08dad3eeebadf6e75a"
+  },
+  {
+    "file": "PayJoy/AppState.swift",
+    "sha256": "08fc86fe68234ec3cff0287678e7646f1258e40f38dcde22e55c7a5338ba446a"
+  },
+  {
+    "file": "PayJoy/PayJoyApp.swift",
+    "sha256": "923e815f9a8f7e65c91c0b75344df7c25b9d21150cd83628b6fb9c921c96903d"
+  },
+  {
+    "file": "PayJoy/Services/SettingsStore.swift",
+    "sha256": "e3844090207f4205187c7ab9b3123b8e783c3e059fb2f89f159e249b0ccd974e"
+  },
+  {
+    "file": "PayJoy/Views/AppRootView.swift",
+    "sha256": "2fd38f71c9e8af44ab51b4d53f754c968aa81583a9d459d989a91c009594209b"
+  },
+  {
+    "file": "PayJoy/Views/HomeView.swift",
+    "sha256": "9a0916db148b98e60e8f1263125a4cd80b00bff8e93f65b3c63f29f83215a086"
+  },
+  {
+    "file": "PayJoy/Views/SalarySettingsView.swift",
+    "sha256": "088436211625ab51f96472063eba8c72239423378135ae14ded02cd635d8edeb"
+  },
+  {
+    "file": "PayJoyTests/SalaryCalculatorTests.swift",
+    "sha256": "0ec3fcdbd9c8b3524b1f2ac1bcfc100cd70669a1333c5ee422ef91974e6a20f2"
+  },
+  {
+    "file": "PayJoyUITests/InputAcceptanceTests.swift",
+    "sha256": "a1e2a963134be27b65cda51b06697c3d4b656c1b1026d457d64159c9809ed924"
+  },
+  {
+    "file": "PayJoyUITests/DeskClockAcceptanceTests.swift",
+    "sha256": "01423bb41acb6661236e747bf96ab27635375d5c5067feb100aecae0c4a83702"
+  },
+  {
+    "file": "PayJoyUITests/DuoAcceptanceSupport.swift",
+    "sha256": "2791f412d55242bf88ca55685279940666b1dfc108cad8938ef6ed58a329642c"
+  },
+  {
+    "file": "scripts/qa/run_duo_pose_tests.py",
+    "sha256": "500b2915707aea821d47a9d7688a690172070d934ef487b7743077b979fc9c68"
+  }
+]

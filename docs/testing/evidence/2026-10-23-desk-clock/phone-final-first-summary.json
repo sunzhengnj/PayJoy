@@ -1,0 +1,55 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "0A9D47BA-14F0-49B4-B0A7-CDE5A28DD72A",
+        "deviceName" : "PayJoy Review iPhone",
+        "modelName" : "iPhone 17e",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 4,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PayJoyPoseUITests · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792760117.248,
+  "passedTests" : 4,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Invalid frame dimension (negative or non-finite)."
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792760021.78,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "Failed to get matching snapshot: No matches found for Descendants matching type TextField from input {(\n    Application, pid: 31606, label: 'ClockJoy'\n)}",
+      "targetName" : "PayJoyUITests",
+      "testIdentifier" : 3,
+      "testIdentifierString" : "InputAcceptanceTests/testFullWidthSalaryDecimalsFollowTheRegion()",
+      "testIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testFullWidthSalaryDecimalsFollowTheRegion",
+      "testName" : "testFullWidthSalaryDecimalsFollowTheRegion()"
+    }
+  ],
+  "title" : "Test - PayJoyPoseUITests",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 5
+}

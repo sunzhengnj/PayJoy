@@ -12,6 +12,43 @@ final class SalaryCalculatorTests: XCTestCase {
         calculator = SalaryCalculator(calendar: calendar)
     }
 
+#if DEBUG
+    func testScreenshotFixtureStoreDoesNotWriteNormalDomainsAndStartsFresh() {
+        let keys = ["payjoy.salary.settings", "payjoy.overtime.records", "payjoy.early.leave.days",
+                    "payjoy.focus.keepScreenAwake", "payjoy.boss.key.didShowExitGuide"]
+        let ordinary = UserDefaults.standard
+        let shared = UserDefaults(suiteName: AppConstants.appGroupIdentifier)
+        let ordinaryBefore = keys.map { ordinary.object(forKey: $0) as? NSObject }
+        let sharedBefore = keys.map { shared?.object(forKey: $0) as? NSObject }
+        let analyticsKey = "payjoy.analytics.aggregate.mainlandChina.closingReceiptOpened"
+        let analyticsBefore = ordinary.integer(forKey: analyticsKey)
+        let fixture = SettingsStore.screenshotFixture()
+        let fixtureDefaults = UserDefaults(suiteName: SettingsStore.screenshotFixtureDomain)!
+        LocalEngagementAnalytics(defaults: fixtureDefaults).record(.closingReceiptOpened, market: .mainlandChina)
+        fixtureDefaults.set(true, forKey: "payjoy.focus.keepScreenAwake")
+        fixtureDefaults.set(true, forKey: "payjoy.boss.key.didShowExitGuide")
+        var settings = SalarySettings.defaultValue
+        settings.salaryAmount = 43210.12
+        fixture.save(settings)
+        fixture.saveEarlyLeaveDays(["2026-06-03"])
+        fixture.saveOvertimeRecords([OvertimeRecord(startAt: Date(timeIntervalSince1970: 1000), endAt: nil)])
+        XCTAssertEqual(fixture.load().salaryAmount, 43210.12)
+        XCTAssertEqual(fixture.loadEarlyLeaveDays(), ["2026-06-03"])
+        XCTAssertEqual(fixture.loadOvertimeRecords().count, 1)
+        XCTAssertEqual(keys.map { ordinary.object(forKey: $0) as? NSObject }, ordinaryBefore)
+        XCTAssertEqual(keys.map { shared?.object(forKey: $0) as? NSObject }, sharedBefore)
+        XCTAssertEqual(ordinary.integer(forKey: analyticsKey), analyticsBefore)
+        XCTAssertEqual(fixtureDefaults.integer(forKey: analyticsKey), 1)
+        let fresh = SettingsStore.screenshotFixture()
+        XCTAssertEqual(fixtureDefaults.integer(forKey: analyticsKey), 0)
+        XCTAssertFalse(fixtureDefaults.bool(forKey: "payjoy.focus.keepScreenAwake"))
+        XCTAssertFalse(fixtureDefaults.bool(forKey: "payjoy.boss.key.didShowExitGuide"))
+        XCTAssertTrue(fresh.loadEarlyLeaveDays().isEmpty)
+        XCTAssertTrue(fresh.loadOvertimeRecords().isEmpty)
+        XCTAssertEqual(fresh.load().salaryAmount, SalarySettings.defaultValue.salaryAmount)
+    }
+#endif
+
     func testSalaryModesCalculateDailyIncome() {
         var settings = SalarySettings.defaultValue
 
@@ -1678,6 +1715,28 @@ final class SalaryCalculatorTests: XCTestCase {
         XCTAssertFalse(state.canOpenClosingReceipt)
         state.stopActiveOvertime()
         XCTAssertTrue(state.canOpenClosingReceipt)
+    }
+
+    @MainActor
+    func testCrossMidnightReceiptPreviewAndSavedAmountUseTheSameWorkday() {
+        let suiteName = "PayJoyTests.ReceiptPreview.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = SettingsStore(defaults: defaults, sharedDefaults: nil)
+        var settings = SalarySettings.defaultValue
+        settings.salaryAmount = 18_000
+        store.save(settings)
+        let state = AppState(store: store, now: date("2026-06-03 22:45:00"))
+        XCTAssertEqual(state.closingReceiptEarnedAmount, state.snapshot.todayEarned)
+        state.startOvertime(at: state.now)
+        state.now = date("2026-06-04 00:18:00")
+        state.stopActiveOvertime()
+        XCTAssertEqual(state.snapshot.todayEarned, 0)
+        let preview = state.closingReceiptEarnedAmount
+        XCTAssertEqual(preview, 18_000.0 / 22, accuracy: 0.001)
+        let receipt = state.completeClosingCapsule()
+        XCTAssertEqual(receipt.dateKey, "2026-06-03")
+        XCTAssertEqual(receipt.earnedAmount, preview, accuracy: 0.001)
     }
 
     @MainActor

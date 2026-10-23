@@ -1,0 +1,8 @@
+{
+  "PayJoy/Views/AppRootView.swift": "2fd38f71c9e8af44ab51b4d53f754c968aa81583a9d459d989a91c009594209b",
+  "PayJoy/PayJoyApp.swift": "9cc064c8a1f49f0d76577e60df70f8dd0d1007941f093334ad367c413c28a433",
+  "PayJoy/Services/SettingsStore.swift": "a34f8edacfa06fbdbc6510776a6262ee7b2447013bf8c24f2efa3a96bbf8ad44",
+  "PayJoy/AppState.swift": "3789bbb100a31155c4f68643ea93947e5505d7beccf312e2c02484cb6b21f8bd",
+  "PayJoy/Views/HomeView.swift": "9a0916db148b98e60e8f1263125a4cd80b00bff8e93f65b3c63f29f83215a086",
+  "PayJoyUITests/DeskClockAcceptanceTests.swift": "71b3bdebdc82aa4fab271ad7033f0e834b60e4d498be0f7d9a08573ba6afd5c3"
+}
