@@ -156,6 +156,48 @@ final class InputAcceptanceTests: XCTestCase {
         app.terminate()
     }
 
+    func testCalendarSelectionAndNavigationSurviveHingeChanges() throws {
+        try requirePoseHost()
+        let app = launchFixture("root")
+        try requestPose("Open")
+        app.buttons["统计"].tap()
+        let calendar = app.buttons["打开工资日历"]
+        XCTAssertTrue(calendar.waitForExistence(timeout: 10))
+        for _ in 0..<5 {
+            if calendar.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(calendar.isHittable)
+        calendar.tap()
+        let day = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "6月15日")).firstMatch
+        XCTAssertTrue(day.waitForExistence(timeout: 10))
+        for _ in 0..<5 {
+            if day.isHittable { break }
+            app.scrollViews.firstMatch.swipeUp()
+        }
+        XCTAssertTrue(day.isHittable)
+        day.tap()
+        let selectedDetail = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "6月15日")).firstMatch
+        XCTAssertTrue(selectedDetail.waitForExistence(timeout: 5))
+        for (index, action) in ["Partially Open", "Rotate Right", "Open", "Closed", "Open"].enumerated() {
+            try requestPose(action)
+            XCTAssertTrue(app.staticTexts["工资日历"].exists, "Keep the pushed calendar page after \(action)")
+            XCTAssertTrue(selectedDetail.exists, "Keep the selected date after \(action)")
+            XCTAssertFalse(app.buttons["退出桌面钟"].exists)
+            attachScreenshot("calendar-selected-day-\(index)-\(action)")
+        }
+        let back = app.buttons["返回"].firstMatch
+        for _ in 0..<5 {
+            if back.isHittable { break }
+            app.scrollViews.firstMatch.swipeDown()
+        }
+        XCTAssertTrue(back.isHittable)
+        back.tap()
+        XCTAssertTrue(calendar.waitForExistence(timeout: 5), "Return to the statistics navigation stack")
+        XCTAssertTrue(app.buttons["我的"].exists)
+        app.terminate()
+    }
+
     func testFocusDraftAndInsertionPointAcrossHingeChanges() throws {
         try requirePoseHost()
         try requestPose("Open")
@@ -320,7 +362,16 @@ final class InputAcceptanceTests: XCTestCase {
             let top = scroll.frame.minY + 16
             let bottom = min(scroll.frame.maxY, save.frame.minY) - 16
             if field.isHittable && frame.minY >= top && frame.maxY <= bottom { break }
-            if frame.minY < top { scroll.swipeDown() } else { scroll.swipeUp() }
+            let visibleTop = max(top, app.navigationBars.firstMatch.frame.maxY + 16)
+            let upper = scroll.coordinate(withNormalizedOffset: .zero)
+                .withOffset(CGVector(dx: scroll.frame.width / 2, dy: visibleTop + 24 - scroll.frame.minY))
+            let lower = scroll.coordinate(withNormalizedOffset: .zero)
+                .withOffset(CGVector(dx: scroll.frame.width / 2, dy: bottom - 24 - scroll.frame.minY))
+            if frame.minY < visibleTop {
+                upper.press(forDuration: 0.05, thenDragTo: lower)
+            } else {
+                lower.press(forDuration: 0.05, thenDragTo: upper)
+            }
         }
         XCTAssertTrue(field.isHittable)
         XCTAssertGreaterThanOrEqual(field.frame.minY, scroll.frame.minY)

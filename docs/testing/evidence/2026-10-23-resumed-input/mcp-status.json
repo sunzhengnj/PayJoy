@@ -1,0 +1,20 @@
+{
+  "package": "xcodebuildmcp",
+  "version": "2.7.0",
+  "installation": "/Users/sunzheng_mac/.codex/tools/xcodebuildmcp-2.7.0",
+  "codexServer": "XcodeBuildMCP",
+  "transport": "stdio",
+  "verified": [
+    "initialize",
+    "tools/list (24 tools)",
+    "list_sims (5 simulators)",
+    "Duo boot",
+    "Duo snapshot_ui",
+    "install_app_sim",
+    "launch_app_sim"
+  ],
+  "telemetryDisabled": true,
+  "rawVerification": "mcp-verification.txt",
+  "foldDriver": "cua_repl; native Device Hub buttons; atomic file acknowledgements",
+  "cliGestureLimitation": "One stats swipe reported success without a visible scroll change; not treated as interaction acceptance."
+}

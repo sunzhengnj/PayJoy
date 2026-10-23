@@ -1,0 +1,9 @@
+{
+  "branch": "2.0.0",
+  "base": "b996ed0",
+  "simulator": "0A9D47BA-14F0-49B4-B0A7-CDE5A28DD72A",
+  "normalKeys": 14,
+  "matchesPausedRestoration": true,
+  "ordinarySalaryAmount": 10000,
+  "rawSnapshot": "/tmp/payjoy-resumed-normal-before.json"
+}

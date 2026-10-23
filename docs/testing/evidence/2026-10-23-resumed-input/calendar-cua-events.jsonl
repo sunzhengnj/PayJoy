@@ -1,0 +1,6 @@
+{"id": "71C8DF57-8321-44F7-A1B4-FA4B4C28E8AD", "action": "Open", "driver": "cua_repl", "observed": "expanded PayJoy homepage; selected Duo device", "time": 1792767830.867201}
+{"id": "1DAC6995-A111-40A6-ADF8-8F5D75AD21F9", "action": "Partially Open", "driver": "cua_repl", "time": 1792767859.9945862}
+{"id": "4476D880-23C9-481C-9484-A78FDB0ECD00", "action": "Rotate Right", "driver": "cua_repl", "observed": "calendar detail remains 6\u670815\u65e5 \u5468\u4e00", "time": 1792767885.288832}
+{"id": "E95D18EE-8249-4B0C-8446-BA09E84EA6B3", "action": "Open", "driver": "cua_repl", "time": 1792767905.726242}
+{"id": "F4118617-2D5B-4FFE-9DFF-B58568B17A09", "action": "Closed", "driver": "cua_repl", "time": 1792767930.954174}
+{"id": "FFE9F825-3928-4572-BE38-66A4EC323F99", "action": "Open", "driver": "cua_repl", "observed": "June15 calendar cell still selected after reopen", "time": 1792767954.070233}

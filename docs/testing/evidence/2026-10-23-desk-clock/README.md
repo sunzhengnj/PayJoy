@@ -26,3 +26,7 @@ review-fixed-source-files.json记录Duo成功运行对应源码；pause-source-f
 运行`python3 docs/testing/evidence/2026-10-23-desk-clock/verify-results.py --checkpoint`仅核对已记录证据和暂停源码，不批准里程碑。默认完整验收门禁仍要求尚不存在的成功薪资专项等证据，暂不满足。
 
 测试机全部关闭，未删除设备或数据。Goal按用户要求暂停；收到继续指令后优先处理上述1、2项，再关闭本里程碑。
+
+## 后续恢复
+
+用户随后明确要求继续。新手机原生运行和原因修订见[恢复记录](../2026-10-23-resumed-input/README.md)：五项5/5，两个地区保存后高度恢复；仅修测试手势，未改产品保存逻辑。普通域14键前后相同，旧两键变化根因仍未确定。上文暂停是历史检查点，当前Goal继续。

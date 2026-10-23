@@ -12,7 +12,7 @@
 
 ## Current status
 
-Paused at the user's request on2026-10-23. Neither task is marked complete. Duo141 units,6 Desk cases,2 preference cases and2 normal-mode/profile cases passed. Ordinary-phone salary keyboard viewport and final fixture-store isolation remain open; the new height assertion is compiled but unexecuted. See docs/testing/evidence/2026-10-23-desk-clock/README.md.
+Active again after the user's explicit resume. Neither task is marked complete. Duo141 unit cases,6 Desk cases,2 preference cases and2 normal/profile cases are recorded passing on unchanged production source. New ordinary-phone5/5 and Duo calendar-continuity1/1 passed. The suspected keyboard-save defect was not reproduced;only the UI test gesture was corrected. Historical normal-store mutation and the remaining full Goal matrix stay open. See docs/testing/evidence/2026-10-23-resumed-input/README.md.
 
 ## Global Constraints
 
@@ -87,3 +87,7 @@ Paused at the user's request on2026-10-23. Neither task is marked complete. Duo1
 - Phone caret-helper RED reported no keyboard focus after dragging outside a short field. Return the tap explicitly inside the field at its right edge before typing the sentinel; retain the append assertion before clearing or saving. Normal-mode persistence is rerun on the ready Duo.
 
 - Pause checkpoint:normal-mode persistence and stronger profile gate passed2/2. Latest phone five-case run4/5; visibility-helper salary rerun still failed after saving. New viewport-height assertion compiled successfully but was not run before the user requested pause. No salary save implementation change. Final phone normal-domain comparison found two business keys changed; restored only these test-machine keys after shutdown, all14 keys now match baseline. Do not mark full fixture isolation accepted.
+
+- Resumed by explicit user instruction. No product keyboard fix:the new height predicate passed for Japanese;the next failure showed default test swipe landing on keyboard coordinates. Restricted test drag to the content between navigation and save footer. Five phone regressions5/5,normal14 keys byte-identical. Prior two-key mutation is not reproduced but remains unresolved historically. Installed and MCP-verifiedXcodeBuildMCP2.7.0 under user authorization.
+
+- Additional original-D07 acceptance:calendar date and navigation stack survive actualPartially Open/Rotate Right/Open/Closed/Open actions;native1/1 passed160.140s. Source product unchanged. Keep all-page scroll,privacy,performance and historical store anomaly open;this is incremental progress,not full-plan completion.
