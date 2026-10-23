@@ -4,6 +4,41 @@ Append one entry per weekday ship. Do not rewrite history; add new sections at t
 
 ---
 
+## 2026-10-23 — shift end reminder without timesheet EN+CN guides
+
+**Status:** shipped
+
+**Topics completed**
+
+1. Shift end reminder without timesheet (soft nudge vs attendance punch) → `/en/guides/shift-end-reminder-without-timesheet.html` + CN twin `/guides/shift-end-reminder-without-timesheet.html`
+
+**Also**
+
+- Updated `docs/en/guides/index.html` and `docs/guides/index.html` (new guide-card first; meta mentions shift end reminder)
+- Updated `docs/sitemap.xml` (both locale URLs + indexes lastmod 2026-10-23)
+- Mutual `hreflang` + 中文版 / English version links
+- Framed around always-visible countdown / Live Activity / widgets; optional clock-in/clock-out reminders mentioned only as described in `docs/privacy.html` (notification permission section)
+- Cross-links to clock-out-live-activity, dynamic-island-countdown, best-lock-screen-countdown-for-work, work-timer-vs-countdown, salary-progress-vs-timesheet, overtime-day-tracker-for-motivation, privacy-mode-lock-screen-earnings, dynamic-island-earnings-glance, workday-progress-bar
+- Social draft: `marketing/posts/2026-10-23-instagram-shift-end-reminder-without-timesheet.md` (Instagram carousel; EN-only)
+- No App Store Connect edits
+- No Xiaohongshu auto-post
+
+**Brand check:** new public copy uses ClockJoy (EN) / 开薪 (CN) only (PayJoy = repo path / GitHub Pages URL only). Product truth: Estimates ≠ paycheck / 估算≠工资条.
+
+**Pages deploy URLs (after GitHub Pages)**
+
+- https://sunzhengnj.github.io/PayJoy/en/guides/shift-end-reminder-without-timesheet.html
+- https://sunzhengnj.github.io/PayJoy/guides/shift-end-reminder-without-timesheet.html
+- https://sunzhengnj.github.io/PayJoy/en/guides/
+- https://sunzhengnj.github.io/PayJoy/guides/
+
+**Failures / follow-ups**
+
+- ASC live metadata: not touched.
+
+**Next queue items:** clock-out companion for office workers; iPhone Live Activity for hourly jobs; early clock-out day tracker.
+
+---
 ## 2026-10-19 — Dynamic Island earnings glance EN+CN guides
 
 **Status:** shipped
