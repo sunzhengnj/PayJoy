@@ -94,7 +94,6 @@ struct SalarySettingsView: View {
                     } else {
                         salaryTypePicker
                         amountCard
-                        if mode == .all { paydayCard }
                     }
                 }
                 .padding(.top, division.map {
@@ -103,7 +102,10 @@ struct SalarySettingsView: View {
                 .frame(width: leadingWidth)
 
                 VStack(alignment: .leading, spacing: 14) {
-                    if mode == .salary { paydayCard }
+                    if mode != .workTime {
+                        monthlyPaidDaysCard
+                        paydayCard
+                    }
                     if mode == .all {
                         workTimeCard
                         workdayCard
@@ -259,12 +261,8 @@ struct SalarySettingsView: View {
                         .font(.system(size: 30, weight: .black, design: .rounded))
                         .keyboardType(.decimalPad)
                         .onChange(of: amountText) { _, newValue in
-                            let sanitized = sanitizeAmount(newValue)
-                            if sanitized != newValue {
-                                amountText = sanitized
-                                return
-                            }
-                            draft.salaryAmount = parsedSalaryAmount(from: sanitized) ?? 0
+                            // Parse a normalized copy without interrupting the keyboard's draft.
+                            draft.salaryAmount = parsedSalaryAmount(from: sanitizeAmount(newValue)) ?? 0
                         }
                 }
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
@@ -289,7 +287,13 @@ struct SalarySettingsView: View {
                     }
                 }
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                Divider().overlay(AppTheme.divider)
+            }
+        }
+    }
+
+    private var monthlyPaidDaysCard: some View {
+        ComicCard {
+            VStack(alignment: .leading, spacing: 12) {
                 monthlyPaidDaysControl
                 Text(monthlyPaidDaysHint)
                     .font(.caption.weight(.bold))
@@ -328,6 +332,7 @@ struct SalarySettingsView: View {
                     Image(systemName: "minus")
                         .font(.system(size: 15, weight: .black))
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(PayJoyPressStyle(scale: 0.92, reduceMotion: prefersReducedMotion))
                 .disabled(draft.monthlyPaidDays <= 1)
@@ -347,12 +352,7 @@ struct SalarySettingsView: View {
                         .accessibilityLabel(L10n.t("月计薪天数"))
                         .accessibilityValue(monthlyPaidDaysText)
                         .onChange(of: monthlyPaidDaysText) { _, newValue in
-                            let sanitized = sanitizeMonthlyPaidDays(newValue)
-                            if sanitized != newValue {
-                                monthlyPaidDaysText = sanitized
-                                return
-                            }
-                            updateMonthlyPaidDays(from: sanitized)
+                            updateMonthlyPaidDays(from: sanitizeMonthlyPaidDays(newValue))
                         }
                     Text(L10n.t("天"))
                         .font(.caption.weight(.black))
@@ -372,6 +372,7 @@ struct SalarySettingsView: View {
                     Image(systemName: "plus")
                         .font(.system(size: 15, weight: .black))
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(PayJoyPressStyle(scale: 0.92, reduceMotion: prefersReducedMotion))
                 .disabled(draft.monthlyPaidDays >= 31)

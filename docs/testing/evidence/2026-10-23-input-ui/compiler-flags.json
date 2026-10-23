@@ -1,0 +1,62 @@
+[
+  {
+    "log": "preserve-draft-build.log",
+    "module": "PayJoy",
+    "jobs": [
+      "1"
+    ],
+    "threads": [
+      "1",
+      "1"
+    ],
+    "wholeModule": true
+  },
+  {
+    "log": "preserve-draft-build.log",
+    "module": "PayJoyUITests",
+    "jobs": [
+      "1"
+    ],
+    "threads": [
+      "1",
+      "1"
+    ],
+    "wholeModule": true
+  },
+  {
+    "log": "focus-fixture-build.log",
+    "module": "PayJoy",
+    "jobs": [
+      "1"
+    ],
+    "threads": [
+      "1",
+      "1"
+    ],
+    "wholeModule": true
+  },
+  {
+    "log": "menu-query-build.log",
+    "module": "PayJoyUITests",
+    "jobs": [
+      "1"
+    ],
+    "threads": [
+      "1",
+      "1"
+    ],
+    "wholeModule": true
+  },
+  {
+    "log": "unit-build.log",
+    "module": "PayJoyTests",
+    "jobs": [
+      "1"
+    ],
+    "threads": [
+      "1",
+      "1"
+    ],
+    "wholeModule": true
+  }
+]

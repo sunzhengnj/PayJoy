@@ -1,0 +1,22 @@
+[
+  {
+    "file": "PayJoy/AppState.swift",
+    "sha256": "007f0785898cf8226d82a1858139316be370fabce16a6282f3fb92ef0a5c740c"
+  },
+  {
+    "file": "PayJoy/Views/SalarySettingsView.swift",
+    "sha256": "088436211625ab51f96472063eba8c72239423378135ae14ded02cd635d8edeb"
+  },
+  {
+    "file": "PayJoyUITests/InputAcceptanceTests.swift",
+    "sha256": "1fef9daaf9516c0abde4b8e58cc375f88282002afd9db8d7606cdcde94c7b1cf"
+  },
+  {
+    "file": "PayJoy.xcodeproj/project.pbxproj",
+    "sha256": "ab287e3f4915b7ad82d54eeaa1b630b8597d36b0cdc14e39796bb5febcb18ae6"
+  },
+  {
+    "file": "PayJoy.xcodeproj/xcshareddata/xcschemes/PayJoyUITests.xcscheme",
+    "sha256": "a70715da1de03580c1aab6a63e764c17b813128566ec54ff460fac21a41085eb"
+  }
+]

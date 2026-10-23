@@ -1,0 +1,55 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+        "deviceName" : "PayJoy Verified Duo",
+        "modelName" : "iPhone",
+        "osBuildNumber" : "24A94425",
+        "osVersion" : "27.1",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 4,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PayJoyUITests · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792742193.217,
+  "passedTests" : 4,
+  "result" : "Failed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Invalid frame dimension (negative or non-finite)."
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792741979.642,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "Failed to tap \"本段剩余\" Button: No matches found for Elements matching predicate '\"本段剩余\" IN identifiers' from input {(\n    Button, identifier: 'chevron.down', label: '收起专注，计时继续',\n    Button, identifier: 'moon', label: '切换为黑底',\n    Button, label: '专注设置',\n    Button, label: '暂停',\n    Button, label: '结束',\n    Button,\n    Button, identifier: 'chevron.down', label: '收起专注，计时继续',\n    Button, identifier: 'moon', label: '切换为黑底',\n    Button, label: '专注设置',\n    Button, label: '暂停',\n    Button, label: '结束',\n    Button,\n    Button, identifier: 'house.fill', label: '首页',\n    Button, identifier: 'timer', label: '专注', Selected,\n    Button, identifier: 'chart.bar.fill', label: '统计',\n    Button, identifier: 'sparkles.rectangle.stack.fill', label: '愿望',\n    Button, identifier: 'person.fill', label: '我的'\n)}\nPossibly caused by runtime issues:\nAutomation type mismatch: computed Button from legacy attributes vs PopUpButton from modern attribute. Input attributes and values: {\n    \"XC_kAXXCAttributeAutomationType\" = 14;\n    \"XC_kAXXCAttributeElementBaseType\" = NSObject;\n    \"XC_kAXXCAttributeElementType\" = \"SwiftUI.AccessibilityNode\";\n    \"XC_kAXXCAttributeTraits\" = 1108101562369;\n}\nSee test report attachments for more detail.",
+      "targetName" : "PayJoyUITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "InputAcceptanceTests/testChangingClockDisplayKeepsFocusRunning()",
+      "testIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testChangingClockDisplayKeepsFocusRunning",
+      "testName" : "testChangingClockDisplayKeepsFocusRunning()"
+    }
+  ],
+  "title" : "Test - PayJoyUITests",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 5
+}

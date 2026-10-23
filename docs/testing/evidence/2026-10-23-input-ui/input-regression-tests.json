@@ -1,0 +1,105 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "A199B0FE-1420-4D85-A191-5E91A9C10FCF",
+      "deviceName" : "PayJoy Verified Duo",
+      "modelName" : "iPhone",
+      "osBuildNumber" : "24A94425",
+      "osVersion" : "27.1",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "name" : "XCTAssertTrue failed - Attributes: Application, 0x1089b3840, pid: 97776, label: 'ClockJoy'\nElement subtree:\n →Application, 0x1089b3840, pid: 97776, label: 'ClockJoy'\n    Window, 0x1089b3980, {{0.0, -0.0}, {951.0, 669.0}}\n      Other, 0x1089b3ac0, {{0.0, -0.0}, {951.0, 669.0}}\n      Other, 0x1089b3c00, {{0.0, -0.0}, {951.0, 669.0}}\n        Other, 0x1089b3d40, {{0.0, -0.0}, {951.0, 669.0}}\n          Other, 0x1089b3e80, {{0.0, -0.0}, {951.0, 669.0}}\n            Other, 0x108a4c000, {{0.0, -0.0}, {951.0, 669.0}}\n              Other, 0x108a4c140, {{0.0, -0.0}, {867.0, 635.0}}\n              Other, 0x108a4c280, {{0.0, -0.0}, {867.0, 635.0}}\n              Other, 0x108a4c3c0, {{0.0, -0.0}, {951.0, 669.0}}\n                Other, 0x108a4c500, {{0.0, -0.0}, {951.0, 669.0}}\n                  Other, 0x108a4c640, {{0.0, -0.0}, {951.0, 669.0}}\n                    Other, 0x108a4c780, {{0.0, -0.0}, {951.0, 669.0}}\n                      Other, 0x108a4c8c0, {{0.0, -0.0}, {951.0, 669.0}}\n                        Other, 0x108a4ca00, {{0.0, -0.0}, {951.0, 669.0}}\n                          Button, 0x108a4cb40, {{22.0, 8.0}, {44.0, 44.0}}, identifier: 'chevron.down', label: '收起专注，计时继续'\n                          Button, 0x108a4cc80, {{749.0, 8.0}, {44.0, 44.0}}, identifier: 'moon', label: '切换为黑底'\n                          Button, 0x108a4cdc0, {{801.0, 8.0}, {44.0, 44.0}}, label: '专注设置'\n                            Button, 0x108a4cf00, {{801.0, 8.0}, {44.0, 44.0}}\n                              Image, 0x108a4d040, {{813.7, 28.0}, {19.0, 4.3}}, identifier: 'ellipsis', label: '更多'\n                          Button, 0x108a4d180, {{393.0, 195.7}, {81.3, 19.3}}, label: '本段剩余'\n                            Button, 0x108a4d2c0, {{393.0, 195.7}, {81.3, 19.3}}\n                              StaticText, 0x108a4d400, {{392.8, 195.5}, {63.7, 19.3}}, label: '本段剩余'\n                              Image, 0x108a4d540, {{464.0, 202.7}, {9.0, 5.3}}, identifier: 'chevron.down', label: '向下移动'\n                          StaticText, 0x108a4d680, {{207.0, 230.8}, {453.0, 188.7}}, label: '本段剩余', value: 25:00\n                          Button, 0x108a4d7c0, {{335.7, 571.0}, {72.0, 44.0}}, label: '暂停'\n                          Button, 0x108a4d900, {{459.7, 571.0}, {72.0, 44.0}}, label: '结束'\n                Other, 0x108a4da40, {{0.0, -0.0}, {951.0, 669.0}}\n                  Toolbar, 0x108a4db80, {{0.0, -0.0}, {951.0, 669.0}}, identifier: 'Toolbar', label: 'Toolbar'\n                    Other, 0x108a4dcc0, {{0.0, -0.0}, {951.0, 669.0}}\n                      Other, 0x108a4de00, {{0.0, -0.0}, {951.0, 669.0}}\n                        Other, 0x108a4df40, {{0.0, -0.0}, {951.0, 669.0}}\n                          Other, 0x108a4e080, {{0.0, 0.0}, {0.0, 0.0}}\n                            Other, 0x108a4e1c0, {{879.0, 383.0}, {48.0, 262.0}}\n                              Other, 0x108a4e300, {{879.0, 383.0}, {48.0, 262.0}}\n                                Other, 0x108a4e440, {{879.0, 383.0}, {48.0, 262.0}}\n                                  Other, 0x108a4e580, {{879.0, 383.0}, {48.0, 262.0}}\n                                    Other, 0x108a4e6c0, {{879.0, 383.0}, {48.0, 262.0}}\n                                      Other, 0x108a4e800, {{879.0, 383.0}, {48.0, 262.0}}\n                                        Other, 0x108a4e940, {{879.0, 383.0}, {44.0, 58.0}}\n                                        Other, 0x108a4ea80, {{879.0, 383.0}, {48.0, 262.0}}\n                                          Button, 0x108a4ebc0, {{881.0, 385.0}, {44.0, 58.0}}, identifier: 'house.fill', label: '首页'\n                                            Image, 0x108a4ed00, {{886.3, 400.0}, {33.3, 28.0}}, identifier: 'house.fill', label: 'home'\n                                          Button, 0x108a4ee40, {{881.0, 435.0}, {44.0, 58.0}}, identifier: 'timer', label: '专注', Selected\n                                            Image, 0x108a4ef80, {{889.3, 450.3}, {27.3, 27.3}}, identifier: 'timer', label: 'Timer'\n                                          Button, 0x108a4f0c0, {{881.0, 485.0}, {44.0, 58.0}}, identifier: 'chart.bar.fill', label: '统计'\n                                            Image, 0x108a4f200, {{885.7, 501.3}, {35.0, 25.3}}, identifier: 'chart.bar.fill', label: 'chart column'\n                                          Button, 0x108a4f340, {{881.0, 535.0}, {44.0, 58.0}}, identifier: 'sparkles.rectangle.stack.fill', label: '愿望'\n                                            Image, 0x108a4f480, {{888.0, 549.0}, {30.0, 31.3}}, identifier: 'sparkles.rectangle.stack.fill', label: 'Sparkles rectangle stack, filled'\n                                          Button, 0x108a4f5c0, {{881.0, 585.0}, {44.0, 58.0}}, identifier: 'person.fill', label: '我的'\n                                            Image, 0x108a4f700, {{890.3, 601.7}, {25.3, 24.7}}, identifier: 'person.fill', label: 'Person silhouette, filled'\n                                        Other, 0x108a4f840, {{879.0, 383.0}, {48.0, 262.0}}\n                                        Other, 0x108a4f980, {{879.0, 383.0}, {48.0, 262.0}}\n                                          Other, 0x108a4fac0, {{879.0, 383.0}, {48.0, 262.0}}\n                                            Other, 0x108a4fc00, {{879.0, 383.0}, {48.0, 262.0}}\n                                              Other, 0x108a4fd40, {{879.0, 383.0}, {48.0, 262.0}}\n                                                Other, 0x108a4fe80, {{879.0, 383.0}, {48.0, 262.0}}\n                                              Other, 0x108a50000, {{879.0, 383.0}, {48.0, 262.0}}\n                                        Other, 0x108a50140, {{881.0, 435.0}, {44.0, 58.0}}\n                                          Other, 0x108a50280, {{881.0, 435.0}, {44.0, 58.0}}\n                                            Other, 0x108a503c0, {{881.0, 435.0}, {44.0, 58.0}}\n                                            Other, 0x108a50500, {{881.0, 435.0}, {44.0, 58.0}}\n                                              Other, 0x108a50640, {{881.0, 435.0}, {44.0, 58.0}}\n                                                Other, 0x108a50780, {{881.0, 435.0}, {44.0, 58.0}}\n                                                  Other, 0x108a508c0, {{881.0, 435.0}, {44.0, 58.0}}\n                                                Other, 0x108a50a00, {{881.0, 435.0}, {44.0, 58.0}}\n                                              Other, 0x108a50b40, {{881.0, 435.0}, {44.0, 58.0}}\n      Other, 0x108a50c80, {{0.0, -0.0}, {951.0, 669.0}}\n        Other, 0x108a50dc0, {{0.0, -0.0}, {951.0, 669.0}}\n          Other, 0x108a50f00, {{0.0, -0.0}, {951.0, 669.0}}\n            Button, 0x108a51040, {{22.0, 8.0}, {44.0, 44.0}}, identifier: 'chevron.down', label: '收起专注，计时继续'\n            Button, 0x108a51180, {{749.0, 8.0}, {44.0, 44.0}}, identifier: 'moon', label: '切换为黑底'\n            Button, 0x108a512c0, {{801.0, 8.0}, {44.0, 44.0}}, label: '专注设置'\n              Button, 0x108a51400, {{801.0, 8.0}, {44.0, 44.0}}\n                Image, 0x108a51540, {{813.7, 28.0}, {19.0, 4.3}}, identifier: 'ellipsis', label: '更多'\n            Button, 0x108a51680, {{393.0, 195.7}, {81.3, 19.3}}, label: '本段剩余'\n              Button, 0x108a517c0, {{393.0, 195.7}, {81.3, 19.3}}\n                StaticText, 0x108a51900, {{392.8, 195.5}, {63.7, 19.3}}, label: '本段剩余'\n                Image, 0x108a51a40, {{464.0, 202.7}, {9.0, 5.3}}, identifier: 'chevron.down', label: '向下移动'\n            StaticText, 0x108a51b80, {{207.0, 230.8}, {453.0, 188.7}}, label: '本段剩余', value: 25:00\n            Button, 0x108a51cc0, {{335.7, 571.0}, {72.0, 44.0}}, label: '暂停'\n            Button, 0x108a51e00, {{459.7, 571.0}, {72.0, 44.0}}, label: '结束'\nPath to element:\n →Application, 0x1089b3840, pid: 97776, label: 'ClockJoy'\nQuery chain:\n →Find: Target Application 'app.payjoy.kaixin'\n  Output: {\n    Application, 0x108a51f40, pid: 97776, label: 'ClockJoy'\n  }\n",
+                      "nodeType" : "Failure Message",
+                      "sourceLocation" : {
+                        "filePath" : "/Volumes/CodexOffload/Projects/project/PayJoy/PayJoyUITests/InputAcceptanceTests.swift",
+                        "lineNumber" : 52
+                      }
+                    }
+                  ],
+                  "duration" : "22秒",
+                  "durationInSeconds" : 22.573994994163513,
+                  "name" : "testChangingClockDisplayKeepsFocusRunning()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testChangingClockDisplayKeepsFocusRunning()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testChangingClockDisplayKeepsFocusRunning",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                },
+                {
+                  "duration" : "16秒",
+                  "durationInSeconds" : 16.94654393196106,
+                  "name" : "testExpandedSalaryInputsFitWithoutScrolling()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testExpandedSalaryInputsFitWithoutScrolling()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testExpandedSalaryInputsFitWithoutScrolling",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "46秒",
+                  "durationInSeconds" : 46.484989047050476,
+                  "name" : "testFullWidthFocusMinutesStartTheRequestedDuration()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testFullWidthFocusMinutesStartTheRequestedDuration()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testFullWidthFocusMinutesStartTheRequestedDuration",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "children" : [
+                    {
+                      "name" : "Invalid frame dimension (negative or non-finite).",
+                      "nodeType" : "Runtime Warning"
+                    }
+                  ],
+                  "duration" : "1分钟1秒",
+                  "durationInSeconds" : 61.23172605037689,
+                  "name" : "testFullWidthSalaryDecimalsFollowTheRegion()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testFullWidthSalaryDecimalsFollowTheRegion()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testFullWidthSalaryDecimalsFollowTheRegion",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "52秒",
+                  "durationInSeconds" : 52.051035046577454,
+                  "name" : "testInvalidFocusMinutesCannotStartASession()",
+                  "nodeIdentifier" : "InputAcceptanceTests/testInvalidFocusMinutesCannotStartASession()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests/testInvalidFocusMinutesCannotStartASession",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "InputAcceptanceTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests/InputAcceptanceTests",
+              "nodeType" : "Test Suite",
+              "result" : "Failed"
+            }
+          ],
+          "name" : "PayJoyUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PayJoy/PayJoyUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Failed"
+        }
+      ],
+      "name" : "PayJoyUITests",
+      "nodeType" : "Test Plan",
+      "result" : "Failed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

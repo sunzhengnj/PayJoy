@@ -35,5 +35,6 @@ docs/testing/evidence/**/*.png
 docs/testing/evidence/**/*.mov
 docs/testing/evidence/**/*.mp4
 docs/testing/evidence/**/*.sample
+docs/testing/evidence/**/*-attachments/
 marketing/app-store/featured-candidate/qa/
 marketing/app-store/featured-candidate/raw/

@@ -1447,6 +1447,7 @@ final class AppState {
 
         if screenshotScreen == "home-after-midnight" || screenshotScreen == "home-rest-day"
             || screenshotScreen == "weekly-echo" || screenshotScreen == "featured-home"
+            || screenshotScreen == "featured-focus-tab"
             || screenshotScreen.hasPrefix("focus-") {
             return []
         }

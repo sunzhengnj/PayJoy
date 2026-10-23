@@ -92,6 +92,7 @@
 		000000000000000000000182 /* FocusSession.swift in Widget Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000269 /* FocusSession.swift */; };
 		000000000000000000000183 /* FocusSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000026B /* FocusSessionTests.swift */; };
 		000000000000000000000184 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000060F /* LaunchScreen.storyboard */; };
+		F02300000000000000000001 /* InputAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02300000000000000000002 /* InputAcceptanceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +109,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 000000000000000000000403;
 			remoteInfo = PayJoyWidgets;
+		};
+		F02300000000000000000008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000000401;
+			remoteInfo = PayJoy;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -222,6 +230,8 @@
 		000000000000000000000295 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en"; path = "en.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		000000000000000000000296 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja"; path = "ja.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		000000000000000000000297 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ko"; path = "ko.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		F02300000000000000000002 /* InputAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputAcceptanceTests.swift; sourceTree = "<group>"; };
+		F02300000000000000000003 /* PayJoyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PayJoyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,6 +256,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F02300000000000000000006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -255,6 +272,7 @@
 				000000000000000000000602 /* PayJoy */,
 				00000000000000000000060B /* PayJoyWidgets */,
 				000000000000000000000609 /* PayJoyTests */,
+				F02300000000000000000004 /* PayJoyUITests */,
 				00000000000000000000060A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -401,6 +419,7 @@
 				000000000000000000000220 /* PayJoy.app */,
 				000000000000000000000221 /* PayJoyTests.xctest */,
 				000000000000000000000222 /* PayJoyWidgets.appex */,
+				F02300000000000000000003 /* PayJoyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -418,6 +437,14 @@
 				000000000000000000000214 /* PayJoyWidgets.entitlements */,
 			);
 			path = PayJoyWidgets;
+			sourceTree = "<group>";
+		};
+		F02300000000000000000004 /* PayJoyUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F02300000000000000000002 /* InputAcceptanceTests.swift */,
+			);
+			path = PayJoyUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -523,6 +550,21 @@
 			productReference = 000000000000000000000222 /* PayJoyWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		F0230000000000000000000A /* PayJoyUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F0230000000000000000000D /* Build configuration list for PBXNativeTarget "PayJoyUITests" */;
+			buildPhases = (
+				F02300000000000000000005 /* Sources */,
+				F02300000000000000000006 /* Frameworks */,
+				F02300000000000000000007 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = (F02300000000000000000009 /* PBXTargetDependency */,);
+			name = PayJoyUITests;
+			productName = PayJoyUITests;
+			productReference = F02300000000000000000003 /* PayJoyUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -580,6 +622,7 @@
 				000000000000000000000401 /* PayJoy */,
 				000000000000000000000402 /* PayJoyTests */,
 				000000000000000000000403 /* PayJoyWidgets */,
+				F0230000000000000000000A /* PayJoyUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -650,6 +693,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F02300000000000000000007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -714,6 +764,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F02300000000000000000005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F02300000000000000000001 /* InputAcceptanceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -726,6 +784,11 @@
 			isa = PBXTargetDependency;
 			target = 000000000000000000000403 /* PayJoyWidgets */;
 			targetProxy = 000000000000000000000303 /* PBXContainerItemProxy */;
+		};
+		F02300000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000000000401 /* PayJoy */;
+			targetProxy = F02300000000000000000008 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -962,6 +1025,40 @@
 			};
 			name = Release;
 		};
+		F0230000000000000000000B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 2.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = PayJoy;
+			};
+			name = Debug;
+		};
+		F0230000000000000000000C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 11;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 2.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.payjoy.kaixin.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = PayJoy;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -998,6 +1095,12 @@
 				000000000000000000000907 /* Debug */,
 				000000000000000000000908 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F0230000000000000000000D /* Build configuration list for PBXNativeTarget "PayJoyUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (F0230000000000000000000B /* Debug */, F0230000000000000000000C /* Release */,);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
