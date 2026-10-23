@@ -1,0 +1,47 @@
+[
+  {
+    "file": "label-before-portrait-zhHans.png",
+    "language": "zhHans",
+    "screen": "focus-paused-offwork",
+    "pose": "open-portrait",
+    "at": "2026-10-23T06:28:53.858454+00:00",
+    "phase": "before-focus-fixture-fix",
+    "observedTimeMeaning": "focus remaining (unexpected for requested off-work fixture)"
+  },
+  {
+    "file": "label-before-portrait-zhHant.png",
+    "language": "zhHant",
+    "screen": "focus-paused-offwork",
+    "pose": "open-portrait",
+    "at": "2026-10-23T06:28:58.557007+00:00",
+    "phase": "before-focus-fixture-fix",
+    "observedTimeMeaning": "focus remaining (unexpected for requested off-work fixture)"
+  },
+  {
+    "file": "label-before-portrait-en.png",
+    "language": "en",
+    "screen": "focus-paused-offwork",
+    "pose": "open-portrait",
+    "at": "2026-10-23T06:29:03.276621+00:00",
+    "phase": "before-focus-fixture-fix",
+    "observedTimeMeaning": "focus remaining (unexpected for requested off-work fixture)"
+  },
+  {
+    "file": "label-before-portrait-ja.png",
+    "language": "ja",
+    "screen": "focus-paused-offwork",
+    "pose": "open-portrait",
+    "at": "2026-10-23T06:29:07.965244+00:00",
+    "phase": "before-focus-fixture-fix",
+    "observedTimeMeaning": "focus remaining (unexpected for requested off-work fixture)"
+  },
+  {
+    "file": "label-before-portrait-ko.png",
+    "language": "ko",
+    "screen": "focus-paused-offwork",
+    "pose": "open-portrait",
+    "at": "2026-10-23T06:29:12.636088+00:00",
+    "phase": "before-focus-fixture-fix",
+    "observedTimeMeaning": "focus remaining (unexpected for requested off-work fixture)"
+  }
+]

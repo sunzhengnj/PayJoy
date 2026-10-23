@@ -1,0 +1,65 @@
+[
+  {
+    "file": "awake-preference-reset-lldb.log",
+    "value": false,
+    "query": "NSUserDefaults keepScreenAwake preference",
+    "sha256": "b2b1d620af5300f3f48672dfc25e647a90a28d23a6ee632d9fcf6bedd4d0bbb4",
+    "modifiedAt": "2026-10-23T06:28:28.963548+00:00"
+  },
+  {
+    "file": "idle-background-lldb.log",
+    "value": false,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "ab503349df6d7b2f548692711bb92515f28ad034882c82f696542e9955d240e2",
+    "modifiedAt": "2026-10-23T06:19:10.506755+00:00"
+  },
+  {
+    "file": "idle-default-lldb.log",
+    "value": false,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "ab503349df6d7b2f548692711bb92515f28ad034882c82f696542e9955d240e2",
+    "modifiedAt": "2026-10-23T06:15:28.312642+00:00"
+  },
+  {
+    "file": "idle-desk-lldb.log",
+    "value": true,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "419f94d22b6dcd53207ef999460f31890887c2f9a87ebee7dad6a49a2b41993a",
+    "modifiedAt": "2026-10-23T06:18:40.781420+00:00"
+  },
+  {
+    "file": "idle-focus-on-lldb.log",
+    "value": true,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "419f94d22b6dcd53207ef999460f31890887c2f9a87ebee7dad6a49a2b41993a",
+    "modifiedAt": "2026-10-23T06:16:14.756163+00:00"
+  },
+  {
+    "file": "idle-home-book-lldb.log",
+    "value": false,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "5ec280e587f2719686ea583da8d56f7d8fbeaeaf6cca358f2f694ba020cf97f9",
+    "modifiedAt": "2026-10-23T06:17:15.854719+00:00"
+  },
+  {
+    "file": "idle-home-lldb.log",
+    "value": false,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "e46758bb214793f2434282b71ca621d45ee0b5e9356ca4b8e97bd58829f3b38b",
+    "modifiedAt": "2026-10-23T06:16:54.173396+00:00"
+  },
+  {
+    "file": "idle-result-lldb.log",
+    "value": false,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "5ec280e587f2719686ea583da8d56f7d8fbeaeaf6cca358f2f694ba020cf97f9",
+    "modifiedAt": "2026-10-23T06:25:28.530035+00:00"
+  },
+  {
+    "file": "idle-returned-lldb.log",
+    "value": true,
+    "query": "UIApplication isIdleTimerDisabled",
+    "sha256": "419f94d22b6dcd53207ef999460f31890887c2f9a87ebee7dad6a49a2b41993a",
+    "modifiedAt": "2026-10-23T06:19:27.789113+00:00"
+  }
+]

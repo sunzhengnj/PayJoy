@@ -1,0 +1,272 @@
+[
+  {
+    "file": "awake-preference-reset-lldb.log",
+    "bytes": 936,
+    "sha256": "b2b1d620af5300f3f48672dfc25e647a90a28d23a6ee632d9fcf6bedd4d0bbb4"
+  },
+  {
+    "file": "boot.log",
+    "bytes": 271,
+    "sha256": "f3108b7efe1b53333a9becac10eb0fad765f5f0761c8de28fa8a210d198679b3"
+  },
+  {
+    "file": "build.log",
+    "bytes": 85353,
+    "sha256": "1dc86d38a5b57dce82302b987fa62d16b11dcf8d32f2c6cb62cdd74fa30fb889"
+  },
+  {
+    "file": "fixture-build.log",
+    "bytes": 168405,
+    "sha256": "c76a24d3f751d9fd8b12524981faec25cc659215cd11dbc373fa78a8352a6d01"
+  },
+  {
+    "file": "focus-reopen-inner.mov",
+    "bytes": 497189400,
+    "sha256": "9cb6c20212d75c667f97e753fe6f77922b71a78acb6b6d9a12ced6daff982d30"
+  },
+  {
+    "file": "focus-visible.sample",
+    "bytes": 437706,
+    "sha256": "7d418123bf6867949d5095426df516516c70dfc8a5933348d1042153f57e88e2"
+  },
+  {
+    "file": "idle-background-lldb.log",
+    "bytes": 909,
+    "sha256": "ab503349df6d7b2f548692711bb92515f28ad034882c82f696542e9955d240e2"
+  },
+  {
+    "file": "idle-default-lldb.log",
+    "bytes": 909,
+    "sha256": "ab503349df6d7b2f548692711bb92515f28ad034882c82f696542e9955d240e2"
+  },
+  {
+    "file": "idle-desk-lldb.log",
+    "bytes": 908,
+    "sha256": "419f94d22b6dcd53207ef999460f31890887c2f9a87ebee7dad6a49a2b41993a"
+  },
+  {
+    "file": "idle-desk-window.png",
+    "bytes": 157790,
+    "sha256": "72efdbd254c4103f08d3a23bbefb2c8595870bddec227c8102117d8ef3eb6df9"
+  },
+  {
+    "file": "idle-focus-on-lldb.log",
+    "bytes": 908,
+    "sha256": "419f94d22b6dcd53207ef999460f31890887c2f9a87ebee7dad6a49a2b41993a"
+  },
+  {
+    "file": "idle-home-book-lldb.log",
+    "bytes": 909,
+    "sha256": "5ec280e587f2719686ea583da8d56f7d8fbeaeaf6cca358f2f694ba020cf97f9"
+  },
+  {
+    "file": "idle-home-lldb.log",
+    "bytes": 1041,
+    "sha256": "e46758bb214793f2434282b71ca621d45ee0b5e9356ca4b8e97bd58829f3b38b"
+  },
+  {
+    "file": "idle-result-lldb.log",
+    "bytes": 909,
+    "sha256": "5ec280e587f2719686ea583da8d56f7d8fbeaeaf6cca358f2f694ba020cf97f9"
+  },
+  {
+    "file": "idle-returned-lldb.log",
+    "bytes": 908,
+    "sha256": "419f94d22b6dcd53207ef999460f31890887c2f9a87ebee7dad6a49a2b41993a"
+  },
+  {
+    "file": "initial-inner.png",
+    "bytes": 106123,
+    "sha256": "fcff7a2e8fa497896c052294baebf0359f7c3055768d0b8b60dd8b7749f9ad0e"
+  },
+  {
+    "file": "label-before-portrait-en.png",
+    "bytes": 203560,
+    "sha256": "b4c3f61154c15bbb3ebd709c223056005a863492fc4142cde7257ea91d69df5a"
+  },
+  {
+    "file": "label-before-portrait-ja.png",
+    "bytes": 205059,
+    "sha256": "e78026f2bc10cadf20c65e76e5c97c16d72e0547129de4ddfd033f9fd59f27a9"
+  },
+  {
+    "file": "label-before-portrait-ko.png",
+    "bytes": 202212,
+    "sha256": "dccf51c2d7e90936982925c9629e9789e431e732ed21bd38b1a62070c023508c"
+  },
+  {
+    "file": "label-before-portrait-zhHans.png",
+    "bytes": 208221,
+    "sha256": "07aa04cbea86a1ec8590a7db896e62c66e26b41a96b154e2f61b66976f1b5d9f"
+  },
+  {
+    "file": "label-before-portrait-zhHant.png",
+    "bytes": 210041,
+    "sha256": "fb90b06ec8c565f328ed0a8fde03aaed76f77f57e372bc2173627c7adf737b64"
+  },
+  {
+    "file": "label-contact.png",
+    "bytes": 245704,
+    "sha256": "36e8595067769db6a7260f3a8994b750e80a41251dd669089a19891f7318b0c2"
+  },
+  {
+    "file": "label-desktop-en.png",
+    "bytes": 222434,
+    "sha256": "180dc3fa6e5024f2c12940ba3e72f903d47a14138a5b10da8c969a0b387cc197"
+  },
+  {
+    "file": "label-desktop-ja.png",
+    "bytes": 223564,
+    "sha256": "3a742b699678746e9ada027705acef3ba9944e2f09732fbb206c2298e52f2892"
+  },
+  {
+    "file": "label-desktop-ko.png",
+    "bytes": 217774,
+    "sha256": "c5658ce8b77656695d1bfc63a64980a12d65000d92bbc476d29c15be9750d33e"
+  },
+  {
+    "file": "label-desktop-zhHans.png",
+    "bytes": 220276,
+    "sha256": "c90393f3cbdbfc16ac4167366deaf2b89aae11053b2205cf847c51e462dc7008"
+  },
+  {
+    "file": "label-desktop-zhHant.png",
+    "bytes": 222122,
+    "sha256": "6d956820e2833e3ba4a24db4f2c71a5f7a37aabadf21d2c9738c04718e787039"
+  },
+  {
+    "file": "label-portrait-en.png",
+    "bytes": 213180,
+    "sha256": "db0f0b915f17a42ddead9b9fbfbfa00eaa98ff14f337053a912dbb266f8a013f"
+  },
+  {
+    "file": "label-portrait-ja.png",
+    "bytes": 216347,
+    "sha256": "e81a277a0ef70e68ccfa1799ea9c16c6f3de9aa15254a5ea7625cf5f4e4a1e20"
+  },
+  {
+    "file": "label-portrait-ko.png",
+    "bytes": 210761,
+    "sha256": "99fae1f8a539db139433cf906f1f6d988ddcc0c007fc898a5fdbcb5993f68ffe"
+  },
+  {
+    "file": "label-portrait-zhHans.png",
+    "bytes": 213929,
+    "sha256": "909dd5c4ef6350d9a56178f26d28635ee8257c54b72198223557d235b1da2780"
+  },
+  {
+    "file": "label-portrait-zhHant.png",
+    "bytes": 215149,
+    "sha256": "cdff0145f82ec7df2ed942d87f95194a9dd0b23ff96b51068a971c5d34c21533"
+  },
+  {
+    "file": "live-paused-window.png",
+    "bytes": 149191,
+    "sha256": "0b9ddf1bc4adfd9704e817f3f561e15f1d171e32d90a2c596c5807e9230ad966"
+  },
+  {
+    "file": "live-result-window.png",
+    "bytes": 147635,
+    "sha256": "ac2df7584223169d883508e162b19914036fe434c8960c59a35555ba090ba0d2"
+  },
+  {
+    "file": "live-start-inner.png",
+    "bytes": 202883,
+    "sha256": "05e9cf7d8caa7d335b7ac4252e91c6d7c3c9b5b63def2852ddba88de2f2eab3e"
+  },
+  {
+    "file": "live-start-window.png",
+    "bytes": 149589,
+    "sha256": "4bf9f563a3846bfa45eafa38a3283cbb711aba103ea44baf5306f519002a4c8d"
+  },
+  {
+    "file": "paused-book-inner.png",
+    "bytes": 204819,
+    "sha256": "1a4b1d93291fdcd50813800513ec3375512ab9d07b7a88b994a24b2c4eaa2788"
+  },
+  {
+    "file": "paused-closed-outer.png",
+    "bytes": 114960,
+    "sha256": "d0d1675a8eda68195a7f6a8b4645e02f2192d351d2515499b1991fbf809b48f5"
+  },
+  {
+    "file": "paused-cycle-1-initial.png",
+    "bytes": 104737,
+    "sha256": "b5147390bf2f8b19203b14e196a923a47e2137265e74f6b0f9386fef30d51f43"
+  },
+  {
+    "file": "paused-cycle-1-outer.png",
+    "bytes": 158017,
+    "sha256": "e784f7a6dc88f327ded1860c864daa64c373a991cbe49c750b325439970b2615"
+  },
+  {
+    "file": "paused-cycle-1-settled.png",
+    "bytes": 226996,
+    "sha256": "8e00de7f83c7b5470c1667cbfb81aae9943eba3456ee18ebedea756ad59b374e"
+  },
+  {
+    "file": "paused-cycle-2-initial.png",
+    "bytes": 104737,
+    "sha256": "b5147390bf2f8b19203b14e196a923a47e2137265e74f6b0f9386fef30d51f43"
+  },
+  {
+    "file": "paused-cycle-2-outer.png",
+    "bytes": 170677,
+    "sha256": "4b126c3a8c818fb1ba9f098a819549c1b9a1f2962587a350cb4a4d2bbdfd39cf"
+  },
+  {
+    "file": "paused-cycle-2-settled.png",
+    "bytes": 242014,
+    "sha256": "42db891bb0927a04831654494fc05bbff6444ef7e4145fd5763a1a2df72e0838"
+  },
+  {
+    "file": "paused-offwork-book-window.png",
+    "bytes": 155093,
+    "sha256": "fbbbed750ff3075e7803598a4086325c8721fb1812706fbfaa9efcc87cba999a"
+  },
+  {
+    "file": "paused-partial-inner.png",
+    "bytes": 210316,
+    "sha256": "d07ea4d45c8e6414209023f9a86f6eabac6c51105c43e07462d0a52d1efe1aa9"
+  },
+  {
+    "file": "paused-reopen-initial.png",
+    "bytes": 106123,
+    "sha256": "fcff7a2e8fa497896c052294baebf0359f7c3055768d0b8b60dd8b7749f9ad0e"
+  },
+  {
+    "file": "paused-reopen-settled.png",
+    "bytes": 200723,
+    "sha256": "a4b6dcb5b68188b8ebc5cfe04cf17e11bb31bb9a58dc67fae65f7a9d45d0ac20"
+  },
+  {
+    "file": "result-after-relaunch-window.png",
+    "bytes": 148038,
+    "sha256": "860c4f6856acb22d84a7ea3af768672fc85f0ecaa4769202692f097a4c065f85"
+  },
+  {
+    "file": "running-offwork-again-window.png",
+    "bytes": 149638,
+    "sha256": "b7a5d3c8cdfbb7e663a8d63b4cbdb99a820501e05dc815ff62ec9cbbe9cded38"
+  },
+  {
+    "file": "running-offwork-window.png",
+    "bytes": 149350,
+    "sha256": "810fc716aff0891c754351fa0535318795cc390c99103ef75b9eeae774d473bb"
+  },
+  {
+    "file": "running-session-window.png",
+    "bytes": 147447,
+    "sha256": "5a6a0770e625f3ab835b1bf1ee328dc087ac006d24784641d6e0596e000bf56f"
+  },
+  {
+    "file": "tests.log",
+    "bytes": 37536,
+    "sha256": "bc35043581512e17985090cd172d7b08712d32605dbc7bb6258c61e7aba8d0fd"
+  },
+  {
+    "file": "window-inspection-lldb.log",
+    "bytes": 1374,
+    "sha256": "da9fa163ffce3a7d743f50579bcf7f4b346be95d3e4ac0dea844590522838915"
+  }
+]

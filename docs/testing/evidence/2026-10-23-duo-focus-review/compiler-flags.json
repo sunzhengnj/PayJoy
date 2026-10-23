@@ -1,0 +1,60 @@
+{
+  "driverInvocations": 9,
+  "flags": [
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ],
+    [
+      "-whole-module-optimization",
+      "-j1",
+      "-num-threads 1",
+      "-num-threads 1"
+    ]
+  ],
+  "verificationOnly": true
+}

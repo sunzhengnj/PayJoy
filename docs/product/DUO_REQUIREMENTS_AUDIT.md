@@ -1,6 +1,6 @@
 # Duo、专注及全应用动效逐项核对
 
-核对日期：2026-10-22。对应用户原始「摆下是桌面钟，展开是今日双页」方案和后续专注／全应用打磨要求。无障碍专项按用户后续指示不作为本版门槛；已有适配不删除。
+核对日期：2026-10-23。对应用户原始「摆下是桌面钟，展开是今日双页」方案和后续专注／全应用打磨要求。无障碍专项按用户后续指示不作为本版门槛；已有适配不删除。
 
 “源码已覆盖”只表示找到了实际实现并完成离线审查，不等于真机／模拟器验收通过。离线审查范围见 [离线证据](../testing/evidence/2026-10-22-offline-polish/README.md)；后续已取得真实2分钟专注和专注到下班连续原片，见[计时恢复](../testing/evidence/2026-10-22-live-continuity/README.md)、[到下班及回执](../testing/evidence/2026-10-22-offwork-flow/README.md)。设备项目统一在 [重启后验收清单](../testing/POST_RESTART_ACCEPTANCE.md)，不再以旧截图证明当前候选版。
 
@@ -12,12 +12,12 @@
 | 展开／合上恢复首页，不打断编辑和弹层 | 原首页 NavigationStack 保留在桌面钟背后；首页表单／弹层阻止自动进入。普通业务编辑页本轮统一稳定输入子树 | D01、D03、D07、D12–D15 |
 | 工作中／午休显示距下班 | `DeskClockMode.select` → `clockTitle/clockValue`；午休有独立标签，不显示工资 | D06 |
 | 上班前／下班后／休息日显示下次上班，无时间则休息中 | `AppState.nextWorkStartDate` 复用 `SalaryCalculator.nextScheduledWorkStart`；nil → `.resting`。既有下一工作日测试覆盖周末及日期覆盖记录 | D06 |
-| 专注中单一时间，可切换已有时间含义 | 两种展示共用 root 的 `focusShowsOffWorkTime` Binding；运行／桌面均读取同一 active session。本轮增加已暂停标签，保留选择值 | D07、V01 |
+| 专注中单一时间，可切换已有时间含义 | 两种展示共用 root 的 `focusShowsOffWorkTime` Binding；运行／桌面均读取同一 active session。10月23日真实运行中切换两种时间，同一会话、无暂停字段、截止不变；暂停标签另以五语言夹具审阅 | D07、V01；全主题、书本及更多姿态仍待测 |
 | 加班显示本次时长；结束沿用确认及回执 | Desk 调用 root `stoppingDeskOvertime` → `OvertimeStopSheet` → 停止后再开回执；不直接结算绕过确认 | D06 |
 | 纯黑／纯白、等宽数字、沿用外观 | Focus／Desk 共用 `focusData.prefersDarkBackground`；纯色背景和 monospacedDigit，无薪资金额。本轮短淡变及按压反馈 | V01 |
 | 时间、标签、按钮不跨折痕 | Desk 上下视区按实际 reserved division；时钟字号与入口共用空间预算。本轮单列回退改用完整分区，并补相机避让 | D02、D14、D16 |
 | 主动退出本次折叠不重入，展开后恢复资格 | scene 的 `deskSuppressedForCurrentFold`；仅 UIHinge fullyOpen 回调清除，尺寸变化不清除 | D03 |
-| 屏幕常亮默认关、仅活跃可见时生效 | root owns idle timer；AppStorage 默认 false，活跃 scene、隐私锁、Desk／运行中 Focus 条件统一判断 | D09、D10 |
+| 屏幕常亮默认关、仅活跃可见时生效 | root owns idle timer；AppStorage 默认 false。10月23日LLDB已读取关闭偏好、专注、首页／书本、桌面钟、后台、返回和结果的实际值，符合当前可见性条件；偏好已关回false | D09、D10；隐私密码、锁屏、其他标签及弹层尚未覆盖 |
 | 17:42→专注到下班→结果→主动收下今天 | `focusToOffWorkDuration`、`startFocus`、`finishFocus`、`dismissFocusResult` 与 cover dismissal 后回执串联。未自动领取 | D04；完整演示仍待录制 |
 | 左页收入／进度／当前状态／下班总结 | `HomeView.expandedHome` 左栏唯一 EarningsCard，沿用 snapshot 和主题 | D07、V01 |
 | 右页专注／加班收工／回执／愿望手动更新入口 | expandedFocusActions、回执、加班、聚焦愿望跳转、摸鱼与提前收工；右栏不重复收入主卡 | D07 |
@@ -71,3 +71,7 @@
 ## 10月22日晚补充：减少左侧滚动
 
 用户要求右侧空余时重新组织内容，而非把长页挤在左侧。已重排工资日历、我的、工作时间／薪资设置和工资报告；具体构建、图片与未覆盖项见[分栏证据](../testing/evidence/2026-10-22-balanced-columns/README.md)。完整 goal 仍进行中，不能用这组修订替代所有主题、语言、键盘和系统版本验收。
+
+## 10月23日补充：专注显示与可见性
+
+最新2.0.0(11)完整139项iOS XCTest通过。新增真实会话证明“距下班”可以与专注同时运行；三次暂停开合余量保持、自然完成及结果重启均只一条记录。实际常亮值与五语言标签画面、测试夹具修订分别记录在[本轮证据](../testing/evidence/2026-10-23-duo-focus-review/README.md)。未复现必须旋转才能恢复的持续黑屏，但原固定下班截止路径、性能与完整兼容矩阵仍未关闭。

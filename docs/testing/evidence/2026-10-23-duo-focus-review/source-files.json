@@ -1,0 +1,9 @@
+{
+  "PayJoy/AppState.swift": "c929348a13d8580897641bc4375edd2ba65c03d283a159ff2221fb5724ed87da",
+  "PayJoy/PayJoyApp.swift": "df21ce7a0a9e05e3a6c1136a8b24de861e1418c6da17c59b11ef8a922340ec29",
+  "PayJoy/Views/FocusView.swift": "44103a6eb7b5ee4df324cd9ce0656b30970d2a3abff5f74b308dfa19dd5362b1",
+  "PayJoy/Views/AppRootView.swift": "ee60e858d7f065587467dec7fe85670f1f0be90070ac0c66fac36d5a3fe3a5fe",
+  "PayJoy/Models/SalaryModels.swift": "83b6a6111aad8ff76246e1802eb3de7e5fd57447b328b1638af8b5706a2028f4",
+  "PayJoyTests/FocusSessionTests.swift": "34d27756da8909eeccd1881a49b8130ab08fe53699115d82aff42c2a8cb699b4",
+  "PayJoyTests/SalaryCalculatorTests.swift": "3961f76b86ea2226553872033e7d1472d510b634dce981ac180ba5d5c33469ab"
+}
