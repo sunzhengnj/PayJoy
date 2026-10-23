@@ -25,7 +25,7 @@ A few things that worked for me:
 If you’re looking for an iOS option that does workday countdown + optional estimated earnings on Lock Screen / Dynamic Island, I’ve been using **ClockJoy**:
 
 - App Store: https://apps.apple.com/us/app/id6771261514
-- Site: https://sunzhengnj.github.io/PayJoy/en/
+- Site: https://sunzhengnj.github.io/ClockJoy/en/
 
 Curious what Lock Screen setups other people use for focus / end-of-day boundaries — widget stacks, Focus modes, Live Activities, something else?
 

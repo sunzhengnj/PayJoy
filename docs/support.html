@@ -36,14 +36,14 @@
       "ko": { title: "ClockJoy - 지원 및 피드백", brand: "ClockJoy", heroTitle: "지원 및 피드백", heroMuted: "문제가 있거나, 제안을 보내고 싶거나, 계산 규칙 설명이 필요하다면 여기서 시작하세요.", heroMeta: "마지막 업데이트: 2026년 8월 12일", navLabel: "페이지 탐색", nav: { index: "홈", privacy: "개인정보 처리방침", terms: "서비스 약관", support: "지원 및 피드백", deleteAccount: "계정 삭제" }, sections: [{ title: "문의 방법", p1: "문의, 버그 제보, 제안은 5232@88.com으로 이메일을 보내 주세요.", button: "이메일 보내기" }, { title: "함께 보내주면 좋은 정보", list: ["사용 중인 iPhone 모델과 iOS 버전.", "앱 버전.", "문제가 발생한 화면 또는 재현 단계.", "가능하다면 스크린샷이나 화면 녹화."] }, { title: "자주 묻는 안내", p1: "ClockJoy의 수입, 진행률, 카운트다운은 모두 기기에 저장된 설정을 기반으로 추정됩니다. 홈 화면 위젯과 잠금 화면 실시간 현황의 갱신 주기는 iOS가 제어하므로 매초 갱신되지 않을 수 있으며, 앱을 열면 더 실시간에 가까운 데이터를 볼 수 있습니다." }] }
     };
 
-    const page = content[PayJoyDocs.language] || content["zh-Hans"];
-    PayJoyDocs.applySharedContent(page);
+    const page = content[ClockJoyDocs.language] || content["zh-Hans"];
+    ClockJoyDocs.applySharedContent(page);
     page.sections.forEach((section, index) => {
       const number = index + 1;
-      PayJoyDocs.setText(`s${number}-title`, section.title);
-      if (section.p1) PayJoyDocs.setText(`s${number}-p1`, section.p1);
-      if (section.list) PayJoyDocs.setList(`s${number}-list`, section.list);
-      if (section.button) PayJoyDocs.setText("issues-link", section.button);
+      ClockJoyDocs.setText(`s${number}-title`, section.title);
+      if (section.p1) ClockJoyDocs.setText(`s${number}-p1`, section.p1);
+      if (section.list) ClockJoyDocs.setList(`s${number}-list`, section.list);
+      if (section.button) ClockJoyDocs.setText("issues-link", section.button);
     });
   </script>
 </body>

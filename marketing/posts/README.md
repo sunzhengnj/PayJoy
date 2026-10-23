@@ -55,7 +55,7 @@ Body = the copy ready to paste (thread beats for X; caption + hashtags for Insta
 ## Links (always prefer these in public copy)
 
 - US App Store: https://apps.apple.com/us/app/id6771261514
-- Product site (EN): https://sunzhengnj.github.io/PayJoy/en/
+- Product site (EN): https://sunzhengnj.github.io/ClockJoy/en/
 
 Do not lead overseas posts with the CN site. Never use `PayJoy` as the app name.
 

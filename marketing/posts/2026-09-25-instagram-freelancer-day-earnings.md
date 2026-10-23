@@ -26,7 +26,7 @@ Estimates are not a paycheck. Not a timesheet. Not tax. Not attendance. Not an i
 ClockJoy — playful workday progress for iPhone. English UI, with Japanese and Korean support too.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide: https://sunzhengnj.github.io/PayJoy/en/guides/freelancer-day-earnings-estimate.html
+Guide: https://sunzhengnj.github.io/ClockJoy/en/guides/freelancer-day-earnings-estimate.html
 
 Which glance would you keep on your Home Screen?
 

@@ -38,7 +38,7 @@ If you want this on iPhone without building a shortcut stack, **ClockJoy** does 
 Estimates only — not a paycheck.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Site: https://sunzhengnj.github.io/PayJoy/en/
+Site: https://sunzhengnj.github.io/ClockJoy/en/
 
 What’s on your Lock Screen during a long day?
 

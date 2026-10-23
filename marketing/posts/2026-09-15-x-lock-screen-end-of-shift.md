@@ -21,8 +21,8 @@ Put end-of-shift on your Lock Screen instead—one glance when you wake the phon
 **ClockJoy** does that with a workday countdown (and optional estimated earnings) on Lock Screen and Live Activity. Estimates only — not payroll, a timesheet, tax, or attendance.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide: https://sunzhengnj.github.io/PayJoy/en/guides/clock-out-live-activity.html
-Site: https://sunzhengnj.github.io/PayJoy/en/
+Guide: https://sunzhengnj.github.io/ClockJoy/en/guides/clock-out-live-activity.html
+Site: https://sunzhengnj.github.io/ClockJoy/en/
 
 (UI available in English, Japanese, and Korean.)
 

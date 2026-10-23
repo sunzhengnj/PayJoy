@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sunzhengnj.github.io/PayJoy/sitemap.xml
+Sitemap: https://sunzhengnj.github.io/ClockJoy/sitemap.xml

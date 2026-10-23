@@ -34,7 +34,7 @@ No streaks either. Pause a wish, let it go, or mark it fulfilled and keep it on 
 ClockJoy is a playful workday progress app for iPhone, with widgets, a Lock Screen countdown, and wish progress. English UI, plus Japanese and Korean.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide: https://sunzhengnj.github.io/PayJoy/en/guides/wish-goal-progress-workday.html
+Guide: https://sunzhengnj.github.io/ClockJoy/en/guides/wish-goal-progress-workday.html
 
 What's your current little wish?
 

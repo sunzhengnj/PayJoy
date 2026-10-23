@@ -57,8 +57,8 @@ ClockJoy は、正確さを競う勤怠アプリではありません。長い�
 ClockJoy の金額は入力内容に基づく推定です。給与明細、税務、法的な記録の代わりにはなりません。データは端末内に保存され、iCloud プライベートデータベース同期は任意です。
 集中時間が収入や願いごとの進捗に自動で加算されることはありません。
 
-Privacy Policy: https://sunzhengnj.github.io/PayJoy/ja/privacy.html
-Terms: https://sunzhengnj.github.io/PayJoy/ja/terms.html
+Privacy Policy: https://sunzhengnj.github.io/ClockJoy/ja/privacy.html
+Terms: https://sunzhengnj.github.io/ClockJoy/ja/terms.html
 ```
 
 ## 截图

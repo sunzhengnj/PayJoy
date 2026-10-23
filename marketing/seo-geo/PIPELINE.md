@@ -4,7 +4,7 @@ Operating manual for the daily agent that owns the GitHub Pages site end-to-end.
 
 ## Scope
 
-- **Own:** `docs/` on `sunzhengnj/PayJoy` (GitHub Pages at https://sunzhengnj.github.io/PayJoy/).
+- **Own:** `docs/` on `sunzhengnj/PayJoy` (GitHub Pages at https://sunzhengnj.github.io/ClockJoy/).
 - **Public brands only:** 开薪 (CN) / **ClockJoy** (EN). Never use `PayJoy` as a public brand in new copy — it is the internal repo name only.
 - **Do not:** invent App Store Connect live-metadata changes unless the agent has ASC access. Repo paste files under `docs/app-store/` may be updated; live ASC is separate.
 - **Product truth:** workday countdown + estimated earnings + Lock Screen / Dynamic Island widgets. Estimates only — **not** payroll, timesheet, tax, or attendance.
@@ -36,7 +36,7 @@ After the SEO page steps (or when the SEO queue is blocked), write **one** socia
 - Use comparison tables when the query implies “vs timesheet / payroll / calculator.”
 - Explicit payroll disclaimer on every earnings-related page.
 - Internal-link to related EN guides and the App Store.
-- Canonical URLs under `https://sunzhengnj.github.io/PayJoy/en/guides/…`.
+- Canonical URLs under `https://sunzhengnj.github.io/ClockJoy/en/guides/…`.
 
 ## Quality bar
 
@@ -55,7 +55,7 @@ After the SEO page steps (or when the SEO queue is blocked), write **one** socia
 
 ## URLs after Pages deploy
 
-- Site: https://sunzhengnj.github.io/PayJoy/
-- EN home: https://sunzhengnj.github.io/PayJoy/en/
-- EN guides index: https://sunzhengnj.github.io/PayJoy/en/guides/
+- Site: https://sunzhengnj.github.io/ClockJoy/
+- EN home: https://sunzhengnj.github.io/ClockJoy/en/
+- EN guides index: https://sunzhengnj.github.io/ClockJoy/en/guides/
 - US App Store: https://apps.apple.com/us/app/id6771261514

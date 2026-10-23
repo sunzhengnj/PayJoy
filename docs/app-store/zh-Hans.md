@@ -67,8 +67,8 @@
 
 金额、进度和倒计时都是估算，仅供个人参考，不作为工资结算凭证、财务建议、税务建议或法律意见。
 
-隐私政策：https://sunzhengnj.github.io/PayJoy/privacy.html
-服务条款：https://sunzhengnj.github.io/PayJoy/terms.html
+隐私政策：https://sunzhengnj.github.io/ClockJoy/privacy.html
+服务条款：https://sunzhengnj.github.io/ClockJoy/terms.html
 ```
 
 ## 截图文案顺序

@@ -111,5 +111,5 @@ Bundle ID：`app.payjoy.kaixin`（内部标识，不作为公开品牌）
 
 ## 上架后台还要勾的两件事
 
-1. Marketing URL 填 `https://sunzhengnj.github.io/PayJoy/`（英文市场填 `/en/`）。
+1. Marketing URL 填 `https://sunzhengnj.github.io/ClockJoy/`（英文市场填 `/en/`）。
 2. 支持 URL 继续指向 `support.html`，隐私政策继续指向 `privacy.html`。

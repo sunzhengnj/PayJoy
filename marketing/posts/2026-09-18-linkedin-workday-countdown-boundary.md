@@ -23,8 +23,8 @@ That is different from a timesheet. A timesheet records hours for employers and 
 **ClockJoy** is a playful workday companion for that second job: countdown, optional estimated earnings, Lock Screen and Dynamic Island Live Activities, and widgets. Estimates only — not payroll, a timesheet, tax, or attendance.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide (salary progress vs timesheet): https://sunzhengnj.github.io/PayJoy/en/guides/salary-progress-vs-timesheet.html
-Site: https://sunzhengnj.github.io/PayJoy/en/
+Guide (salary progress vs timesheet): https://sunzhengnj.github.io/ClockJoy/en/guides/salary-progress-vs-timesheet.html
+Site: https://sunzhengnj.github.io/ClockJoy/en/
 
 (UI available in English, Japanese, and Korean.)
 

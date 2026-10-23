@@ -1,4 +1,4 @@
-const PayJoyDocs = (() => {
+const ClockJoyDocs = (() => {
   const supportedLanguages = ["zh-Hans", "zh-Hant", "en", "ja", "ko"];
 
   function normalizeLanguage(input) {

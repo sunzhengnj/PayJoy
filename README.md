@@ -4,12 +4,12 @@
 
 ## 产品站、法律页与获客文案
 
-GitHub Pages 托管 [`docs`](docs/)：
+产品站源码位于 [`docs`](docs/)，公开站点由 `sunzhengnj/ClockJoy` 的 GitHub Pages 托管：
 
-- 产品首页：https://sunzhengnj.github.io/PayJoy/
-- 隐私政策：https://sunzhengnj.github.io/PayJoy/privacy.html
-- 服务条款：https://sunzhengnj.github.io/PayJoy/terms.html
-- 支持与反馈：https://sunzhengnj.github.io/PayJoy/support.html
+- 产品首页：https://sunzhengnj.github.io/ClockJoy/
+- 隐私政策：https://sunzhengnj.github.io/ClockJoy/privacy.html
+- 服务条款：https://sunzhengnj.github.io/ClockJoy/terms.html
+- 支持与反馈：https://sunzhengnj.github.io/ClockJoy/support.html
 
 商店文案审计和可粘贴稿：[`docs/app-store/AUDIT.md`](docs/app-store/AUDIT.md)。  
 小红书 4 周连发日历：[`marketing/xiaohongshu/CALENDAR.md`](marketing/xiaohongshu/CALENDAR.md)。

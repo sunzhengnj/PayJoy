@@ -26,7 +26,7 @@ Estimates are not a paycheck. Not payroll overtime. Not a timesheet. Not tax. No
 ClockJoy — playful workday progress for iPhone. English UI, with Japanese and Korean support too.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide: https://sunzhengnj.github.io/PayJoy/en/guides/overtime-day-tracker-for-motivation.html
+Guide: https://sunzhengnj.github.io/ClockJoy/en/guides/overtime-day-tracker-for-motivation.html
 
 Do you notice when you tip into overtime—or only when you close the laptop?
 

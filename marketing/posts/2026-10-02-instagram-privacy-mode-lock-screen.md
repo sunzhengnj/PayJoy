@@ -26,7 +26,7 @@ Estimates are not a paycheck. Not a timesheet. Not tax. Not attendance.
 ClockJoy — playful workday progress for iPhone. English UI, with Japanese and Korean support too.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide: https://sunzhengnj.github.io/PayJoy/en/guides/privacy-mode-lock-screen-earnings.html
+Guide: https://sunzhengnj.github.io/ClockJoy/en/guides/privacy-mode-lock-screen-earnings.html
 
 Do you keep amounts off Lock Screen—or only worry after someone walks by?
 

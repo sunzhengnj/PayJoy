@@ -3477,7 +3477,7 @@ private enum PayJoyLegalLinks {
     }
 
     private static func url(_ path: String) -> URL {
-        URL(string: "https://sunzhengnj.github.io/PayJoy/\(languagePath)/\(path)")!
+        URL(string: "https://sunzhengnj.github.io/ClockJoy/\(languagePath)/\(path)")!
     }
 
     static var privacy: URL { url("privacy.html") }

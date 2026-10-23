@@ -57,8 +57,8 @@ ClockJoy는 정확한 급여 계산이나 근태 관리 앱이 아니에요. 길
 금액은 입력값을 바탕으로 한 추정이며 급여 명세서, 세무, 법적 기록이 아닙니다. 데이터는 기기에 저장되며 iCloud 개인 데이터베이스 동기화는 선택 사항입니다.
 집중 시간은 수입이나 소원 진행률에 자동으로 더해지지 않습니다.
 
-개인정보 처리방침: https://sunzhengnj.github.io/PayJoy/ko/privacy.html
-서비스 약관: https://sunzhengnj.github.io/PayJoy/ko/terms.html
+개인정보 처리방침: https://sunzhengnj.github.io/ClockJoy/ko/privacy.html
+서비스 약관: https://sunzhengnj.github.io/ClockJoy/ko/terms.html
 ```
 
 ## 스크린샷

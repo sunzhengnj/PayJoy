@@ -137,16 +137,16 @@
       }
     };
 
-    const page = content[PayJoyDocs.language] || content["zh-Hans"];
-    PayJoyDocs.applySharedContent(page);
+    const page = content[ClockJoyDocs.language] || content["zh-Hans"];
+    ClockJoyDocs.applySharedContent(page);
     page.sections.forEach((section, index) => {
       const number = index + 1;
-      PayJoyDocs.setText(`s${number}-title`, section.title);
+      ClockJoyDocs.setText(`s${number}-title`, section.title);
       section.paragraphs.forEach((paragraph, paragraphIndex) => {
-        PayJoyDocs.setHTML(`s${number}-p${paragraphIndex + 1}`, paragraph.replaceAll("./delete-account.html", PayJoyDocs.withLanguage("./delete-account.html")).replaceAll("./support.html", PayJoyDocs.withLanguage("./support.html")));
+        ClockJoyDocs.setHTML(`s${number}-p${paragraphIndex + 1}`, paragraph.replaceAll("./delete-account.html", ClockJoyDocs.withLanguage("./delete-account.html")).replaceAll("./support.html", ClockJoyDocs.withLanguage("./support.html")));
       });
       if (section.list) {
-        PayJoyDocs.setList(`s${number}-list`, section.list);
+        ClockJoyDocs.setList(`s${number}-list`, section.list);
       }
     });
   </script>

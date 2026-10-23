@@ -23,7 +23,7 @@ If you also show estimated earnings, keep it honest: personal estimate only — 
 That’s what **ClockJoy** is for on iPhone.
 
 https://apps.apple.com/us/app/id6771261514
-https://sunzhengnj.github.io/PayJoy/en/
+https://sunzhengnj.github.io/ClockJoy/en/
 
 ## Image (optional)
 

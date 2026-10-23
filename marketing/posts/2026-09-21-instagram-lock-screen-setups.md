@@ -25,7 +25,7 @@ Estimates are not a paycheck. Not a timesheet. Not tax. Not attendance. Just a p
 ClockJoy — playful workday progress for iPhone. English UI, with Japanese and Korean support too.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-Guide: https://sunzhengnj.github.io/PayJoy/en/guides/best-lock-screen-countdown-for-work.html
+Guide: https://sunzhengnj.github.io/ClockJoy/en/guides/best-lock-screen-countdown-for-work.html
 
 Which setup would you keep?
 

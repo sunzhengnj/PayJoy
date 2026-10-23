@@ -55,8 +55,8 @@
 所有金額都是依你的設定估算，僅供個人參考，不能當作薪資單、報稅或法律文件。資料預設只存在你的 iPhone，iCloud 私人資料庫同步可自行開啟。
 專注時間不會自動變成額外收入或願望進度。
 
-隱私權政策：https://sunzhengnj.github.io/PayJoy/zh-hant/privacy.html
-服務條款：https://sunzhengnj.github.io/PayJoy/zh-hant/terms.html
+隱私權政策：https://sunzhengnj.github.io/ClockJoy/zh-hant/privacy.html
+服務條款：https://sunzhengnj.github.io/ClockJoy/zh-hant/terms.html
 ```
 
 ## 截圖

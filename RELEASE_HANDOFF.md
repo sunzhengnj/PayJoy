@@ -23,6 +23,8 @@
 
 本地调试使用 `PayJoy/Configuration/PayJoy.storekit`，其产品 ID 是 `payjoy.pro.lifetime`；这仅用于模拟环境，不能替代 App Store Connect 的正式产品。
 
+所有已配置语言的用户可见名称、商品描述及商店网址按照 [`docs/app-store/URLS_AND_PURCHASES.md`](docs/app-store/URLS_AND_PURCHASES.md) 逐项核对。公开站点统一使用 `https://sunzhengnj.github.io/ClockJoy/`。新站部署、本地配置修改不代表 App Store Connect 已保存或审核通过；正式商品需单独复核。
+
 ## 2. CloudKit：部署生产 Schema
 
 在 CloudKit Console 选择容器 `iCloud.com.sunzheng.PayJoy`，确认 Production 环境具有 `PayJoyUserData` 记录类型以及上表两个字段，然后部署 Schema。上架版本只能使用 Production Schema。
@@ -40,7 +42,7 @@ Widget 使用独立的显式 App ID `app.payjoy.kaixin.widgets`，并启用同�
 ## 4. 上传前最终检查
 
 1. 在 App Store Connect 创建与 `app.payjoy.kaixin` 相同 Bundle ID 的 App 记录。
-2. 美区采用 [`docs/app-store/en-US.md`](docs/app-store/en-US.md) 中的 `ClockJoy` 名称、分类、关键词、英文描述与截图顺序，不再提交 `PayJoy` 作为公开名称。中国区按 [`docs/app-store/zh-Hans.md`](docs/app-store/zh-Hans.md) 更新副标题、关键词和说明，**不要改现有名称**。Marketing URL 填 `https://sunzhengnj.github.io/PayJoy/`（英文市场填 `/en/`）。
+2. 美区采用 [`docs/app-store/en-US.md`](docs/app-store/en-US.md) 中的 `ClockJoy` 名称、分类、关键词、英文描述与截图顺序，不再提交 `PayJoy` 作为公开名称。中国区按 [`docs/app-store/zh-Hans.md`](docs/app-store/zh-Hans.md) 更新副标题、关键词和说明，**不要改现有名称**。Marketing URL 填 `https://sunzhengnj.github.io/ClockJoy/`（英文市场填 `/en/`）。
 3. 用 Release/Generic iOS Device archive，确认产物由 `Apple Distribution` 签名，而非 `Apple Development`。
 4. 用 TestFlight 英文环境安装，确认主 App 与 Widget 均显示 `ClockJoy`，且商店页、截图、隐私政策、服务条款和支持页的英文品牌一致。
 5. 验证首次启动引导、一次性解锁购买/恢复购买、iCloud 同步、Widget 读取 App Group 数据、隐私政策与服务条款链接。

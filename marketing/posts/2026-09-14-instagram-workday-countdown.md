@@ -27,7 +27,7 @@ A few rules that keep it calm:
 Free to start. Amounts come from your settings — they are not a paycheck.
 
 App Store: https://apps.apple.com/us/app/id6771261514
-More: https://sunzhengnj.github.io/PayJoy/en/
+More: https://sunzhengnj.github.io/ClockJoy/en/
 
 What’s on your Lock Screen at 3pm?
 

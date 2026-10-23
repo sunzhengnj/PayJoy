@@ -31,7 +31,7 @@ I tried a few paths:
 ClockJoy is estimates-from-your-settings, on purpose. It will not replace a timesheet or payroll app, and I wouldn’t use it as proof of hours.
 
 - App Store: https://apps.apple.com/us/app/id6771261514
-- Site: https://sunzhengnj.github.io/PayJoy/en/
+- Site: https://sunzhengnj.github.io/ClockJoy/en/
 
 Curious what other people use for a live workday countdown on iPhone. Native Live Activities? A shortcut stack? Something else that actually stays on Dynamic Island?
 
