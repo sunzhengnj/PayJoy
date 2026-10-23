@@ -2368,6 +2368,60 @@ final class SalaryCalculatorTests: XCTestCase {
         XCTAssertTrue(legacy.actualSalaryRecords.isEmpty)
     }
 
+    func testRetiredDefaultProfileEditKeepsCanonicalValuesAcrossLanguages() throws {
+        let defaults = UserDefaults.standard
+        let preferencesKey = "payjoy.app.preferences"
+        let originalPreferences = defaults.data(forKey: preferencesKey)
+        defer {
+            if let originalPreferences {
+                defaults.set(originalPreferences, forKey: preferencesKey)
+            } else {
+                defaults.removeObject(forKey: preferencesKey)
+            }
+        }
+
+        let payload = try JSONSerialization.data(withJSONObject: [
+            "nickname": "PayJoy Worker",
+            "motto": "출근해서 벌고 퇴근 후 쓰며, 열심히 살고 즐겁게 PayJoy!"
+        ])
+        let legacy = try JSONDecoder().decode(UserProfile.self, from: payload)
+        let languages: [AppLanguage] = [.zhHans, .zhHant, .en, .ja, .ko]
+
+        for language in languages {
+            var preferences = AppPreferences.defaultValue
+            preferences.appLanguage = language
+            defaults.set(try JSONEncoder().encode(preferences), forKey: preferencesKey)
+
+            XCTAssertFalse(legacy.displayNickname.contains("PayJoy"))
+            XCTAssertFalse(legacy.displayMotto.contains("PayJoy"))
+            let edited = UserProfile(nickname: legacy.displayNickname, motto: legacy.displayMotto)
+            XCTAssertEqual(edited.nickname, UserProfile.defaultNicknameKey)
+            XCTAssertEqual(edited.motto, UserProfile.defaultMottoKey)
+
+            for nextLanguage in languages {
+                preferences.appLanguage = nextLanguage
+                defaults.set(try JSONEncoder().encode(preferences), forKey: preferencesKey)
+                XCTAssertEqual(edited.displayNickname, L10n.t(UserProfile.defaultNicknameKey))
+                XCTAssertEqual(edited.displayMotto, L10n.t(UserProfile.defaultMottoKey))
+            }
+        }
+    }
+
+    func testProfileBrandCleanupPreservesCustomContentAndAvatar() throws {
+        let profile = UserProfile(
+            nickname: "  自己写的 PayJoy 昵称  ",
+            motto: "  今天也按自己的节奏  ",
+            avatarAssetName: "classic_profile_avatar_coffee_v2"
+        )
+        let restored = try JSONDecoder().decode(UserProfile.self, from: JSONEncoder().encode(profile))
+
+        XCTAssertEqual(restored.nickname, profile.nickname)
+        XCTAssertEqual(restored.motto, profile.motto)
+        XCTAssertEqual(restored.avatarAssetName, profile.avatarAssetName)
+        XCTAssertEqual(restored.displayNickname, profile.nickname)
+        XCTAssertEqual(restored.displayMotto, profile.motto)
+    }
+
     private func date(_ text: String) -> Date {
         let formatter = DateFormatter()
         formatter.calendar = calendar

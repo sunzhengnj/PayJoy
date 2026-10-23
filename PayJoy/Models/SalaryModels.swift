@@ -815,6 +815,8 @@ struct UserProfile: Codable, Equatable {
         self.nickname = nickname
         self.motto = motto
         self.avatarAssetName = avatarAssetName
+        self.nickname = isDefaultNickname ? Self.defaultNicknameKey : nickname
+        self.motto = isDefaultMotto ? Self.defaultMottoKey : motto
     }
 
     init(from decoder: Decoder) throws {

@@ -1464,8 +1464,8 @@ private struct ProfileEditSheet: View {
         }
         .onAppear {
             guard !didLoad else { return }
-            nickname = appState.profile.nickname
-            motto = appState.profile.motto
+            nickname = appState.profile.displayNickname
+            motto = appState.profile.displayMotto
             selectedAvatar = appState.profile.avatarAssetName
             didLoad = true
         }

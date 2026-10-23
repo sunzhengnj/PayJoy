@@ -26,7 +26,7 @@ Do not add `ClockJoy`, `workday`, `countdown`, `earnings`, `work`, or `timer` to
 
 `Take the workday one focus session at a time. Choose 25 minutes or, near the end of your shift, focus until clock-out. See your actual focused time at the end.`
 
-## What's New in 1.6 (candidate)
+## What's New in 2.0.0 (candidate)
 
 Choose a 25-minute, 45-minute, or custom focus session—or focus until clock-out near the end of your shift. Pause and resume, then see how long you actually focused.
 
