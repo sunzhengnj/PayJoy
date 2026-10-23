@@ -58,3 +58,7 @@ Widget 使用独立的显式 App ID `app.payjoy.kaixin.widgets`，并启用同�
 - [部署 CloudKit Schema](https://developer.apple.com/documentation/CloudKit/deploying-an-icloud-container-s-schema)
 - [创建 App Store provisioning profile](https://developer.apple.com/help/account/provisioning-profiles/create-an-app-store-provisioning-profile/)
 - [App Store Connect 工作流](https://developer.apple.com/help/app-store-connect/get-started/app-store-connect-workflow/)
+
+## 2026-10-23 公开名称与网址后台进度
+
+正式内购的英语、日语和韩语更名已单独提交审核，状态为“正在等待审核”。`2.0.0` 草稿中的五种语言描述、支持／营销网址及隐私政策网址已保存并刷新核对；在售仍是 `1.5`，网址字段随新版本发布。本轮没有提交或发布 App 二进制。具体状态和本地证据索引见 [`docs/testing/evidence/2026-10-23-public-branding/README.md`](docs/testing/evidence/2026-10-23-public-branding/README.md)。发布范围待用户选择最小修正版或完整 `2.0.0`，不要把草稿状态当作发布批准。
